@@ -1,16 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  TrendingUp,
-  Twitter,
-  Github,
-  Linkedin,
-  Mail,
-  MapPin,
-  Phone,
-} from "lucide-react";
+import { Twitter, Github, Linkedin, Mail, MapPin, Phone } from "lucide-react";
 
 export function SiteFooter() {
   const footerLinks = {
@@ -51,21 +44,22 @@ export function SiteFooter() {
   ];
 
   return (
-    <footer className="border-t bg-muted/30">
+    <footer className="border-t bg-black/95 dark:bg-background/95 supports-[backdrop-filter]:bg-black/60 dark:supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-8 sm:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 sm:gap-8">
           {/* Brand Section */}
           <div className="sm:col-span-2 lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <TrendingUp className="h-3 w-3 sm:h-5 sm:w-5" />
-              </div>
-              <span className="text-lg sm:text-xl font-bold">Furu</span>
-              <Badge variant="secondary" className="text-xs">
-                AI
-              </Badge>
+              <Image
+                src="/logo.png"
+                alt="Furu+ Logo"
+                width={100}
+                height={32}
+                className="h-6 w-auto sm:h-8"
+                priority
+              />
             </Link>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-xs">
+            <p className="text-xs sm:text-sm text-white dark:text-muted-foreground max-w-xs">
               Your AI-powered financial coach for smarter trading across all
               markets. Join thousands of traders making data-driven decisions.
             </p>
@@ -75,7 +69,7 @@ export function SiteFooter() {
                   key={social.name}
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 sm:h-9 sm:w-9"
+                  className="h-8 w-8 sm:h-9 sm:w-9 text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground hover:bg-white/10 dark:hover:bg-muted/50"
                   asChild
                 >
                   <Link href={social.href}>
@@ -89,13 +83,15 @@ export function SiteFooter() {
 
           {/* Links Sections */}
           <div className="space-y-3 sm:space-y-4">
-            <h3 className="text-xs sm:text-sm font-semibold">Product</h3>
+            <h3 className="text-xs sm:text-sm font-semibold text-white dark:text-foreground">
+              Product
+            </h3>
             <ul className="space-y-1 sm:space-y-2">
               {footerLinks.product.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-xs sm:text-sm text-white dark:text-muted-foreground hover:text-gray-300 dark:hover:text-foreground transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -105,13 +101,15 @@ export function SiteFooter() {
           </div>
 
           <div className="space-y-3 sm:space-y-4">
-            <h3 className="text-xs sm:text-sm font-semibold">Company</h3>
+            <h3 className="text-xs sm:text-sm font-semibold text-white dark:text-foreground">
+              Company
+            </h3>
             <ul className="space-y-1 sm:space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-xs sm:text-sm text-white dark:text-muted-foreground hover:text-gray-300 dark:hover:text-foreground transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -121,13 +119,15 @@ export function SiteFooter() {
           </div>
 
           <div className="space-y-3 sm:space-y-4">
-            <h3 className="text-xs sm:text-sm font-semibold">Resources</h3>
+            <h3 className="text-xs sm:text-sm font-semibold text-white dark:text-foreground">
+              Resources
+            </h3>
             <ul className="space-y-1 sm:space-y-2">
               {footerLinks.resources.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-xs sm:text-sm text-white dark:text-muted-foreground hover:text-gray-300 dark:hover:text-foreground transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -137,13 +137,15 @@ export function SiteFooter() {
           </div>
 
           <div className="space-y-3 sm:space-y-4">
-            <h3 className="text-xs sm:text-sm font-semibold">Legal</h3>
+            <h3 className="text-xs sm:text-sm font-semibold text-white dark:text-foreground">
+              Legal
+            </h3>
             <ul className="space-y-1 sm:space-y-2">
               {footerLinks.legal.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-xs sm:text-sm text-white dark:text-muted-foreground hover:text-gray-300 dark:hover:text-foreground transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -154,13 +156,13 @@ export function SiteFooter() {
         </div>
 
         {/* Newsletter Section */}
-        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t">
+        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-white/20 dark:border-border">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 items-start sm:items-center">
             <div className="space-y-2">
-              <h3 className="text-base sm:text-lg font-semibold">
+              <h3 className="text-base sm:text-lg font-semibold text-white dark:text-foreground">
                 Stay updated
               </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-white dark:text-muted-foreground">
                 Get the latest market insights and product updates delivered to
                 your inbox.
               </p>
@@ -169,9 +171,9 @@ export function SiteFooter() {
               <Input
                 placeholder="Enter your email"
                 type="email"
-                className="flex-1 text-sm bg-background border-muted-foreground/20 focus:border-primary focus:ring-primary/20"
+                className="flex-1 text-sm bg-white/10 dark:bg-background border-white/20 dark:border-muted-foreground/20 focus:border-primary focus:ring-primary/20 text-white dark:text-foreground placeholder:text-white/60 dark:placeholder:text-muted-foreground"
               />
-              <Button className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto bg-white text-black dark:bg-primary dark:text-primary-foreground hover:bg-gray-200 dark:hover:bg-primary/90">
                 <Mail className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                 Subscribe
               </Button>
@@ -180,20 +182,23 @@ export function SiteFooter() {
         </div>
 
         {/* Bottom Section */}
-        <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-muted-foreground">
-            <span>© 2024 Furu AI. All rights reserved.</span>
+        <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/20 dark:border-border flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-white dark:text-muted-foreground">
+            <span>© 2025 Furu AI. All rights reserved.</span>
             <div className="flex items-center space-x-1">
               <MapPin className="h-3 w-3" />
               <span>San Francisco, CA</span>
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-white dark:text-muted-foreground">
             <div className="flex items-center space-x-1">
               <Phone className="h-3 w-3" />
               <span>24/7 Support</span>
             </div>
-            <Badge variant="outline" className="text-xs">
+            <Badge
+              variant="outline"
+              className="text-xs border-white/20 dark:border-border text-white dark:text-foreground"
+            >
               SOC 2 Compliant
             </Badge>
           </div>

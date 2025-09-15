@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Menu,
   X,
-  TrendingUp,
   BarChart3,
   Brain,
   Shield,
@@ -33,17 +32,18 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-black/95 dark:bg-background/95 supports-[backdrop-filter]:bg-black/60 dark:supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 flex h-14 sm:h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <TrendingUp className="h-3 w-3 sm:h-5 sm:w-5" />
-            </div>
-            <span className="text-lg sm:text-xl font-bold">Furu</span>
-            <Badge variant="secondary" className="text-xs">
-              AI
-            </Badge>
+            <Image
+              src="/logo.png"
+              alt="Furu+ Logo"
+              width={100}
+              height={32}
+              className="h-8 w-auto"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -52,7 +52,7 @@ export function SiteHeader() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center space-x-1 text-sm font-medium text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground transition-colors"
               >
                 <item.icon className="h-4 w-4" />
                 <span>{item.name}</span>
@@ -62,22 +62,35 @@ export function SiteHeader() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-3 lg:space-x-4">
-            <ThemeToggle />
-            <Button variant="ghost" size="sm" asChild>
+            <div className="text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground">
+              <ThemeToggle />
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground hover:bg-white/10 dark:hover:bg-muted/50"
+            >
               <Link href="/signin">Sign In</Link>
             </Button>
-            <Button size="sm" asChild>
+            <Button
+              size="sm"
+              asChild
+              className="bg-white text-black dark:bg-primary dark:text-primary-foreground hover:bg-gray-200 dark:hover:bg-primary/90"
+            >
               <Link href="/signup">Get Started</Link>
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center space-x-1 sm:space-x-2">
-            <ThemeToggle />
+            <div className="text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground">
+              <ThemeToggle />
+            </div>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 sm:h-9 sm:w-9"
+              className="h-8 w-8 sm:h-9 sm:w-9 text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground hover:bg-white/10 dark:hover:bg-muted/50"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (
@@ -91,14 +104,14 @@ export function SiteHeader() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t bg-background">
+          <div className="md:hidden border-t bg-black/95 dark:bg-background/95">
             <div className="container mx-auto px-4 py-4 space-y-4">
               <nav className="space-y-1">
                 {navigation.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="flex items-center space-x-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 rounded-md hover:bg-muted/50"
+                    className="flex items-center space-x-3 text-sm font-medium text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground transition-colors py-3 px-2 rounded-md hover:bg-white/10 dark:hover:bg-muted/50"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <item.icon className="h-4 w-4 flex-shrink-0" />
@@ -106,17 +119,17 @@ export function SiteHeader() {
                   </Link>
                 ))}
               </nav>
-              <div className="flex flex-col space-y-2 pt-4 border-t">
+              <div className="flex flex-col space-y-2 pt-4 border-t border-white/20 dark:border-border">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start"
+                  className="w-full justify-start text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground hover:bg-white/10 dark:hover:bg-muted/50"
                   asChild
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Link href="/signin">Sign In</Link>
                 </Button>
                 <Button
-                  className="w-full"
+                  className="w-full bg-white text-black dark:bg-primary dark:text-primary-foreground hover:bg-gray-200 dark:hover:bg-primary/90"
                   asChild
                   onClick={() => setIsMenuOpen(false)}
                 >
