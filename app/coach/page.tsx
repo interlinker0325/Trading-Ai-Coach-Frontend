@@ -1,29 +1,37 @@
-import { AICoachInterface } from "@/components/ai-coach-interface"
-import { CoachSidebar } from "@/components/coach-sidebar"
-import { DashboardHeader } from "@/components/dashboard-header"
+"use client";
+
+import { useAuth } from "@/contexts/auth-context";
+import { AICoachInterface } from "@/components/ai-coach-interface";
+import { CoachSidebar } from "@/components/coach-sidebar";
 
 export default function CoachPage() {
-  // Mock user data - in real app this would come from auth/database
-  const user = {
-    name: "Alex Thompson",
-    email: "alex@example.com",
-    plan: "pro", // free, pro, elite
-    avatar: "/professional-avatar.png",
+  const { user, isAuthenticated } = useAuth();
+
+  // Redirect to signin if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">
+            Please sign in to access the AI coach
+          </h1>
+          <a href="/signin" className="text-primary hover:underline">
+            Go to Sign In
+          </a>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardHeader user={user} />
+    <div className="flex h-[calc(100vh-73px)]">
+      {/* Sidebar */}
+      <CoachSidebar plan={user?.plan || "free"} />
 
-      <div className="flex h-[calc(100vh-73px)]">
-        {/* Sidebar */}
-        <CoachSidebar plan={user.plan} />
-
-        {/* Main Chat Interface */}
-        <div className="flex-1 flex flex-col">
-          <AICoachInterface plan={user.plan} />
-        </div>
+      {/* Main Chat Interface */}
+      <div className="flex-1 flex flex-col">
+        <AICoachInterface plan={user?.plan || "free"} />
       </div>
     </div>
-  )
+  );
 }

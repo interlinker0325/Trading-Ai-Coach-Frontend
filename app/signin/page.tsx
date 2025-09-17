@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useAuth } from "@/contexts/auth-context";
+import { AlertCircle } from "lucide-react";
 import {
   Mail,
   Lock,
@@ -20,20 +23,35 @@ import {
 
 export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const router = useRouter();
+  const { login, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    // Redirect to dashboard or home page
-    window.location.href = "/";
+    setError("");
+    setSuccess("");
+
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    const result = await login(email, password);
+
+    if (result.success) {
+      setSuccess("Sign in successful!");
+      // Redirect to dashboard or home page
+      setTimeout(() => {
+        router.push("/");
+      }, 1000);
+    } else {
+      setError(result.error || "Sign in failed. Please try again.");
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Back to Home */}
         <div className="flex items-center space-x-2">
@@ -46,7 +64,7 @@ export default function SignInPage() {
         </div>
 
         {/* Auth Card */}
-        <Card>
+        <Card className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <CardHeader className="text-center space-y-2">
             <div className="flex items-center justify-center space-x-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -85,6 +103,19 @@ export default function SignInPage() {
               </div>
             </div>
 
+            {/* Error/Success Messages */}
+            {error && (
+              <div className="flex items-center space-x-2 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
+                <AlertCircle className="h-4 w-4" />
+                <span>{error}</span>
+              </div>
+            )}
+            {success && (
+              <div className="flex items-center space-x-2 text-sm text-green-600 bg-green-50 dark:bg-green-900/20 p-3 rounded-md">
+                <span>{success}</span>
+              </div>
+            )}
+
             {/* Email Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -93,6 +124,7 @@ export default function SignInPage() {
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
+                    name="email"
                     type="email"
                     placeholder="john@example.com"
                     className="pl-10"
@@ -107,6 +139,7 @@ export default function SignInPage() {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     className="pl-10 pr-10"
@@ -139,17 +172,31 @@ export default function SignInPage() {
                     Remember me
                   </Label>
                 </div>
-                <Button variant="link" className="p-0 h-auto text-sm">
+                <Button
+                  variant="link"
+                  className="p-0 h-auto text-sm"
+                  type="button"
+                  onClick={() => {
+                    // TODO: Implement forgot password modal/page
+                    alert("Forgot password functionality coming soon!");
+                  }}
+                >
                   Forgot password?
                 </Button>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !!success}
+              >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
                     <span>Signing in...</span>
                   </div>
+                ) : success ? (
+                  "Sign In Successful!"
                 ) : (
                   "Sign In"
                 )}

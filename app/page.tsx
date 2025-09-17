@@ -1,5 +1,3 @@
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -97,8 +95,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader />
-
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-background via-muted/30 to-background">
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
@@ -403,8 +399,6 @@ export default function HomePage() {
           </Card>
         </div>
       </section>
-
-      <SiteFooter />
     </div>
   );
 }
