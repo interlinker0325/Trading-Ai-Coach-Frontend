@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 import {
   Play,
   Brain,
@@ -94,9 +95,9 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background dark:bg-black">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-background via-muted/30 to-background">
+      <section className="relative overflow-hidden bg-gradient-to-br from-background via-muted/30 to-background dark:from-black dark:via-gray-900/30 dark:to-black">
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
         <div className="container relative py-12 sm:py-16 lg:py-24 xl:py-32 mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
@@ -121,17 +122,23 @@ export default function HomePage() {
                 <Button
                   size="lg"
                   className="animate-pulse-glow w-full sm:w-auto"
+                  asChild
                 >
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <Link href="/signup">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
                 <Button
                   variant="outline"
                   size="lg"
                   className="w-full sm:w-auto"
+                  asChild
                 >
-                  <Play className="mr-2 h-4 w-4" />
-                  Watch Demo
+                  <Link href="/pricing">
+                    <Play className="mr-2 h-4 w-4" />
+                    View Pricing
+                  </Link>
                 </Button>
               </div>
 
@@ -183,7 +190,7 @@ export default function HomePage() {
       {/* Features Section */}
       <section
         id="features"
-        className="py-12 sm:py-16 lg:py-24 bg-muted/30 relative overflow-hidden"
+        className="py-12 sm:py-16 lg:py-24 bg-muted/30 dark:bg-black relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
         <div className="container mx-auto px-4 relative">
@@ -256,9 +263,11 @@ export default function HomePage() {
                 ))}
               </div>
 
-              <Button size="lg" className="w-full sm:w-auto">
-                Try AI Coach
-                <ArrowRight className="ml-2 h-4 w-4" />
+              <Button size="lg" className="w-full sm:w-auto" asChild>
+                <Link href="/coach">
+                  Try AI Coach
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
 
@@ -301,7 +310,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-muted/30">
+      <section className="py-12 sm:py-16 lg:py-24 bg-muted/30 dark:bg-black">
         <div className="container mx-auto px-4">
           <div className="text-center space-y-4 mb-12 sm:mb-16 max-w-4xl mx-auto">
             <Badge variant="outline">Testimonials</Badge>
@@ -369,16 +378,20 @@ export default function HomePage() {
                   size="lg"
                   variant="secondary"
                   className="w-full sm:w-auto"
+                  asChild
                 >
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <Link href="/signup">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
                   className="w-full sm:w-auto border-white/20 text-white hover:bg-white/10 bg-transparent"
+                  asChild
                 >
-                  View Pricing
+                  <Link href="/pricing">View Pricing</Link>
                 </Button>
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm opacity-75">

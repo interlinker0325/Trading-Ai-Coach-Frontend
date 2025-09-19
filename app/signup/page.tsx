@@ -28,43 +28,27 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const { isLoading } = useAuth();
+  const { isLoading, signup } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     const formData = new FormData(e.currentTarget as HTMLFormElement);
-    const userData = {
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-      full_name: formData.get("name") as string,
-    };
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const full_name = formData.get("name") as string;
 
-    try {
-      const response = await fetch(
-        "http://localhost:8000/api/v1/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userData),
-        }
-      );
+    const result = await signup(email, password, full_name);
 
-      if (response.ok) {
-        setSuccess(true);
-        // Redirect to signin page after successful registration
-        setTimeout(() => {
-          router.push("/signin");
-        }, 2000);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.detail || "Registration failed. Please try again.");
-      }
-    } catch (error) {
-      setError("Network error. Please check your connection and try again.");
+    if (result.success) {
+      setSuccess(true);
+      // Redirect to signin page with verification alert after successful registration
+      setTimeout(() => {
+        router.push("/signin?verification_sent=true");
+      }, 2000);
+    } else {
+      setError(result.error || "Registration failed. Please try again.");
     }
   };
 
@@ -76,7 +60,7 @@ export default function SignUpPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background dark:from-black dark:via-gray-900/30 dark:to-black flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Back to Home */}
         <div className="flex items-center space-x-2">

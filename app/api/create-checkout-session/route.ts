@@ -1,9 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-08-27.basil",
-});
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,34 +11,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
+    // Forward request to backend
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/stripe/create-checkout-session`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      ],
-      mode: "subscription",
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}&upgrade=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/plans?canceled=true`,
-      client_reference_id: userId,
-      metadata: {
-        userId,
-        planName,
-      },
-      subscription_data: {
-        metadata: {
+        body: JSON.stringify({
+          priceId,
           userId,
           planName,
-        },
-      },
-      customer_email: undefined, // Will be collected during checkout
-      allow_promotion_codes: true,
-    });
+        }),
+      }
+    );
 
-    return NextResponse.json({ sessionId: session.id, url: session.url });
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: data.detail || "Failed to create checkout session" },
+        { status: response.status }
+      );
+    }
+
+    return NextResponse.json(data);
   } catch (error) {
     console.error("Error creating checkout session:", error);
     return NextResponse.json(

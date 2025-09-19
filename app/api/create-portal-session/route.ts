@@ -1,9 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-08-27.basil",
-});
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,13 +11,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create Stripe customer portal session
-    const session = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`,
-    });
+    // Forward request to backend
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/stripe/create-portal-session`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customerId,
+        }),
+      }
+    );
 
-    return NextResponse.json({ url: session.url });
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: data.detail || "Failed to create portal session" },
+        { status: response.status }
+      );
+    }
+
+    return NextResponse.json(data);
   } catch (error) {
     console.error("Error creating portal session:", error);
     return NextResponse.json(

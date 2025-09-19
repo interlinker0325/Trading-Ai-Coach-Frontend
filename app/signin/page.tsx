@@ -1,32 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/auth-context";
-import { AlertCircle } from "lucide-react";
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  Chrome,
-  TrendingUp,
-  ArrowLeft,
-} from "lucide-react";
+import { AlertCircle, Mail, CheckCircle } from "lucide-react";
+import { Lock, Eye, EyeOff, Chrome, TrendingUp, ArrowLeft } from "lucide-react";
 
 export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [verificationStatus, setVerificationStatus] = useState<
+    "none" | "sent" | "verified"
+  >("none");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, isLoading } = useAuth();
+
+  useEffect(() => {
+    // Check if user was redirected after email verification
+    if (searchParams.get("verified") === "true") {
+      setSuccess("Email verified successfully! You can now sign in.");
+      setVerificationStatus("verified");
+    }
+    // Check if user was redirected after signup (verification email sent)
+    else if (searchParams.get("verification_sent") === "true") {
+      setSuccess(
+        "Verification email sent! Please check your email and click the verification link to activate your account."
+      );
+      setVerificationStatus("sent");
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +63,7 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background dark:from-black dark:via-gray-900/30 dark:to-black flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Back to Home */}
         <div className="flex items-center space-x-2">
@@ -110,7 +122,31 @@ export default function SignInPage() {
                 <span>{error}</span>
               </div>
             )}
-            {success && (
+
+            {/* Verification Alert */}
+            {verificationStatus === "sent" && (
+              <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+                <Mail className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <AlertDescription className="text-blue-800 dark:text-blue-200">
+                  <strong>Verification email sent!</strong> Please check your
+                  email and click the verification link to activate your
+                  account. You can sign in after verification.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {verificationStatus === "verified" && (
+              <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <AlertDescription className="text-green-800 dark:text-green-200">
+                  <strong>Email verified successfully!</strong> You can now sign
+                  in to your account.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Regular success message for other cases */}
+            {success && verificationStatus === "none" && (
               <div className="flex items-center space-x-2 text-sm text-green-600 bg-green-50 dark:bg-green-900/20 p-3 rounded-md">
                 <span>{success}</span>
               </div>
@@ -188,15 +224,15 @@ export default function SignInPage() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isLoading || !!success}
+                disabled={
+                  isLoading || (!!success && verificationStatus === "none")
+                }
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
                     <span>Signing in...</span>
                   </div>
-                ) : success ? (
-                  "Sign In Successful!"
                 ) : (
                   "Sign In"
                 )}

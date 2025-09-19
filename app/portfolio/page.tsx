@@ -13,7 +13,7 @@ export default function PortfolioPage() {
   // Redirect to signin if not authenticated
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background dark:bg-black flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">
             Please sign in to access your portfolio
@@ -27,39 +27,41 @@ export default function PortfolioPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
-      {/* Portfolio Overview */}
-      <PortfolioOverview plan={user?.plan || "free"} />
+    <div className="min-h-screen bg-background dark:bg-black">
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        {/* Portfolio Overview */}
+        <PortfolioOverview plan={user?.plan || "free"} />
 
-      {/* Portfolio Management Tabs */}
-      <Tabs defaultValue="holdings" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="holdings">Holdings</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="actions">Actions</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
-        </TabsList>
+        {/* Portfolio Management Tabs */}
+        <Tabs defaultValue="holdings" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="holdings">Holdings</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="actions">Actions</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="holdings" className="space-y-6">
-          <PortfolioHoldings plan={user?.plan || "free"} />
-        </TabsContent>
+          <TabsContent value="holdings" className="space-y-6">
+            <PortfolioHoldings plan={user?.plan || "free"} />
+          </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-6">
-          <PortfolioAnalytics plan={user?.plan || "free"} />
-        </TabsContent>
+          <TabsContent value="analytics" className="space-y-6">
+            <PortfolioAnalytics plan={user?.plan || "free"} />
+          </TabsContent>
 
-        <TabsContent value="actions" className="space-y-6">
-          <PortfolioActions plan={user?.plan || "free"} />
-        </TabsContent>
+          <TabsContent value="actions" className="space-y-6">
+            <PortfolioActions plan={user?.plan || "free"} />
+          </TabsContent>
 
-        <TabsContent value="history" className="space-y-6">
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              Portfolio history coming soon...
-            </p>
-          </div>
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="history" className="space-y-6">
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">
+                Portfolio history coming soon...
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

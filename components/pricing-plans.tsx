@@ -1,15 +1,24 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Check, Zap, Crown, Star, Loader2 } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Check, Zap, Crown, Star, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/auth-context";
+import { createCheckoutSession } from "@/lib/stripe";
 
 export function PricingPlans() {
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
-  const { toast } = useToast()
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
 
   const plans = [
     {
@@ -27,9 +36,19 @@ export function PricingPlans() {
         "Community support",
         "Mobile app access",
       ],
-      limitations: ["Limited to 3 watchlists", "No real-time alerts", "Basic charts only"],
-      buttonText: "Current Plan",
-      buttonVariant: "outline" as const,
+      limitations: [
+        "Limited to 3 watchlists",
+        "No real-time alerts",
+        "Basic charts only",
+      ],
+      buttonText: !isAuthenticated
+        ? "Sign In to Subscribe"
+        : user?.plan === "free"
+        ? "Current Plan"
+        : "Downgrade",
+      buttonVariant: !isAuthenticated
+        ? ("default" as const)
+        : ("outline" as const),
       popular: false,
     },
     {
@@ -39,7 +58,7 @@ export function PricingPlans() {
       period: "per month",
       description: "Advanced tools for serious traders and investors",
       icon: Zap,
-      priceId: "price_1234567890", // Replace with actual Stripe price ID
+      priceId: "price_1S8lbvBlj5e71CfEtWSSBHAe", // Replace with actual Stripe price ID
       features: [
         "Unlimited AI queries",
         "Real-time market data",
@@ -51,8 +70,15 @@ export function PricingPlans() {
         "Crypto sentiment analysis",
       ],
       limitations: [],
-      buttonText: "Upgrade to Pro",
-      buttonVariant: "default" as const,
+      buttonText: !isAuthenticated
+        ? "Sign In to Subscribe"
+        : user?.plan === "pro"
+        ? "Current Plan"
+        : user?.plan === "elite"
+        ? "Downgrade"
+        : "Upgrade to Pro",
+      buttonVariant:
+        user?.plan === "pro" ? ("outline" as const) : ("default" as const),
       popular: true,
     },
     {
@@ -62,7 +88,7 @@ export function PricingPlans() {
       period: "per month",
       description: "Professional-grade platform with automation",
       icon: Crown,
-      priceId: "price_0987654321", // Replace with actual Stripe price ID
+      priceId: "price_1S8lcPBlj5e71CfEPFxQrEok", // Replace with actual Stripe price ID
       features: [
         "Everything in Pro",
         "Broker integration (TD Ameritrade, IBKR)",
@@ -75,69 +101,96 @@ export function PricingPlans() {
         "White-label options",
       ],
       limitations: [],
-      buttonText: "Go Elite",
-      buttonVariant: "secondary" as const,
+      buttonText: !isAuthenticated
+        ? "Sign In to Subscribe"
+        : user?.plan === "elite"
+        ? "Current Plan"
+        : "Go Elite",
+      buttonVariant:
+        user?.plan === "elite" ? ("outline" as const) : ("secondary" as const),
       popular: false,
     },
-  ]
+  ];
 
   const handleUpgrade = async (plan: (typeof plans)[0]) => {
-    if (plan.id === "free" || !plan.priceId) {
+    if (!isAuthenticated || !user) {
       toast({
-        title: "Already on Free Plan",
-        description: "You're currently on the free plan.",
-      })
-      return
+        title: "Authentication Required",
+        description: "Please sign in to upgrade your plan.",
+        variant: "destructive",
+      });
+      // Redirect to sign in page
+      window.location.href = "/signin";
+      return;
     }
 
-    setLoadingPlan(plan.id)
+    // Handle current plan
+    if (user.plan === plan.id) {
+      toast({
+        title: "Current Plan",
+        description: `You're already on the ${plan.name} plan.`,
+      });
+      return;
+    }
+
+    // Handle free plan (no payment needed)
+    if (plan.id === "free") {
+      toast({
+        title: "Contact Support",
+        description: "Please contact support to downgrade your plan.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!plan.priceId) {
+      toast({
+        title: "Plan Not Available",
+        description: "This plan is not available for subscription.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoadingPlan(plan.id);
 
     try {
-      // Mock user ID - in real app, get from auth context
-      const userId = "user_123"
-
-      const response = await fetch("/api/create-checkout-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          priceId: plan.priceId,
-          userId: userId,
-          planName: plan.name.toLowerCase(),
-        }),
-      })
-
-      const data = await response.json()
-
-      if (data.error) {
-        throw new Error(data.error)
-      }
+      const data = await createCheckoutSession(
+        plan.priceId,
+        user.id,
+        plan.name.toLowerCase()
+      );
 
       // Redirect to Stripe Checkout
       if (data.url) {
-        window.location.href = data.url
+        window.location.href = data.url;
       }
     } catch (error) {
-      console.error("Error creating checkout session:", error)
+      console.error("Error creating checkout session:", error);
       toast({
         title: "Error",
-        description: "Failed to start checkout process. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to start checkout process. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setLoadingPlan(null)
+      setLoadingPlan(null);
     }
-  }
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {plans.map((plan) => {
-        const Icon = plan.icon
-        const isLoading = loadingPlan === plan.id
+        const Icon = plan.icon;
+        const isLoading = loadingPlan === plan.id;
 
         return (
-          <Card key={plan.name} className={`relative ${plan.popular ? "ring-2 ring-primary" : ""}`}>
+          <Card
+            key={plan.name}
+            className={`relative ${plan.popular ? "ring-2 ring-primary" : ""}`}
+          >
             {plan.popular && (
               <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground">
                 Most Popular
@@ -153,15 +206,21 @@ export function PricingPlans() {
                 <span className="text-4xl font-bold">{plan.price}</span>
                 <span className="text-muted-foreground">/{plan.period}</span>
               </div>
-              <CardDescription className="mt-2">{plan.description}</CardDescription>
+              <CardDescription className="mt-2">
+                {plan.description}
+              </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-4">
               <Button
-                className="w-full"
+                className={`w-full ${
+                  !isAuthenticated && plan.id === "free"
+                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                    : ""
+                }`}
                 variant={plan.buttonVariant}
                 onClick={() => handleUpgrade(plan)}
-                disabled={isLoading}
+                disabled={isLoading || user?.plan === plan.id}
               >
                 {isLoading ? (
                   <>
@@ -186,10 +245,15 @@ export function PricingPlans() {
 
                 {plan.limitations.length > 0 && (
                   <div className="pt-2 border-t">
-                    <div className="text-sm font-medium text-muted-foreground mb-2">Limitations:</div>
+                    <div className="text-sm font-medium text-muted-foreground mb-2">
+                      Limitations:
+                    </div>
                     <ul className="space-y-1">
                       {plan.limitations.map((limitation, index) => (
-                        <li key={index} className="text-sm text-muted-foreground">
+                        <li
+                          key={index}
+                          className="text-sm text-muted-foreground"
+                        >
                           • {limitation}
                         </li>
                       ))}
@@ -199,8 +263,8 @@ export function PricingPlans() {
               </div>
             </CardContent>
           </Card>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

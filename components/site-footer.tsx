@@ -44,7 +44,7 @@ export function SiteFooter() {
   ];
 
   return (
-    <footer className="border-t bg-black/95 dark:bg-background/95 supports-[backdrop-filter]:bg-black/60 dark:supports-[backdrop-filter]:bg-background/60">
+    <footer className="border-t bg-black/95 dark:bg-black/95 supports-[backdrop-filter]:bg-black/60 dark:supports-[backdrop-filter]:bg-black/60">
       <div className="container mx-auto px-4 py-8 sm:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 sm:gap-8">
           {/* Brand Section */}

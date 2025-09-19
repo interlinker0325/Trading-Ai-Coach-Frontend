@@ -16,6 +16,7 @@ import {
   Users,
   BookOpen,
   Target,
+  DollarSign,
   User,
   LogOut,
   Settings,
@@ -55,13 +56,14 @@ export function SiteHeader() {
     { name: "Alerts", href: "/alerts", icon: Shield },
     { name: "Liquidity", href: "/liquidity", icon: Target },
     { name: "Education", href: "/education", icon: BookOpen },
+    { name: "Pricing", href: "/pricing", icon: DollarSign },
     { name: "AI Coach", href: "#ai-coach", icon: Brain },
     { name: "Community", href: "#community", icon: Users },
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b bg-black/95 dark:bg-background/95 supports-[backdrop-filter]:bg-black/60 dark:supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-black/75 dark:bg-black/75 supports-[backdrop-filter]:bg-black/60 dark:supports-[backdrop-filter]:bg-black/60">
         <div className="container mx-auto px-4 flex h-14 sm:h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
@@ -205,7 +207,7 @@ export function SiteHeader() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t bg-black/95 dark:bg-background/95">
+          <div className="md:hidden border-t bg-black/95 dark:bg-black/95">
             <div className="container mx-auto px-4 py-4 space-y-4">
               <nav className="space-y-1">
                 {navigation.map((item) => (

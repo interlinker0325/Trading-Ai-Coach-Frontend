@@ -25,6 +25,11 @@ interface AuthContextType {
     email: string,
     password: string
   ) => Promise<{ success: boolean; error?: string }>;
+  signup: (
+    email: string,
+    password: string,
+    full_name: string
+  ) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -82,13 +87,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setIsLoading(true);
 
-      const response = await fetch("http://localhost:8000/api/v1/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       const data = await response.json();
 
@@ -124,6 +132,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const signup = async (email: string, password: string, full_name: string) => {
+    try {
+      setIsLoading(true);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password, full_name }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return { success: true };
+      } else {
+        return { success: false, error: data.detail || "Registration failed" };
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      return { success: false, error: "Network error. Please try again." };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     // Clear all stored data
     localStorage.removeItem("access_token");
@@ -144,11 +182,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       // Make request to get current user info
-      const response = await fetch("http://localhost:8000/api/v1/users/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const userData = await response.json();
@@ -176,6 +217,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAuthenticated,
     isLoading,
     login,
+    signup,
     logout,
     refreshUser,
   };

@@ -10,7 +10,7 @@ export default function CoachPage() {
   // Redirect to signin if not authenticated
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background dark:bg-black flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">
             Please sign in to access the AI coach
@@ -24,13 +24,15 @@ export default function CoachPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-73px)]">
-      {/* Sidebar */}
-      <CoachSidebar plan={user?.plan || "free"} />
+    <div className="min-h-screen bg-background dark:bg-black">
+      <div className="flex h-[calc(100vh-73px)]">
+        {/* Sidebar */}
+        <CoachSidebar plan={user?.plan || "free"} />
 
-      {/* Main Chat Interface */}
-      <div className="flex-1 flex flex-col">
-        <AICoachInterface plan={user?.plan || "free"} />
+        {/* Main Chat Interface */}
+        <div className="flex-1 flex flex-col">
+          <AICoachInterface plan={user?.plan || "free"} />
+        </div>
       </div>
     </div>
   );

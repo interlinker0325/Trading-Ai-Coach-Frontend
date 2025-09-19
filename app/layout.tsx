@@ -5,8 +5,10 @@ import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
 import { AuthProvider } from "@/contexts/auth-context";
+import { ThemeProvider } from "@/components/theme-provider";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ConditionalLayout } from "@/components/conditional-layout";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,18 +24,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <AuthProvider>
-          <div className="min-h-screen flex flex-col">
-            <SiteHeader />
-            <main className="flex-1">
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`font-sans ${GeistSans.variable} ${GeistMono.variable} bg-background dark:bg-black`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <ConditionalLayout>
               <Suspense fallback={null}>{children}</Suspense>
-            </main>
-            <SiteFooter />
-          </div>
-          <Analytics />
-        </AuthProvider>
+            </ConditionalLayout>
+            <Analytics />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
