@@ -32,7 +32,7 @@ interface AuthContextType {
     full_name: string
   ) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<User | null | undefined>;
 }
 
 // Create Context
@@ -262,13 +262,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         };
         setUser(userInfo);
         setIsAuthenticated(true);
+        return userInfo; // Return user data for external use
       } else {
         // Token is invalid, logout
         logout();
+        return null;
       }
     } catch (error) {
       console.error("Refresh user failed:", error);
       logout();
+      return null;
     }
   };
 

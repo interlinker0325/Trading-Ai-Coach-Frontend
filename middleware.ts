@@ -19,6 +19,9 @@ const protectedRoutes = [
 // Define public routes that should redirect if authenticated
 const authRoutes = ["/signin", "/signup"];
 
+// Define public routes that don't require authentication
+const publicRoutes = ["/subscription-success", "/pricing"];
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -33,6 +36,11 @@ export function middleware(request: NextRequest) {
   // Check if route is auth route (signin/signup)
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
+  // Check if route is public (no auth required)
+  const isPublicRoute = publicRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
   // If accessing protected route without token, redirect to signin
   if (isProtectedRoute && !token) {
     const signInUrl = new URL("/signin", request.url);
@@ -43,6 +51,11 @@ export function middleware(request: NextRequest) {
   // If accessing auth routes with token, redirect to dashboard
   if (isAuthRoute && token) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  // Allow public routes to pass through without auth checks
+  if (isPublicRoute) {
+    return NextResponse.next();
   }
 
   return NextResponse.next();
