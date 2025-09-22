@@ -50,23 +50,6 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold mb-4">
             Please sign in to access the dashboard
           </h1>
-          <div className="mb-4 p-4 bg-gray-800 rounded text-left text-sm">
-            <p>
-              <strong>Debug Info:</strong>
-            </p>
-            <p>isAuthenticated: {isAuthenticated.toString()}</p>
-            <p>isLoading: {isLoading.toString()}</p>
-            <p>user: {user ? JSON.stringify(user) : "null"}</p>
-            <p>
-              access_token:{" "}
-              {typeof window !== "undefined"
-                ? localStorage.getItem("access_token")
-                  ? "present"
-                  : "missing"
-                : "N/A"}
-            </p>
-            <p>URL params: {searchParams.toString()}</p>
-          </div>
           <a href="/signin" className="text-primary hover:underline">
             Go to Sign In
           </a>

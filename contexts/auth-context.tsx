@@ -64,18 +64,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const checkAuthStatus = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      if (token) {
-        // Verify token is still valid by making a request to get user info
-        await refreshUser();
-      } else {
+      if (!token) {
         setIsAuthenticated(false);
         setUser(null);
+        setIsLoading(false);
+        return;
       }
+
+      // Verify token is still valid by making a request to get user info
+      await refreshUser();
     } catch (error) {
       console.error("Auth check failed:", error);
-      // Clear invalid tokens
+      // Clear invalid tokens from both localStorage and cookies
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
+      document.cookie = "access_token=; path=/; max-age=0";
+      document.cookie = "refresh_token=; path=/; max-age=0";
       setIsAuthenticated(false);
       setUser(null);
     } finally {
@@ -101,10 +105,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const data = await response.json();
 
       if (response.ok) {
-        // Store tokens
+        // Store tokens in both localStorage and cookies
         localStorage.setItem("access_token", data.access_token);
+        document.cookie = `access_token=${data.access_token}; path=/; max-age=${
+          7 * 24 * 60 * 60
+        }; secure; samesite=strict`;
+
         if (data.refresh_token) {
           localStorage.setItem("refresh_token", data.refresh_token);
+          document.cookie = `refresh_token=${
+            data.refresh_token
+          }; path=/; max-age=${30 * 24 * 60 * 60}; secure; samesite=strict`;
         }
 
         // Store user information
@@ -117,8 +128,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
             is_verified: data.user.is_verified,
           };
           setUser(userData);
-          setIsAuthenticated(true);
         }
+
+        // Set authenticated state AFTER storing everything
+        setIsAuthenticated(true);
 
         return { success: true };
       } else {
@@ -163,9 +176,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = () => {
-    // Clear all stored data
+    // Clear all stored data from localStorage
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
+
+    // Clear cookies
+    document.cookie = "access_token=; path=/; max-age=0";
+    document.cookie = "refresh_token=; path=/; max-age=0";
 
     // Reset state
     setUser(null);

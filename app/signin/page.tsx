@@ -21,11 +21,18 @@ export default function SignInPage() {
   const [verificationStatus, setVerificationStatus] = useState<
     "none" | "sent" | "verified"
   >("none");
+  const [showResendVerification, setShowResendVerification] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
+    // Check if user is already authenticated
+    if (isAuthenticated) {
+      router.push("/");
+      return;
+    }
+
     // Check if user was redirected after email verification
     if (searchParams.get("verified") === "true") {
       setSuccess("Email verified successfully! You can now sign in.");
@@ -38,7 +45,7 @@ export default function SignInPage() {
       );
       setVerificationStatus("sent");
     }
-  }, [searchParams]);
+  }, [searchParams, isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +66,48 @@ export default function SignInPage() {
       }, 1000);
     } else {
       setError(result.error || "Sign in failed. Please try again.");
+
+      // Show resend verification button if error is about email verification
+      if (result.error && result.error.includes("verify your email")) {
+        setShowResendVerification(true);
+      } else {
+        setShowResendVerification(false);
+      }
+    }
+  };
+
+  const handleResendVerification = async () => {
+    const formData = document.querySelector("form") as HTMLFormElement;
+    const email = formData?.querySelector(
+      'input[name="email"]'
+    ) as HTMLInputElement;
+
+    if (!email?.value) {
+      setError("Please enter your email address first");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/resend-verification`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: email.value }),
+        }
+      );
+
+      if (response.ok) {
+        setSuccess("Verification email sent! Please check your inbox.");
+        setShowResendVerification(false);
+      } else {
+        const data = await response.json();
+        setError(data.detail || "Failed to send verification email");
+      }
+    } catch (error) {
+      setError("Network error. Please try again.");
     }
   };
 
@@ -117,9 +166,22 @@ export default function SignInPage() {
 
             {/* Error/Success Messages */}
             {error && (
-              <div className="flex items-center space-x-2 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
-                <AlertCircle className="h-4 w-4" />
-                <span>{error}</span>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{error}</span>
+                </div>
+                {showResendVerification && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResendVerification}
+                    className="w-full text-sm"
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Resend Verification Email
+                  </Button>
+                )}
               </div>
             )}
 
