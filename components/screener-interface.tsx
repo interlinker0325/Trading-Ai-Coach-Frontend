@@ -353,8 +353,8 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.map((forex: any) => (
-          <TableRow key={forex.pair}>
+        {data.map((forex: any, index: number) => (
+          <TableRow key={index}>
             <TableCell>
               <div>
                 <div className="font-medium">{forex.pair}</div>

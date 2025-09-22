@@ -56,10 +56,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Check authentication status on mount
   useEffect(() => {
-    checkAuthStatus();
+    // Add a small delay to prevent race conditions with login
+    const timer = setTimeout(() => {
+      checkAuthStatus();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const checkAuthStatus = async () => {
@@ -68,6 +74,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (!token) {
         setIsAuthenticated(false);
         setUser(null);
+        setIsLoading(false);
+        return;
+      }
+
+      // If we're already authenticated and have user data, don't make unnecessary API calls
+      if (isAuthenticated && user) {
+        setIsLoading(false);
+        return;
+      }
+
+      // If we're in the middle of logging in, don't reset the state
+      if (isLoggingIn) {
         setIsLoading(false);
         return;
       }
@@ -95,6 +113,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   ) => {
     try {
       setIsLoading(true);
+      setIsLoggingIn(true);
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`,
@@ -119,11 +138,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
           ? 90 * 24 * 60 * 60
           : 7 * 24 * 60 * 60; // 90 days or 7 days
 
-        document.cookie = `access_token=${data.access_token}; path=/; max-age=${accessTokenExpiry}; secure; samesite=strict`;
+        // Set cookies with proper attributes
+        const isSecure = window.location.protocol === "https:";
+        const cookieOptions = `path=/; max-age=${accessTokenExpiry}${
+          isSecure ? "; secure" : ""
+        }; samesite=strict`;
+
+        document.cookie = `access_token=${data.access_token}; ${cookieOptions}`;
 
         if (data.refresh_token) {
           localStorage.setItem("refresh_token", data.refresh_token);
-          document.cookie = `refresh_token=${data.refresh_token}; path=/; max-age=${refreshTokenExpiry}; secure; samesite=strict`;
+          const refreshCookieOptions = `path=/; max-age=${refreshTokenExpiry}${
+            isSecure ? "; secure" : ""
+          }; samesite=strict`;
+          document.cookie = `refresh_token=${data.refresh_token}; ${refreshCookieOptions}`;
         }
 
         // Store user information
@@ -141,6 +169,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Set authenticated state AFTER storing everything
         setIsAuthenticated(true);
 
+        // Add a small delay to ensure state is fully updated
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         return { success: true };
       } else {
         return { success: false, error: data.detail || "Login failed" };
@@ -150,6 +181,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return { success: false, error: "Network error. Please try again." };
     } finally {
       setIsLoading(false);
+      // Keep isLoggingIn true for a bit longer to prevent flickering
+      setTimeout(() => {
+        setIsLoggingIn(false);
+      }, 1000);
     }
   };
 

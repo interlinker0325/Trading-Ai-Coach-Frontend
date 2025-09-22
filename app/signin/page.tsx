@@ -72,10 +72,10 @@ export default function SignInPage() {
 
     if (result.success) {
       setSuccess("Sign in successful!");
-      // Redirect to dashboard or home page
+      // Wait for authentication state to be properly set
       setTimeout(() => {
-        router.push("/");
-      }, 1000);
+        router.replace("/");
+      }, 800);
     } else {
       setError(result.error || "Sign in failed. Please try again.");
 
