@@ -23,7 +23,8 @@ interface AuthContextType {
   isLoading: boolean;
   login: (
     email: string,
-    password: string
+    password: string,
+    rememberMe?: boolean
   ) => Promise<{ success: boolean; error?: string }>;
   signup: (
     email: string,
@@ -87,7 +88,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (
+    email: string,
+    password: string,
+    rememberMe: boolean = false
+  ) => {
     try {
       setIsLoading(true);
 
@@ -98,7 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email, password, remember_me: rememberMe }),
         }
       );
 
@@ -107,15 +112,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.ok) {
         // Store tokens in both localStorage and cookies
         localStorage.setItem("access_token", data.access_token);
-        document.cookie = `access_token=${data.access_token}; path=/; max-age=${
-          7 * 24 * 60 * 60
-        }; secure; samesite=strict`;
+
+        // Set different cookie expiration based on remember me
+        const accessTokenExpiry = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days or 1 day
+        const refreshTokenExpiry = rememberMe
+          ? 90 * 24 * 60 * 60
+          : 7 * 24 * 60 * 60; // 90 days or 7 days
+
+        document.cookie = `access_token=${data.access_token}; path=/; max-age=${accessTokenExpiry}; secure; samesite=strict`;
 
         if (data.refresh_token) {
           localStorage.setItem("refresh_token", data.refresh_token);
-          document.cookie = `refresh_token=${
-            data.refresh_token
-          }; path=/; max-age=${30 * 24 * 60 * 60}; secure; samesite=strict`;
+          document.cookie = `refresh_token=${data.refresh_token}; path=/; max-age=${refreshTokenExpiry}; secure; samesite=strict`;
         }
 
         // Store user information

@@ -1,24 +1,52 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Slider } from "@/components/ui/slider"
-import { useScreener } from "@/hooks/use-market-data"
-import { TrendingUp, TrendingDown, Search, Filter, Lock, Target, Zap, DollarSign } from "lucide-react"
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { useScreener } from "@/hooks/use-market-data";
+import {
+  TrendingUp,
+  TrendingDown,
+  Search,
+  Filter,
+  Lock,
+  Target,
+  Zap,
+  DollarSign,
+} from "lucide-react";
 
 interface ScreenerInterfaceProps {
-  plan: "free" | "pro" | "elite"
+  plan: "free" | "pro" | "elite";
 }
 
 export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
-  const [activeTab, setActiveTab] = useState("stocks")
+  const [activeTab, setActiveTab] = useState("stocks");
 
   const [stockFilters, setStockFilters] = useState({
     sortBy: "score",
@@ -32,7 +60,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
     maxDebtToEquity: "100",
     minROE: "10",
     priceRange: [10, 1000] as [number, number],
-  })
+  });
 
   const [optionsFilters, setOptionsFilters] = useState({
     strategy: "csp", // cash secured puts
@@ -44,7 +72,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
     maxIVRank: "80",
     minLiquidity: "100",
     underlyingType: "all",
-  })
+  });
 
   const [cryptoFilters, setCryptoFilters] = useState({
     sortBy: "whale_flow",
@@ -55,7 +83,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
     exchangeFlow: "all",
     socialSentiment: "all",
     technicalSignal: "all",
-  })
+  });
 
   const [forexFilters, setForexFilters] = useState({
     sortBy: "volatility",
@@ -65,7 +93,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
     trend: "all", // bullish, bearish, sideways
     newsImpact: "all",
     sessionTime: "all", // london, ny, tokyo, sydney
-  })
+  });
 
   const [commoditiesFilters, setCommoditiesFilters] = useState({
     sortBy: "momentum",
@@ -74,46 +102,53 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
     inventoryLevel: "all",
     newsEvents: "all",
     technicalSetup: "all",
-  })
+  });
 
-  const { data, loading, error, refetch } = useScreener(activeTab as any, plan, getCurrentFilters())
+  const { data, loading, error, refetch } = useScreener(
+    activeTab as any,
+    plan,
+    getCurrentFilters()
+  );
 
   function getCurrentFilters() {
     switch (activeTab) {
       case "stocks":
-        return stockFilters
+        return stockFilters;
       case "options":
-        return optionsFilters
+        return optionsFilters;
       case "crypto":
-        return cryptoFilters
+        return cryptoFilters;
       case "forex":
-        return forexFilters
+        return forexFilters;
       case "commodities":
-        return commoditiesFilters
+        return commoditiesFilters;
       default:
-        return stockFilters
+        return stockFilters;
     }
   }
 
-  const handleStockFilterChange = (key: string, value: string | number | [number, number]) => {
-    setStockFilters((prev) => ({ ...prev, [key]: value }))
-  }
+  const handleStockFilterChange = (
+    key: string,
+    value: string | number | [number, number]
+  ) => {
+    setStockFilters((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleOptionsFilterChange = (key: string, value: string) => {
-    setOptionsFilters((prev) => ({ ...prev, [key]: value }))
-  }
+    setOptionsFilters((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleCryptoFilterChange = (key: string, value: string) => {
-    setCryptoFilters((prev) => ({ ...prev, [key]: value }))
-  }
+    setCryptoFilters((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleForexFilterChange = (key: string, value: string) => {
-    setForexFilters((prev) => ({ ...prev, [key]: value }))
-  }
+    setForexFilters((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleCommoditiesFilterChange = (key: string, value: string) => {
-    setCommoditiesFilters((prev) => ({ ...prev, [key]: value }))
-  }
+    setCommoditiesFilters((prev) => ({ ...prev, [key]: value }));
+  };
 
   const renderStockResults = () => (
     <Table>
@@ -136,32 +171,46 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <TableCell>
               <div>
                 <div className="font-medium">{stock.symbol}</div>
-                <div className="text-sm text-muted-foreground">{stock.name}</div>
+                <div className="text-sm text-muted-foreground">
+                  {stock.name}
+                </div>
               </div>
             </TableCell>
-            <TableCell>${stock.price.toFixed(2)}</TableCell>
+            <TableCell>${stock.price?.toFixed(2) || "0.00"}</TableCell>
             <TableCell>
-              <div className={`flex items-center space-x-1 ${stock.change > 0 ? "text-green-600" : "text-red-600"}`}>
-                {stock.change > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              <div
+                className={`flex items-center space-x-1 ${
+                  stock.change > 0 ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {stock.change > 0 ? (
+                  <TrendingUp className="h-3 w-3" />
+                ) : (
+                  <TrendingDown className="h-3 w-3" />
+                )}
                 <span>
                   {stock.change > 0 ? "+" : ""}
-                  {stock.changePercent.toFixed(2)}%
+                  {stock.changePercent?.toFixed(2) || "0.00"}%
                 </span>
               </div>
             </TableCell>
             <TableCell>{stock.volume.toLocaleString()}</TableCell>
-            <TableCell>${(stock.marketCap / 1000000000).toFixed(1)}B</TableCell>
-            <TableCell>{stock.pe.toFixed(1)}</TableCell>
+            <TableCell>
+              ${(stock.marketCap / 1000000000)?.toFixed(1) || "0.0"}B
+            </TableCell>
+            <TableCell>{stock.pe?.toFixed(1) || "0.0"}</TableCell>
             <TableCell>{stock.dividendYield?.toFixed(2)}%</TableCell>
             <TableCell>{stock.roe?.toFixed(1)}%</TableCell>
             <TableCell>
-              <Badge variant="secondary">{stock.score.toFixed(1)}</Badge>
+              <Badge variant="secondary">
+                {stock.score?.toFixed(1) || "0.0"}
+              </Badge>
             </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
-  )
+  );
 
   const renderOptionsResults = () => (
     <Table>
@@ -183,29 +232,37 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <TableCell>
               <div>
                 <div className="font-medium">{option.underlying}</div>
-                <div className="text-sm text-muted-foreground">{option.strategy}</div>
+                <div className="text-sm text-muted-foreground">
+                  {option.strategy}
+                </div>
               </div>
             </TableCell>
             <TableCell>${option.strike}</TableCell>
             <TableCell>{option.dte} DTE</TableCell>
-            <TableCell>${option.premium.toFixed(2)}</TableCell>
+            <TableCell>${option.premium?.toFixed(2) || "0.00"}</TableCell>
             <TableCell>
               <Badge variant="secondary" className="text-green-700">
-                {option.yield.toFixed(1)}%
+                {option.yield?.toFixed(1) || "0.0"}%
               </Badge>
             </TableCell>
             <TableCell>{option.ivRank}%</TableCell>
             <TableCell>
-              <Badge variant={option.liquidity > 500 ? "default" : "outline"}>{option.liquidity}</Badge>
+              <Badge variant={option.liquidity > 500 ? "default" : "outline"}>
+                {option.liquidity}
+              </Badge>
             </TableCell>
             <TableCell>
-              <Badge variant={option.riskScore < 5 ? "secondary" : "destructive"}>{option.riskScore.toFixed(1)}</Badge>
+              <Badge
+                variant={option.riskScore < 5 ? "secondary" : "destructive"}
+              >
+                {option.riskScore?.toFixed(1) || "0.0"}
+              </Badge>
             </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
-  )
+  );
 
   const renderCryptoResults = () => (
     <Table>
@@ -227,23 +284,43 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <TableCell>
               <div>
                 <div className="font-medium">{crypto.symbol}</div>
-                <div className="text-sm text-muted-foreground">{crypto.name}</div>
+                <div className="text-sm text-muted-foreground">
+                  {crypto.name}
+                </div>
               </div>
             </TableCell>
             <TableCell>${crypto.price.toLocaleString()}</TableCell>
             <TableCell>
-              <div className={`flex items-center space-x-1 ${crypto.change > 0 ? "text-green-600" : "text-red-600"}`}>
-                {crypto.change > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              <div
+                className={`flex items-center space-x-1 ${
+                  crypto.change > 0 ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {crypto.change > 0 ? (
+                  <TrendingUp className="h-3 w-3" />
+                ) : (
+                  <TrendingDown className="h-3 w-3" />
+                )}
                 <span>
                   {crypto.change > 0 ? "+" : ""}
-                  {crypto.changePercent.toFixed(2)}%
+                  {crypto.changePercent?.toFixed(2) || "0.00"}%
                 </span>
               </div>
             </TableCell>
-            <TableCell>${(crypto.volume24h / 1000000000).toFixed(1)}B</TableCell>
-            <TableCell>${(crypto.marketCap / 1000000000).toFixed(1)}B</TableCell>
             <TableCell>
-              <Badge variant={crypto.whaleFlow === "accumulation" ? "secondary" : "destructive"}>
+              ${(crypto.volume24h / 1000000000)?.toFixed(1) || "0.0"}B
+            </TableCell>
+            <TableCell>
+              ${(crypto.marketCap / 1000000000)?.toFixed(1) || "0.0"}B
+            </TableCell>
+            <TableCell>
+              <Badge
+                variant={
+                  crypto.whaleFlow === "accumulation"
+                    ? "secondary"
+                    : "destructive"
+                }
+              >
                 {crypto.whaleFlow}
               </Badge>
             </TableCell>
@@ -251,13 +328,15 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
               <Badge variant="outline">{crypto.exchangeFlow}</Badge>
             </TableCell>
             <TableCell>
-              <Badge variant="secondary">{crypto.score.toFixed(1)}</Badge>
+              <Badge variant="secondary">
+                {crypto.score?.toFixed(1) || "0.0"}
+              </Badge>
             </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
-  )
+  );
 
   const renderForexResults = () => (
     <Table>
@@ -279,24 +358,38 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <TableCell>
               <div>
                 <div className="font-medium">{forex.pair}</div>
-                <div className="text-sm text-muted-foreground">{forex.type}</div>
+                <div className="text-sm text-muted-foreground">
+                  {forex.type}
+                </div>
               </div>
             </TableCell>
-            <TableCell>{forex.price.toFixed(4)}</TableCell>
+            <TableCell>{forex.price?.toFixed(4) || "0.0000"}</TableCell>
             <TableCell>
-              <div className={`flex items-center space-x-1 ${forex.change > 0 ? "text-green-600" : "text-red-600"}`}>
-                {forex.change > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              <div
+                className={`flex items-center space-x-1 ${
+                  forex.change > 0 ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {forex.change > 0 ? (
+                  <TrendingUp className="h-3 w-3" />
+                ) : (
+                  <TrendingDown className="h-3 w-3" />
+                )}
                 <span>
                   {forex.change > 0 ? "+" : ""}
-                  {forex.changePercent.toFixed(2)}%
+                  {forex.changePercent?.toFixed(2) || "0.00"}%
                 </span>
               </div>
             </TableCell>
-            <TableCell>{forex.volatility.toFixed(2)}%</TableCell>
+            <TableCell>{forex.volatility?.toFixed(2) || "0.00"}%</TableCell>
             <TableCell>
               <Badge
                 variant={
-                  forex.trend === "bullish" ? "secondary" : forex.trend === "bearish" ? "destructive" : "outline"
+                  forex.trend === "bullish"
+                    ? "secondary"
+                    : forex.trend === "bearish"
+                    ? "destructive"
+                    : "outline"
                 }
               >
                 {forex.trend}
@@ -306,16 +399,24 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
               <Badge variant="outline">{forex.activeSession}</Badge>
             </TableCell>
             <TableCell>
-              <Badge variant={forex.newsImpact === "high" ? "destructive" : "secondary"}>{forex.newsImpact}</Badge>
+              <Badge
+                variant={
+                  forex.newsImpact === "high" ? "destructive" : "secondary"
+                }
+              >
+                {forex.newsImpact}
+              </Badge>
             </TableCell>
             <TableCell>
-              <Badge variant="secondary">{forex.score.toFixed(1)}</Badge>
+              <Badge variant="secondary">
+                {forex.score?.toFixed(1) || "0.0"}
+              </Badge>
             </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
-  )
+  );
 
   const renderCommoditiesResults = () => (
     <Table>
@@ -337,43 +438,73 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <TableCell>
               <div>
                 <div className="font-medium">{commodity.symbol}</div>
-                <div className="text-sm text-muted-foreground">{commodity.category}</div>
+                <div className="text-sm text-muted-foreground">
+                  {commodity.category}
+                </div>
               </div>
             </TableCell>
-            <TableCell>${commodity.price.toFixed(2)}</TableCell>
+            <TableCell>${commodity.price?.toFixed(2) || "0.00"}</TableCell>
             <TableCell>
               <div
-                className={`flex items-center space-x-1 ${commodity.change > 0 ? "text-green-600" : "text-red-600"}`}
+                className={`flex items-center space-x-1 ${
+                  commodity.change > 0 ? "text-green-600" : "text-red-600"
+                }`}
               >
-                {commodity.change > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                {commodity.change > 0 ? (
+                  <TrendingUp className="h-3 w-3" />
+                ) : (
+                  <TrendingDown className="h-3 w-3" />
+                )}
                 <span>
                   {commodity.change > 0 ? "+" : ""}
-                  {commodity.changePercent.toFixed(2)}%
+                  {commodity.changePercent?.toFixed(2) || "0.00"}%
                 </span>
               </div>
             </TableCell>
             <TableCell>
-              <Badge variant={commodity.momentum === "strong" ? "secondary" : "outline"}>{commodity.momentum}</Badge>
+              <Badge
+                variant={
+                  commodity.momentum === "strong" ? "secondary" : "outline"
+                }
+              >
+                {commodity.momentum}
+              </Badge>
             </TableCell>
             <TableCell>
-              <Badge variant={commodity.seasonal === "favorable" ? "secondary" : "outline"}>{commodity.seasonal}</Badge>
+              <Badge
+                variant={
+                  commodity.seasonal === "favorable" ? "secondary" : "outline"
+                }
+              >
+                {commodity.seasonal}
+              </Badge>
             </TableCell>
             <TableCell>
-              <Badge variant={commodity.inventory === "low" ? "destructive" : "secondary"}>{commodity.inventory}</Badge>
+              <Badge
+                variant={
+                  commodity.inventory === "low" ? "destructive" : "secondary"
+                }
+              >
+                {commodity.inventory}
+              </Badge>
             </TableCell>
             <TableCell>
-              <Badge variant={commodity.newsEvents > 0 ? "destructive" : "outline"}>
+              <Badge
+                variant={commodity.newsEvents > 0 ? "destructive" : "outline"}
+              >
                 {commodity.newsEvents} events
               </Badge>
             </TableCell>
             <TableCell>
-              <Badge variant="secondary">{commodity.score.toFixed(1)}</Badge>
+              <Badge variant="secondary">
+                {commodity.score?.toFixed(1) || "0.0"}
+              </Badge>
             </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
-  )
+  );
 
   if (plan === "free" && activeTab !== "stocks") {
     return (
@@ -386,17 +517,17 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
               {activeTab === "crypto"
                 ? "Crypto"
                 : activeTab === "forex"
-                  ? "Forex"
-                  : activeTab === "options"
-                    ? "Options"
-                    : "Commodities"}{" "}
+                ? "Forex"
+                : activeTab === "options"
+                ? "Options"
+                : "Commodities"}{" "}
               screener is available with Pro or Elite plans
             </p>
             <Button>Upgrade to Pro</Button>
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -408,7 +539,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <Filter className="h-5 w-5" />
             <span>Advanced Screening Filters</span>
           </CardTitle>
-          <CardDescription>Customize your search criteria for {activeTab}</CardDescription>
+          <CardDescription>
+            Customize your search criteria for {activeTab}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {/* Stock Filters */}
@@ -416,7 +549,12 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Sort By</Label>
-                <Select value={stockFilters.sortBy} onValueChange={(value) => handleStockFilterChange("sortBy", value)}>
+                <Select
+                  value={stockFilters.sortBy}
+                  onValueChange={(value) =>
+                    handleStockFilterChange("sortBy", value)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -425,13 +563,20 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                     <SelectItem value="change">Price Change</SelectItem>
                     <SelectItem value="volume">Volume</SelectItem>
                     <SelectItem value="marketCap">Market Cap</SelectItem>
-                    <SelectItem value="dividendYield">Dividend Yield</SelectItem>
+                    <SelectItem value="dividendYield">
+                      Dividend Yield
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Sector</Label>
-                <Select value={stockFilters.sector} onValueChange={(value) => handleStockFilterChange("sector", value)}>
+                <Select
+                  value={stockFilters.sector}
+                  onValueChange={(value) =>
+                    handleStockFilterChange("sector", value)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -450,7 +595,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Input
                   type="number"
                   value={stockFilters.minMarketCap}
-                  onChange={(e) => handleStockFilterChange("minMarketCap", e.target.value)}
+                  onChange={(e) =>
+                    handleStockFilterChange("minMarketCap", e.target.value)
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -458,17 +605,25 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Input
                   type="number"
                   value={stockFilters.minDividendYield}
-                  onChange={(e) => handleStockFilterChange("minDividendYield", e.target.value)}
+                  onChange={(e) =>
+                    handleStockFilterChange("minDividendYield", e.target.value)
+                  }
                   step="0.1"
                 />
               </div>
               <div className="space-y-2">
                 <Label>
-                  Price Range: ${stockFilters.priceRange[0]} - ${stockFilters.priceRange[1]}
+                  Price Range: ${stockFilters.priceRange[0]} - $
+                  {stockFilters.priceRange[1]}
                 </Label>
                 <Slider
                   value={stockFilters.priceRange}
-                  onValueChange={(value) => handleStockFilterChange("priceRange", value as [number, number])}
+                  onValueChange={(value) =>
+                    handleStockFilterChange(
+                      "priceRange",
+                      value as [number, number]
+                    )
+                  }
                   max={1000}
                   min={1}
                   step={1}
@@ -485,7 +640,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Label>Strategy</Label>
                 <Select
                   value={optionsFilters.strategy}
-                  onValueChange={(value) => handleOptionsFilterChange("strategy", value)}
+                  onValueChange={(value) =>
+                    handleOptionsFilterChange("strategy", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -503,7 +660,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Input
                   type="number"
                   value={optionsFilters.minYield}
-                  onChange={(e) => handleOptionsFilterChange("minYield", e.target.value)}
+                  onChange={(e) =>
+                    handleOptionsFilterChange("minYield", e.target.value)
+                  }
                   step="0.1"
                 />
               </div>
@@ -514,13 +673,17 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                     type="number"
                     placeholder="Min"
                     value={optionsFilters.minDTE}
-                    onChange={(e) => handleOptionsFilterChange("minDTE", e.target.value)}
+                    onChange={(e) =>
+                      handleOptionsFilterChange("minDTE", e.target.value)
+                    }
                   />
                   <Input
                     type="number"
                     placeholder="Max"
                     value={optionsFilters.maxDTE}
-                    onChange={(e) => handleOptionsFilterChange("maxDTE", e.target.value)}
+                    onChange={(e) =>
+                      handleOptionsFilterChange("maxDTE", e.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -531,13 +694,17 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                     type="number"
                     placeholder="Min"
                     value={optionsFilters.minIVRank}
-                    onChange={(e) => handleOptionsFilterChange("minIVRank", e.target.value)}
+                    onChange={(e) =>
+                      handleOptionsFilterChange("minIVRank", e.target.value)
+                    }
                   />
                   <Input
                     type="number"
                     placeholder="Max"
                     value={optionsFilters.maxIVRank}
-                    onChange={(e) => handleOptionsFilterChange("maxIVRank", e.target.value)}
+                    onChange={(e) =>
+                      handleOptionsFilterChange("maxIVRank", e.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -551,7 +718,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Label>Sort By</Label>
                 <Select
                   value={cryptoFilters.sortBy}
-                  onValueChange={(value) => handleCryptoFilterChange("sortBy", value)}
+                  onValueChange={(value) =>
+                    handleCryptoFilterChange("sortBy", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -568,7 +737,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Label>Whale Activity</Label>
                 <Select
                   value={cryptoFilters.whaleActivity}
-                  onValueChange={(value) => handleCryptoFilterChange("whaleActivity", value)}
+                  onValueChange={(value) =>
+                    handleCryptoFilterChange("whaleActivity", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -585,7 +756,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Label>Exchange Flow</Label>
                 <Select
                   value={cryptoFilters.exchangeFlow}
-                  onValueChange={(value) => handleCryptoFilterChange("exchangeFlow", value)}
+                  onValueChange={(value) =>
+                    handleCryptoFilterChange("exchangeFlow", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -603,7 +776,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Input
                   type="number"
                   value={cryptoFilters.minMarketCap}
-                  onChange={(e) => handleCryptoFilterChange("minMarketCap", e.target.value)}
+                  onChange={(e) =>
+                    handleCryptoFilterChange("minMarketCap", e.target.value)
+                  }
                 />
               </div>
             </div>
@@ -616,7 +791,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Label>Pair Type</Label>
                 <Select
                   value={forexFilters.pairType}
-                  onValueChange={(value) => handleForexFilterChange("pairType", value)}
+                  onValueChange={(value) =>
+                    handleForexFilterChange("pairType", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -631,7 +808,12 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
               </div>
               <div className="space-y-2">
                 <Label>Trend</Label>
-                <Select value={forexFilters.trend} onValueChange={(value) => handleForexFilterChange("trend", value)}>
+                <Select
+                  value={forexFilters.trend}
+                  onValueChange={(value) =>
+                    handleForexFilterChange("trend", value)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -647,7 +829,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Label>Session Time</Label>
                 <Select
                   value={forexFilters.sessionTime}
-                  onValueChange={(value) => handleForexFilterChange("sessionTime", value)}
+                  onValueChange={(value) =>
+                    handleForexFilterChange("sessionTime", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -668,14 +852,18 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                     type="number"
                     placeholder="Min"
                     value={forexFilters.minVolatility}
-                    onChange={(e) => handleForexFilterChange("minVolatility", e.target.value)}
+                    onChange={(e) =>
+                      handleForexFilterChange("minVolatility", e.target.value)
+                    }
                     step="0.1"
                   />
                   <Input
                     type="number"
                     placeholder="Max"
                     value={forexFilters.maxVolatility}
-                    onChange={(e) => handleForexFilterChange("maxVolatility", e.target.value)}
+                    onChange={(e) =>
+                      handleForexFilterChange("maxVolatility", e.target.value)
+                    }
                     step="0.1"
                   />
                 </div>
@@ -690,7 +878,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Label>Category</Label>
                 <Select
                   value={commoditiesFilters.category}
-                  onValueChange={(value) => handleCommoditiesFilterChange("category", value)}
+                  onValueChange={(value) =>
+                    handleCommoditiesFilterChange("category", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -700,7 +890,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                     <SelectItem value="metals">Precious Metals</SelectItem>
                     <SelectItem value="energy">Energy</SelectItem>
                     <SelectItem value="agriculture">Agriculture</SelectItem>
-                    <SelectItem value="industrial">Industrial Metals</SelectItem>
+                    <SelectItem value="industrial">
+                      Industrial Metals
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -708,7 +900,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Label>Seasonal Pattern</Label>
                 <Select
                   value={commoditiesFilters.seasonalPattern}
-                  onValueChange={(value) => handleCommoditiesFilterChange("seasonalPattern", value)}
+                  onValueChange={(value) =>
+                    handleCommoditiesFilterChange("seasonalPattern", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -725,7 +919,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Label>Technical Setup</Label>
                 <Select
                   value={commoditiesFilters.technicalSetup}
-                  onValueChange={(value) => handleCommoditiesFilterChange("technicalSetup", value)}
+                  onValueChange={(value) =>
+                    handleCommoditiesFilterChange("technicalSetup", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -742,7 +938,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <Label>News Events</Label>
                 <Select
                   value={commoditiesFilters.newsEvents}
-                  onValueChange={(value) => handleCommoditiesFilterChange("newsEvents", value)}
+                  onValueChange={(value) =>
+                    handleCommoditiesFilterChange("newsEvents", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -764,7 +962,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
               {loading ? "Searching..." : "Search"}
             </Button>
             <div className="text-sm text-muted-foreground">
-              {plan === "free" ? "Top 5 results (upgrade for unlimited)" : `Showing all results`}
+              {plan === "free"
+                ? "Top 5 results (upgrade for unlimited)"
+                : `Showing all results`}
             </div>
           </div>
         </CardContent>
@@ -775,7 +975,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
         <CardHeader>
           <CardTitle>Screening Results</CardTitle>
           <CardDescription>
-            {plan === "free" ? "Top 5 results (upgrade for unlimited)" : `${data.length} results found`}
+            {plan === "free"
+              ? "Top 5 results (upgrade for unlimited)"
+              : `${data.length} results found`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -841,7 +1043,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
 
             <TabsContent value="commodities" className="mt-6">
               {loading ? (
-                <div className="text-center py-8">Loading commodities data...</div>
+                <div className="text-center py-8">
+                  Loading commodities data...
+                </div>
               ) : error ? (
                 <div className="text-center py-8 text-destructive">{error}</div>
               ) : (
@@ -852,5 +1056,5 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

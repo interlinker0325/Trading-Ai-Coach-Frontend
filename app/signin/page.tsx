@@ -22,6 +22,7 @@ export default function SignInPage() {
     "none" | "sent" | "verified"
   >("none");
   const [showResendVerification, setShowResendVerification] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isLoading, isAuthenticated } = useAuth();
@@ -56,7 +57,7 @@ export default function SignInPage() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    const result = await login(email, password);
+    const result = await login(email, password, rememberMe);
 
     if (result.success) {
       setSuccess("Sign in successful!");
@@ -265,6 +266,8 @@ export default function SignInPage() {
                     id="remember"
                     type="checkbox"
                     className="h-4 w-4 rounded border-gray-300"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                   />
                   <Label htmlFor="remember" className="text-sm">
                     Remember me
