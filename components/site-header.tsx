@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -26,7 +27,7 @@ import {
 export function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, isLoading } = useAuth();
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -164,6 +165,11 @@ export function SiteHeader() {
                   )}
                 </div>
               </>
+            ) : isLoading ? (
+              <div className="flex items-center space-x-2">
+                <Skeleton className="h-8 w-16 bg-white/20" />
+                <Skeleton className="h-8 w-24 bg-white/20" />
+              </div>
             ) : (
               <>
                 <Button
@@ -273,6 +279,11 @@ export function SiteHeader() {
                       Sign Out
                     </Button>
                   </>
+                ) : isLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-10 w-full bg-white/20" />
+                    <Skeleton className="h-10 w-full bg-white/20" />
+                  </div>
                 ) : (
                   <>
                     <Button
