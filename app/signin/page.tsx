@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/auth-context";
+import { ForgotPasswordModal } from "@/components/forgot-password-modal";
 import { AlertCircle, Mail, CheckCircle } from "lucide-react";
 import { Lock, Eye, EyeOff, Chrome, TrendingUp, ArrowLeft } from "lucide-react";
 
@@ -23,6 +24,8 @@ export default function SignInPage() {
   >("none");
   const [showResendVerification, setShowResendVerification] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [isPasswordReset, setIsPasswordReset] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isLoading, isAuthenticated } = useAuth();
@@ -45,6 +48,14 @@ export default function SignInPage() {
         "Verification email sent! Please check your email and click the verification link to activate your account."
       );
       setVerificationStatus("sent");
+    }
+    // Check if user was redirected after password reset
+    else if (searchParams.get("password_reset") === "true") {
+      setSuccess(
+        "Password reset successfully! You can now sign in with your new password."
+      );
+      setVerificationStatus("none");
+      setIsPasswordReset(true);
     }
   }, [searchParams, isAuthenticated, router]);
 
@@ -277,10 +288,7 @@ export default function SignInPage() {
                   variant="link"
                   className="p-0 h-auto text-sm"
                   type="button"
-                  onClick={() => {
-                    // TODO: Implement forgot password modal/page
-                    alert("Forgot password functionality coming soon!");
-                  }}
+                  onClick={() => setShowForgotPassword(true)}
                 >
                   Forgot password?
                 </Button>
@@ -290,7 +298,10 @@ export default function SignInPage() {
                 type="submit"
                 className="w-full"
                 disabled={
-                  isLoading || (!!success && verificationStatus === "none")
+                  isLoading ||
+                  (!!success &&
+                    verificationStatus === "none" &&
+                    !isPasswordReset)
                 }
               >
                 {isLoading ? (
@@ -329,6 +340,12 @@ export default function SignInPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Forgot Password Modal */}
+        <ForgotPasswordModal
+          isOpen={showForgotPassword}
+          onClose={() => setShowForgotPassword(false)}
+        />
       </div>
     </div>
   );
