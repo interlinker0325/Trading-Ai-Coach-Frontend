@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth-context";
+import { useGoogleAuth } from "@/hooks/use-google-auth";
 import {
   Mail,
   Lock,
@@ -29,13 +30,21 @@ export default function SignUpPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const { isLoading, signup, isAuthenticated } = useAuth();
+  const {
+    initializeGoogleAuth,
+    signInWithGoogle,
+    isLoading: isGoogleLoading,
+  } = useGoogleAuth();
 
   useEffect(() => {
+    // Initialize Google Auth
+    initializeGoogleAuth();
+
     // Check if user is already authenticated
     if (isAuthenticated) {
       router.push("/");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, initializeGoogleAuth]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,10 +111,11 @@ export default function SignUpPage() {
             <Button
               variant="outline"
               className="w-full bg-transparent"
-              disabled={isLoading}
+              disabled={isLoading || isGoogleLoading}
+              onClick={signInWithGoogle}
             >
               <Chrome className="h-4 w-4 mr-2" />
-              Continue with Google
+              {isGoogleLoading ? "Signing up..." : "Continue with Google"}
             </Button>
 
             <div className="relative">

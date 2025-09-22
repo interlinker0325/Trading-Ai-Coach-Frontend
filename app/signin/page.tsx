@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/auth-context";
 import { ForgotPasswordModal } from "@/components/forgot-password-modal";
+import { useGoogleAuth } from "@/hooks/use-google-auth";
 import { AlertCircle, Mail, CheckCircle } from "lucide-react";
 import { Lock, Eye, EyeOff, Chrome, TrendingUp, ArrowLeft } from "lucide-react";
 
@@ -29,8 +30,16 @@ export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isLoading, isAuthenticated } = useAuth();
+  const {
+    initializeGoogleAuth,
+    signInWithGoogle,
+    isLoading: isGoogleLoading,
+  } = useGoogleAuth();
 
   useEffect(() => {
+    // Initialize Google Auth
+    initializeGoogleAuth();
+
     // Check if user is already authenticated
     if (isAuthenticated) {
       router.push("/");
@@ -57,7 +66,7 @@ export default function SignInPage() {
       setVerificationStatus("none");
       setIsPasswordReset(true);
     }
-  }, [searchParams, isAuthenticated, router]);
+  }, [searchParams, isAuthenticated, router, initializeGoogleAuth]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,10 +168,11 @@ export default function SignInPage() {
             <Button
               variant="outline"
               className="w-full bg-transparent"
-              disabled={isLoading}
+              disabled={isLoading || isGoogleLoading}
+              onClick={signInWithGoogle}
             >
               <Chrome className="h-4 w-4 mr-2" />
-              Continue with Google
+              {isGoogleLoading ? "Signing in..." : "Continue with Google"}
             </Button>
 
             <div className="relative">
