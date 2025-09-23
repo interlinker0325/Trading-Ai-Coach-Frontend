@@ -38,6 +38,9 @@ export const useGoogleAuth = () => {
   const handleGoogleResponse = async (response: any) => {
     setIsLoading(true);
     try {
+      console.log("Google response received:", response);
+      console.log("Credential length:", response.credential?.length);
+
       const result = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`,
         {
