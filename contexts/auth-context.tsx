@@ -33,6 +33,8 @@ interface AuthContextType {
   ) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   refreshUser: () => Promise<User | null | undefined>;
+  setUser: (user: User | null) => void;
+  setIsAuthenticated: (isAuthenticated: boolean) => void;
 }
 
 // Create Context
@@ -283,6 +285,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signup,
     logout,
     refreshUser,
+    setUser,
+    setIsAuthenticated,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -11,7 +11,14 @@ declare global {
 }
 
 export const useGoogleAuth = () => {
-  const { login, isAuthenticated } = useAuth();
+  const {
+    login,
+    isAuthenticated,
+    refreshUser,
+    user,
+    setUser,
+    setIsAuthenticated,
+  } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -55,8 +62,11 @@ export const useGoogleAuth = () => {
       );
 
       const data = await result.json();
+      console.log("Google auth response:", data);
 
       if (result.ok) {
+        console.log("Google auth successful:", data);
+
         // Store tokens in localStorage and cookies
         localStorage.setItem("access_token", data.access_token);
 
@@ -79,8 +89,21 @@ export const useGoogleAuth = () => {
           document.cookie = `refresh_token=${data.refresh_token}; ${refreshCookieOptions}`;
         }
 
-        // Redirect to dashboard
-        router.push("/dashboard");
+        // Update auth context with user data directly
+        if (data.user) {
+          const userData = {
+            id: data.user.id,
+            email: data.user.email,
+            full_name: data.user.full_name,
+            plan: data.user.plan,
+            is_verified: data.user.is_verified,
+          };
+          setUser(userData);
+          setIsAuthenticated(true);
+        }
+
+        // Force a page reload to ensure middleware picks up the new cookies
+        window.location.href = "/dashboard";
       } else {
         console.error("Google auth failed:", data.detail);
         // Handle error - you might want to show a toast or error message
