@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -28,6 +29,7 @@ export function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { user, isAuthenticated, logout, isLoading } = useAuth();
+  const router = useRouter();
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -47,8 +49,8 @@ export function SiteHeader() {
   const handleSignOut = () => {
     logout();
     setShowUserMenu(false);
-    // Redirect to home page
-    window.location.href = "/";
+    // Redirect to home page using Next.js router (no page reload)
+    router.push("/");
   };
 
   const navigation = [

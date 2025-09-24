@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,6 +20,7 @@ export function PricingPlans() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
 
   const plans = [
     {
@@ -120,7 +122,7 @@ export function PricingPlans() {
         variant: "destructive",
       });
       // Redirect to sign in page
-      window.location.href = "/signin";
+      router.push("/signin");
       return;
     }
 
