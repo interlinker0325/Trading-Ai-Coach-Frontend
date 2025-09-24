@@ -11,29 +11,29 @@ export function SiteFooter() {
       { name: "Features", href: "#features" },
       { name: "AI Coach", href: "#ai-coach" },
       { name: "Analytics", href: "#analytics" },
-      { name: "Pricing", href: "/plans" },
-      { name: "API", href: "/api" },
+      { name: "Pricing", href: "/pricing" },
+      { name: "API", href: "#api" },
     ],
     company: [
-      { name: "About", href: "/about" },
-      { name: "Blog", href: "/blog" },
-      { name: "Careers", href: "/careers" },
-      { name: "Press", href: "/press" },
-      { name: "Partners", href: "/partners" },
+      { name: "About", href: "#about" },
+      { name: "Blog", href: "#blog" },
+      { name: "Careers", href: "#careers" },
+      { name: "Press", href: "#press" },
+      { name: "Partners", href: "#partners" },
     ],
     resources: [
-      { name: "Documentation", href: "/docs" },
-      { name: "Help Center", href: "/help" },
-      { name: "Community", href: "/community" },
-      { name: "Status", href: "/status" },
-      { name: "Changelog", href: "/changelog" },
+      { name: "Documentation", href: "#docs" },
+      { name: "Help Center", href: "#help" },
+      { name: "Community", href: "#community" },
+      { name: "Status", href: "#status" },
+      { name: "Changelog", href: "#changelog" },
     ],
     legal: [
-      { name: "Privacy", href: "/privacy" },
-      { name: "Terms", href: "/terms" },
-      { name: "Security", href: "/security" },
-      { name: "Compliance", href: "/compliance" },
-      { name: "Cookies", href: "/cookies" },
+      { name: "Privacy", href: "#privacy" },
+      { name: "Terms", href: "#terms" },
+      { name: "Security", href: "#security" },
+      { name: "Compliance", href: "#compliance" },
+      { name: "Cookies", href: "#cookies" },
     ],
   };
 
@@ -49,7 +49,11 @@ export function SiteFooter() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 sm:gap-8">
           {/* Brand Section */}
           <div className="sm:col-span-2 lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center space-x-2">
+            <Link
+              href="/"
+              className="flex items-center space-x-2"
+              prefetch={false}
+            >
               <Image
                 src="/logo.png"
                 alt="Furu+ Logo"
@@ -72,7 +76,7 @@ export function SiteFooter() {
                   className="h-8 w-8 sm:h-9 sm:w-9 text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground hover:bg-white/10 dark:hover:bg-muted/50"
                   asChild
                 >
-                  <Link href={social.href}>
+                  <Link href={social.href} prefetch={false}>
                     <social.icon className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="sr-only">{social.name}</span>
                   </Link>
@@ -91,6 +95,7 @@ export function SiteFooter() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
+                    prefetch={false}
                     className="text-xs sm:text-sm text-white dark:text-muted-foreground hover:text-gray-300 dark:hover:text-foreground transition-colors"
                   >
                     {link.name}
@@ -109,6 +114,7 @@ export function SiteFooter() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
+                    prefetch={false}
                     className="text-xs sm:text-sm text-white dark:text-muted-foreground hover:text-gray-300 dark:hover:text-foreground transition-colors"
                   >
                     {link.name}
@@ -127,6 +133,7 @@ export function SiteFooter() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
+                    prefetch={false}
                     className="text-xs sm:text-sm text-white dark:text-muted-foreground hover:text-gray-300 dark:hover:text-foreground transition-colors"
                   >
                     {link.name}
@@ -145,6 +152,7 @@ export function SiteFooter() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
+                    prefetch={false}
                     className="text-xs sm:text-sm text-white dark:text-muted-foreground hover:text-gray-300 dark:hover:text-foreground transition-colors"
                   >
                     {link.name}

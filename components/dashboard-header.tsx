@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,19 +10,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Bell, Settings, LogOut, CreditCard } from "lucide-react"
-import Link from "next/link"
+} from "@/components/ui/dropdown-menu";
+import { Bell, Settings, LogOut, CreditCard } from "lucide-react";
+import Link from "next/link";
 
 interface User {
-  name: string
-  email: string
-  plan: "free" | "pro" | "elite"
-  avatar: string
+  name: string;
+  email: string;
+  plan: "free" | "pro" | "elite";
+  avatar: string;
 }
 
 interface DashboardHeaderProps {
-  user: User
+  user: User;
 }
 
 export function DashboardHeader({ user }: DashboardHeaderProps) {
@@ -30,7 +30,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
     free: "bg-muted text-muted-foreground",
     pro: "bg-secondary text-secondary-foreground",
     elite: "bg-primary text-primary-foreground",
-  }
+  };
 
   return (
     <header className="border-b bg-card">
@@ -39,9 +39,13 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
           {/* Logo */}
           <div className="flex items-center space-x-4">
             <Link href="/dashboard">
-              <h1 className="text-2xl font-bold text-primary cursor-pointer">Furu</h1>
+              <h1 className="text-2xl font-bold text-primary cursor-pointer">
+                Furu
+              </h1>
             </Link>
-            <Badge className={planColors[user.plan]}>{user.plan.toUpperCase()}</Badge>
+            <Badge className={planColors[user.plan]}>
+              {user.plan.toUpperCase()}
+            </Badge>
           </div>
 
           {/* Navigation */}
@@ -70,9 +74,15 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                <Button
+                  variant="ghost"
+                  className="relative h-10 w-10 rounded-full"
+                >
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+                    <AvatarImage
+                      src={user.avatar || "/placeholder.svg"}
+                      alt={user.name}
+                    />
                     <AvatarFallback>
                       {user.name
                         .split(" ")
@@ -85,13 +95,17 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.name}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                    <p className="text-sm font-medium leading-none">
+                      {user.name}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/plans">
+                  <Link href="/pricing">
                     <CreditCard className="mr-2 h-4 w-4" />
                     <span>Upgrade Plan</span>
                   </Link>
@@ -113,5 +127,5 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
         </div>
       </div>
     </header>
-  )
+  );
 }

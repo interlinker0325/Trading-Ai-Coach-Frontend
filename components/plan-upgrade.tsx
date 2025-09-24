@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Zap, X } from "lucide-react"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Zap, X } from "lucide-react";
+import Link from "next/link";
 
 export function PlanUpgrade() {
   return (
@@ -12,14 +12,17 @@ export function PlanUpgrade() {
             <Zap className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold">Unlock Real-Time Data & Unlimited AI Queries</h3>
+            <h3 className="font-semibold">
+              Unlock Real-Time Data & Unlimited AI Queries
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Upgrade to Pro for advanced screeners, portfolio analysis, and instant alerts
+              Upgrade to Pro for advanced screeners, portfolio analysis, and
+              instant alerts
             </p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <Link href="/plans">
+          <Link href="/pricing">
             <Button>Upgrade Now</Button>
           </Link>
           <Button variant="ghost" size="icon">
@@ -28,5 +31,5 @@ export function PlanUpgrade() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
