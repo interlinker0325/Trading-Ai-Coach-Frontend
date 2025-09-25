@@ -9,7 +9,7 @@ export function SiteFooter() {
   const footerLinks = {
     product: [
       { name: "Features", href: "#features" },
-      { name: "AI Coach", href: "#ai-coach" },
+      { name: "AI Coach", href: "/ai-coach" },
       { name: "Analytics", href: "#analytics" },
       { name: "Pricing", href: "/pricing" },
       { name: "API", href: "#api" },

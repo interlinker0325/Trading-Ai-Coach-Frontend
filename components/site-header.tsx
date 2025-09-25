@@ -60,7 +60,7 @@ export function SiteHeader() {
     { name: "Liquidity", href: "/liquidity", icon: Target },
     { name: "Education", href: "/education", icon: BookOpen },
     { name: "Pricing", href: "/pricing", icon: DollarSign },
-    { name: "AI Coach", href: "#ai-coach", icon: Brain },
+    { name: "AI Coach", href: "/ai-coach", icon: Brain },
     { name: "Community", href: "#community", icon: Users },
   ];
 

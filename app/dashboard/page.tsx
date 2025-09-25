@@ -42,22 +42,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Redirect to signin if not authenticated
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">
-            Please sign in to access the dashboard
-          </h1>
-          <a href="/signin" className="text-primary hover:underline">
-            Go to Sign In
-          </a>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
       {/* Success message for successful upgrade */}

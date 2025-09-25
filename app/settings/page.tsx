@@ -18,7 +18,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
 
 export default function SettingsPage() {
-  const { user, isAuthenticated, refreshUser } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { toast } = useToast();
   const [fullName, setFullName] = useState(user?.full_name || "");
   const [isSaving, setIsSaving] = useState(false);
@@ -70,22 +70,6 @@ export default function SettingsPage() {
       setIsSaving(false);
     }
   };
-
-  // Redirect to signin if not authenticated
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background dark:bg-black flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">
-            Please sign in to access settings
-          </h1>
-          <a href="/signin" className="text-primary hover:underline">
-            Go to Sign In
-          </a>
-        </div>
-      </div>
-    );
-  }
 
   // Mock subscription data - in real app this would come from auth/database
   const subscriptionData = {

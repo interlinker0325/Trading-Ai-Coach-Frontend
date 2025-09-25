@@ -7,13 +7,15 @@ const protectedRoutes = [
   "/settings",
   "/portfolio",
   "/screener",
-  "/coach",
+  "/ai-coach",
   "/alerts",
   "/charts",
   "/liquidity",
   "/backtester",
   "/education",
   "/admin",
+  "/subscription-success",
+  "/profile",
 ];
 
 // Define public routes that should redirect if authenticated

@@ -8,23 +8,7 @@ import { PortfolioActions } from "@/components/portfolio-actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function PortfolioPage() {
-  const { user, isAuthenticated } = useAuth();
-
-  // Redirect to signin if not authenticated
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background dark:bg-black flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">
-            Please sign in to access your portfolio
-          </h1>
-          <a href="/signin" className="text-primary hover:underline">
-            Go to Sign In
-          </a>
-        </div>
-      </div>
-    );
-  }
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background dark:bg-black">

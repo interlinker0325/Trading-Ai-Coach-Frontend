@@ -62,13 +62,11 @@ export default function ChartsPage() {
   return (
     <div className="min-h-screen bg-background dark:bg-black">
       <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Advanced Charts</h1>
-            <p className="text-muted-foreground">
-              TradingView-style charting with technical analysis
-            </p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold">Advanced Charts</h1>
+          <p className="text-muted-foreground">
+            TradingView-style charting with technical analysis
+          </p>
         </div>
 
         {/* Symbol Search and Selection */}
