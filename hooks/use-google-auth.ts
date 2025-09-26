@@ -102,8 +102,7 @@ export const useGoogleAuth = () => {
           setIsAuthenticated(true);
         }
 
-        router.push("/dashboard");
-        router.refresh();
+        window.location.href = "/dashboard";
       } else {
         console.error("Google auth failed:", data.detail);
         // Handle error - you might want to show a toast or error message
