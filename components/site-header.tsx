@@ -204,7 +204,19 @@ export function SiteHeader() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex lg:hidden items-center">
+          <div className="flex lg:hidden items-center space-x-2">
+            <div className="text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground">
+              <ThemeToggle />
+            </div>
+            {isAuthenticated && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground hover:bg-white/10 dark:hover:bg-muted/50"
+              >
+                <Bell className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
