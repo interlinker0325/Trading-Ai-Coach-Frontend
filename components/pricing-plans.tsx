@@ -165,7 +165,8 @@ export function PricingPlans() {
 
       // Redirect to Stripe Checkout
       if (data.url) {
-        window.location.href = data.url;
+        router.push(data.url);
+        router.refresh();
       }
     } catch (error) {
       console.error("Error creating checkout session:", error);

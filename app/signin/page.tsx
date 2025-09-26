@@ -42,7 +42,7 @@ export default function SignInPage() {
 
     // Check if user is already authenticated
     if (isAuthenticated) {
-      router.push("/");
+      router.push("/dashboard");
       return;
     }
 
@@ -81,10 +81,7 @@ export default function SignInPage() {
 
     if (result.success) {
       setSuccess("Sign in successful!");
-      // Wait for authentication state to be properly set
-      setTimeout(() => {
-        router.replace("/");
-      }, 800);
+      router.refresh();
     } else {
       setError(result.error || "Sign in failed. Please try again.");
 

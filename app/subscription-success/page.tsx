@@ -60,16 +60,23 @@ export default function SubscriptionSuccessPage() {
       }
     };
 
+    // Wait for authentication to complete before checking status
+    if (isLoading) {
+      // Still loading auth state - keep loading status
+      return;
+    }
+
     // Only run if we have the required parameters and user is authenticated
     if (sessionId && upgrade === "success" && isAuthenticated && user) {
       handleSubscriptionSuccess();
-    } else if (isLoading) {
-      // Still loading auth state
-      return;
+    } else if (sessionId && upgrade === "success") {
+      // We have valid session but not authenticated yet - keep loading
+      setStatus("loading");
+      setMessage("Processing your subscription...");
     } else {
-      // Missing required parameters or not authenticated
+      // Missing required parameters
       setStatus("error");
-      setMessage("Invalid subscription session or authentication required");
+      setMessage("Invalid subscription session");
     }
   }, [
     sessionId,
@@ -81,14 +88,14 @@ export default function SubscriptionSuccessPage() {
     router,
   ]);
 
-  if (isLoading) {
+  if (isLoading || status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="h-6 w-6 animate-spin" />
-              <span>Loading...</span>
+              <span>{message || "Loading..."}</span>
             </div>
           </CardContent>
         </Card>

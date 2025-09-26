@@ -1,26 +1,41 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { CreditCard, Calendar, DollarSign, Settings, AlertTriangle, CheckCircle } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  CreditCard,
+  Calendar,
+  DollarSign,
+  Settings,
+  AlertTriangle,
+  CheckCircle,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 interface SubscriptionManagementProps {
   user: {
-    plan: "free" | "pro" | "elite"
-    subscriptionStatus?: "active" | "canceled" | "past_due" | "incomplete"
-    currentPeriodEnd?: string
-    customerId?: string
-    nextBillingAmount?: number
-  }
+    plan: "free" | "pro" | "elite";
+    subscriptionStatus?: "active" | "canceled" | "past_due" | "incomplete";
+    currentPeriodEnd?: string;
+    customerId?: string;
+    nextBillingAmount?: number;
+  };
 }
 
 export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
 
   const planDetails = {
     free: {
@@ -38,7 +53,7 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
       price: "$99/month",
       color: "bg-primary text-primary-foreground",
     },
-  }
+  };
 
   const statusDetails = {
     active: {
@@ -61,7 +76,7 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
       color: "bg-orange-500/10 text-orange-700 border-orange-200",
       icon: AlertTriangle,
     },
-  }
+  };
 
   const handleManageSubscription = async () => {
     if (!user.customerId) {
@@ -69,11 +84,11 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
         title: "Error",
         description: "No subscription found to manage.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       const response = await fetch("/api/create-portal-session", {
@@ -84,32 +99,37 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
         body: JSON.stringify({
           customerId: user.customerId,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.error) {
-        throw new Error(data.error)
+        throw new Error(data.error);
       }
 
       // Redirect to Stripe Customer Portal
       if (data.url) {
-        window.location.href = data.url
+        // window.location.href = data.url
+        router.push(data.url);
+        router.refresh();
       }
     } catch (error) {
-      console.error("Error creating portal session:", error)
+      console.error("Error creating portal session:", error);
       toast({
         title: "Error",
-        description: "Failed to open subscription management. Please try again.",
+        description:
+          "Failed to open subscription management. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const currentPlan = planDetails[user.plan]
-  const currentStatus = user.subscriptionStatus ? statusDetails[user.subscriptionStatus] : null
+  const currentPlan = planDetails[user.plan];
+  const currentStatus = user.subscriptionStatus
+    ? statusDetails[user.subscriptionStatus]
+    : null;
 
   return (
     <div className="space-y-6">
@@ -137,7 +157,11 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
               <div className="text-2xl font-bold">{currentPlan.price}</div>
             </div>
             {user.plan !== "free" && (
-              <Button onClick={handleManageSubscription} disabled={isLoading} variant="outline">
+              <Button
+                onClick={handleManageSubscription}
+                disabled={isLoading}
+                variant="outline"
+              >
                 <Settings className="mr-2 h-4 w-4" />
                 {isLoading ? "Loading..." : "Manage Subscription"}
               </Button>
@@ -152,7 +176,9 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <div className="text-sm font-medium">Next billing date</div>
+                      <div className="text-sm font-medium">
+                        Next billing date
+                      </div>
                       <div className="text-sm text-muted-foreground">
                         {new Date(user.currentPeriodEnd).toLocaleDateString()}
                       </div>
@@ -163,8 +189,12 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
                   <div className="flex items-center space-x-2">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <div className="text-sm font-medium">Next billing amount</div>
-                      <div className="text-sm text-muted-foreground">${user.nextBillingAmount}</div>
+                      <div className="text-sm font-medium">
+                        Next billing amount
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        ${user.nextBillingAmount}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -178,12 +208,16 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
       <Card>
         <CardHeader>
           <CardTitle>Billing History</CardTitle>
-          <CardDescription>View your past invoices and payments</CardDescription>
+          <CardDescription>
+            View your past invoices and payments
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {user.plan === "free" ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No billing history for free plan</p>
+              <p className="text-muted-foreground">
+                No billing history for free plan
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -191,7 +225,9 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <div className="font-medium">Pro Plan - Monthly</div>
-                  <div className="text-sm text-muted-foreground">Dec 1, 2024</div>
+                  <div className="text-sm text-muted-foreground">
+                    Dec 1, 2024
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className="font-medium">$29.00</div>
@@ -203,7 +239,9 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <div className="font-medium">Pro Plan - Monthly</div>
-                  <div className="text-sm text-muted-foreground">Nov 1, 2024</div>
+                  <div className="text-sm text-muted-foreground">
+                    Nov 1, 2024
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className="font-medium">$29.00</div>
@@ -224,7 +262,9 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
       <Card>
         <CardHeader>
           <CardTitle>Plan Features</CardTitle>
-          <CardDescription>What's included in your current plan</CardDescription>
+          <CardDescription>
+            What's included in your current plan
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -288,5 +328,5 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

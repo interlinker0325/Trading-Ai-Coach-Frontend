@@ -1,24 +1,32 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Brain, MessageSquare, Lock } from "lucide-react"
-import Link from "next/link"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Brain, MessageSquare, Lock } from "lucide-react";
+import Link from "next/link";
 
 interface AIInsightsProps {
-  plan: "free" | "pro" | "elite"
+  plan: "free" | "pro" | "elite";
 }
 
 export function AIInsights({ plan }: AIInsightsProps) {
   const insights = [
     {
       type: "Market Alert",
-      message: "NVDA showing strong momentum with 15% institutional buying increase",
+      message:
+        "NVDA showing strong momentum with 15% institutional buying increase",
       confidence: 87,
       timeAgo: "2 hours ago",
     },
     {
       type: "Portfolio Recommendation",
-      message: "Consider reducing tech exposure by 5% and increasing defensive positions",
+      message:
+        "Consider reducing tech exposure by 5% and increasing defensive positions",
       confidence: 73,
       timeAgo: "4 hours ago",
     },
@@ -28,10 +36,10 @@ export function AIInsights({ plan }: AIInsightsProps) {
       confidence: 91,
       timeAgo: "6 hours ago",
     },
-  ]
+  ];
 
-  const freeInsights = insights.slice(0, 1)
-  const displayInsights = plan === "free" ? freeInsights : insights
+  const freeInsights = insights.slice(0, 1);
+  const displayInsights = plan === "free" ? freeInsights : insights;
 
   return (
     <Card>
@@ -42,9 +50,13 @@ export function AIInsights({ plan }: AIInsightsProps) {
               <Brain className="h-5 w-5" />
               <span>AI Insights</span>
             </CardTitle>
-            <CardDescription>Personalized recommendations from your AI coach</CardDescription>
+            <CardDescription>
+              Personalized recommendations from your AI coach
+            </CardDescription>
           </div>
-          <Badge variant={plan === "free" ? "outline" : "default"}>{plan === "free" ? "1/5 Daily" : "Unlimited"}</Badge>
+          <Badge variant={plan === "free" ? "outline" : "default"}>
+            {plan === "free" ? "1/5 Daily" : "Unlimited"}
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -55,9 +67,13 @@ export function AIInsights({ plan }: AIInsightsProps) {
                 {insight.type}
               </Badge>
               <div className="flex items-center space-x-2">
-                <span className="text-xs text-muted-foreground">{insight.confidence}% confidence</span>
+                <span className="text-xs text-muted-foreground">
+                  {insight.confidence}% confidence
+                </span>
                 <span className="text-xs text-muted-foreground">•</span>
-                <span className="text-xs text-muted-foreground">{insight.timeAgo}</span>
+                <span className="text-xs text-muted-foreground">
+                  {insight.timeAgo}
+                </span>
               </div>
             </div>
             <p className="text-sm">{insight.message}</p>
@@ -68,7 +84,9 @@ export function AIInsights({ plan }: AIInsightsProps) {
           <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-dashed">
             <div className="flex items-center space-x-2">
               <Lock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">4 more insights available</span>
+              <span className="text-sm text-muted-foreground">
+                4 more insights available
+              </span>
             </div>
             <Button size="sm" variant="outline">
               Upgrade
@@ -77,7 +95,7 @@ export function AIInsights({ plan }: AIInsightsProps) {
         )}
 
         <div className="flex space-x-2">
-          <Link href="/coach" className="flex-1">
+          <Link href="/ai-coach" className="flex-1">
             <Button className="w-full" disabled={plan === "free"}>
               <MessageSquare className="mr-2 h-4 w-4" />
               Ask AI Coach
@@ -91,5 +109,5 @@ export function AIInsights({ plan }: AIInsightsProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -14,7 +14,6 @@ const protectedRoutes = [
   "/backtester",
   "/education",
   "/admin",
-  "/subscription-success",
   "/profile",
 ];
 
@@ -52,7 +51,7 @@ export function middleware(request: NextRequest) {
 
   // If accessing auth routes with token, redirect to dashboard
   if (isAuthRoute && token) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   // Allow public routes to pass through without auth checks

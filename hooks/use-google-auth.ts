@@ -102,8 +102,8 @@ export const useGoogleAuth = () => {
           setIsAuthenticated(true);
         }
 
-        // Force a page reload to ensure middleware picks up the new cookies
-        window.location.href = "/dashboard";
+        router.push("/dashboard");
+        router.refresh();
       } else {
         console.error("Google auth failed:", data.detail);
         // Handle error - you might want to show a toast or error message

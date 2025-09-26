@@ -23,6 +23,7 @@ import {
   LogOut,
   Settings,
   Bell,
+  LayoutDashboard,
 } from "lucide-react";
 
 export function SiteHeader() {
@@ -51,9 +52,11 @@ export function SiteHeader() {
     setShowUserMenu(false);
     // Redirect to home page using Next.js router (no page reload)
     router.push("/");
+    router.refresh();
   };
 
   const navigation = [
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Charts", href: "/charts", icon: BarChart3 },
     { name: "Screener", href: "/screener", icon: Zap },
     { name: "Alerts", href: "/alerts", icon: Shield },
@@ -81,21 +84,21 @@ export function SiteHeader() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="flex items-center space-x-1 text-sm font-medium text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground transition-colors"
+                className="flex items-center space-x-1 text-sm font-medium text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground transition-colors whitespace-nowrap"
               >
-                <item.icon className="h-4 w-4" />
-                <span>{item.name}</span>
+                <item.icon className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden xl:inline">{item.name}</span>
               </Link>
             ))}
           </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-3 lg:space-x-4">
+          <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
             <div className="text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground">
               <ThemeToggle />
             </div>
@@ -116,11 +119,18 @@ export function SiteHeader() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground hover:bg-white/10 dark:hover:bg-muted/50"
+                    className="text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground hover:bg-white/10 dark:hover:bg-muted/50 max-w-[120px] lg:max-w-none"
                     onClick={() => setShowUserMenu(!showUserMenu)}
                   >
-                    <User className="h-4 w-4 mr-2" />
-                    {user?.full_name || user?.email || "User"}
+                    <User className="h-4 w-4 mr-1 lg:mr-2 flex-shrink-0" />
+                    <span className="truncate hidden lg:inline">
+                      {user?.full_name || user?.email || "User"}
+                    </span>
+                    <span className="lg:hidden">
+                      {user?.full_name?.split(" ")[0] ||
+                        user?.email?.split("@")[0] ||
+                        "User"}
+                    </span>
                   </Button>
 
                   {/* Dropdown Menu */}
@@ -194,20 +204,17 @@ export function SiteHeader() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex md:hidden items-center space-x-1 sm:space-x-2">
-            <div className="text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground">
-              <ThemeToggle />
-            </div>
+          <div className="flex lg:hidden items-center">
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 sm:h-9 sm:w-9 text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground hover:bg-white/10 dark:hover:bg-muted/50"
+              className="h-9 w-9 text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground hover:bg-white/10 dark:hover:bg-muted/50"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (
-                <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                <X className="h-5 w-5" />
               ) : (
-                <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Menu className="h-5 w-5" />
               )}
             </Button>
           </div>
@@ -215,7 +222,7 @@ export function SiteHeader() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t bg-black/95 dark:bg-black/95">
+          <div className="lg:hidden border-t bg-black/95 dark:bg-black/95">
             <div className="container mx-auto px-4 py-4 space-y-4">
               <nav className="space-y-1">
                 {navigation.map((item) => (

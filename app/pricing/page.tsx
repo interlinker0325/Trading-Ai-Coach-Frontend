@@ -3,23 +3,26 @@
 import { PricingPlans } from "@/components/pricing-plans";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, LogIn } from "lucide-react";
-import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useRouter } from "next/navigation";
 
 export default function PlansPage() {
   const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-background dark:bg-black">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <Link href="/dashboard">
-            <Button variant="ghost" className="mb-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            className="mb-4"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
           <h1 className="text-3xl font-bold text-balance">Choose Your Plan</h1>
           <p className="text-muted-foreground mt-2">
             Unlock the full power of AI-driven financial insights
