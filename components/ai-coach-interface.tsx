@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Send, Brain, User, Sparkles, Zap, MessageSquare } from "lucide-react";
+import { TradingViewChart } from "./tradingview-chart";
 
 interface Message {
   id: string;
@@ -157,170 +158,188 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/30">
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-6" ref={scrollAreaRef}>
-        <div className="space-y-6 max-w-4xl mx-auto">
-          {messages.length === 0 && (
-            <div className="text-center py-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
-                <Sparkles className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Welcome to AI Trading Coach
-              </h3>
-            </div>
-          )}
-
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              } animate-in slide-in-from-bottom-2 duration-300`}
-            >
-              <div
-                className={`flex space-x-4 max-w-4xl ${
-                  message.role === "user"
-                    ? "flex-row-reverse space-x-reverse"
-                    : ""
-                }`}
-              >
-                <div className="flex-shrink-0">
-                  {message.role === "assistant" ? (
-                    <div className="relative">
-                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                        <Brain className="h-5 w-5 text-white" />
-                      </div>
-                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></div>
-                    </div>
-                  ) : (
-                    <div className="w-10 h-10 bg-gradient-to-r from-gray-500 to-gray-600 rounded-full flex items-center justify-center shadow-lg">
-                      <User className="h-5 w-5 text-white" />
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-2 flex-1">
-                  <div
-                    className={`relative group ${
-                      message.role === "user"
-                        ? "ml-auto max-w-2xl"
-                        : "max-w-3xl"
-                    }`}
-                  >
-                    <div
-                      className={`px-6 py-4 rounded-2xl shadow-lg backdrop-blur-sm ${
-                        message.role === "user"
-                          ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white ml-auto"
-                          : "bg-white/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50"
-                      }`}
-                    >
-                      <p
-                        className={`text-sm leading-relaxed ${
-                          message.role === "user"
-                            ? "text-white"
-                            : "text-gray-800 dark:text-gray-100"
-                        }`}
-                      >
-                        {message.content}
-                      </p>
-                    </div>
-
-                    {/* Message timestamp */}
-                    <div
-                      className={`text-xs text-gray-500 dark:text-gray-400 mt-2 ${
-                        message.role === "user" ? "text-right" : "text-left"
-                      }`}
-                    >
-                      {message.timestamp.toLocaleTimeString()}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {isLoading && (
-            <div className="flex justify-start animate-in slide-in-from-bottom-2 duration-300">
-              <div className="flex space-x-4 max-w-4xl">
-                <div className="flex-shrink-0">
-                  <div className="relative">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                      <Brain className="h-5 w-5 text-white animate-pulse" />
-                    </div>
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></div>
-                  </div>
-                </div>
-                <div className="bg-white/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl px-6 py-4 shadow-lg backdrop-blur-sm">
-                  <div className="flex space-x-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
-                    <div
-                      className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.1s" }}
-                    />
-                    <div
-                      className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.2s" }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+    <div className="flex flex-col lg:flex-row h-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/30">
+      {/* Main Content Area - Full width on mobile, 7/10 on desktop */}
+      <div className="flex-1 lg:w-7/10 h-full lg:h-auto">
+        {/* TradingView Chart */}
+        <div className="">
+          <TradingViewChart
+            symbol="AAPL"
+            interval="1D"
+            // height={600}
+            plan={plan}
+          />
         </div>
-      </ScrollArea>
+      </div>
 
-      {/* Input */}
-      <div className="border-t border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="relative">
-            <div className="flex items-center space-x-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl border-2 border-gray-200/50 dark:border-gray-700/50 focus-within:border-blue-500 dark:focus-within:border-blue-400 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <div className="flex items-center pl-6">
-                <MessageSquare className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-              </div>
-              <Input
-                placeholder="Ask me anything about trading, market analysis, portfolio optimization, or investment strategies..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleSendMessage(e);
-                  }
-                }}
-                disabled={isLoading}
-                className="flex-1 border-0 border-none bg-transparent focus:ring-0 focus:ring-offset-0 focus:border-0 focus:border-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0 focus-visible:border-none focus-visible:outline-none text-base py-5 placeholder:text-gray-500 dark:placeholder:text-gray-400 text-gray-900 dark:text-gray-100"
-              />
-              <Button
-                onClick={handleSendMessage}
-                disabled={isLoading || !input.trim()}
-                className="m-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                size="sm"
-              >
-                <div className="flex items-center gap-2">
-                  <Send className="h-4 w-4" />
-                  <span className="text-sm font-medium">Send</span>
+      {/* Chat Interface - Full width on mobile, 3/10 on desktop */}
+      <div className="w-full lg:w-3/10 flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200/50 dark:border-gray-700/50 h-96 lg:h-full">
+        {/* Messages */}
+        <ScrollArea className="flex-1 p-2 lg:p-4" ref={scrollAreaRef}>
+          <div className="space-y-3 lg:space-y-4 max-w-full mx-auto">
+            {messages.length === 0 && (
+              <div className="text-center py-8 lg:py-12">
+                <div className="inline-flex items-center justify-center w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
+                  <Sparkles className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
                 </div>
-              </Button>
-            </div>
-
-            {plan === "free" && (
-              <div className="flex items-center justify-between mt-4 px-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
-                    {dailyQueries}/{maxQueries} queries used today
-                  </p>
-                </div>
-                <Link href="/pricing">
-                  <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 font-medium">
-                    <Sparkles className="h-4 w-4" />
-                    <span>Upgrade for unlimited queries</span>
-                  </div>
-                </Link>
+                <h3 className="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  AI Trading Coach
+                </h3>
               </div>
             )}
+
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                } animate-in slide-in-from-bottom-2 duration-300`}
+              >
+                <div
+                  className={`flex space-x-1 lg:space-x-2 max-w-full ${
+                    message.role === "user"
+                      ? "flex-row-reverse space-x-reverse gap-x-2"
+                      : ""
+                  }`}
+                >
+                  <div className="flex-shrink-0">
+                    {message.role === "assistant" ? (
+                      <div className="relative">
+                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                          <Brain className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
+                        </div>
+                        <div className="absolute -top-1 -right-1 w-3 h-3 lg:w-4 lg:h-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></div>
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-gray-500 to-gray-600 rounded-full flex items-center justify-center shadow-lg">
+                        <User className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-1 lg:space-y-2 flex-1">
+                    <div
+                      className={`relative group ${
+                        message.role === "user"
+                          ? "ml-auto max-w-full"
+                          : "max-w-full"
+                      }`}
+                    >
+                      <div
+                        className={`px-2 py-1.5 lg:px-3 lg:py-2 rounded-lg lg:rounded-xl shadow-lg backdrop-blur-sm ${
+                          message.role === "user"
+                            ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white ml-auto"
+                            : "bg-white/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50"
+                        }`}
+                      >
+                        <p
+                          className={`text-xs lg:text-sm leading-relaxed ${
+                            message.role === "user"
+                              ? "text-white"
+                              : "text-gray-800 dark:text-gray-100"
+                          }`}
+                        >
+                          {message.content}
+                        </p>
+                      </div>
+
+                      {/* Message timestamp */}
+                      <div
+                        className={`text-xs text-gray-500 dark:text-gray-400 mt-1 ${
+                          message.role === "user" ? "text-right" : "text-left"
+                        }`}
+                      >
+                        {message.timestamp.toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {isLoading && (
+              <div className="flex justify-start animate-in slide-in-from-bottom-2 duration-300">
+                <div className="flex space-x-1 lg:space-x-2 max-w-full">
+                  <div className="flex-shrink-0">
+                    <div className="relative">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                        <Brain className="h-4 w-4 lg:h-5 lg:w-5 text-white animate-pulse" />
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-3 h-3 lg:w-4 lg:h-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></div>
+                    </div>
+                  </div>
+                  <div className="bg-white/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 rounded-lg lg:rounded-xl px-2 py-1.5 lg:px-3 lg:py-2 shadow-lg backdrop-blur-sm">
+                    <div className="flex space-x-1 lg:space-x-2">
+                      <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-blue-500 rounded-full animate-bounce" />
+                      <div
+                        className="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-purple-500 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      />
+                      <div
+                        className="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-indigo-500 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+
+        {/* Input */}
+        <div className="border-t border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-2 lg:p-3">
+          <div className="max-w-full mx-auto">
+            <div className="relative">
+              <div className="flex items-center space-x-1 lg:space-x-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg lg:rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50 focus-within:border-blue-500 dark:focus-within:border-blue-400 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <div className="flex items-center pl-2 lg:pl-3">
+                  <MessageSquare className="h-3 w-3 lg:h-4 lg:w-4 text-gray-400 dark:text-gray-500" />
+                </div>
+                <Input
+                  placeholder="Ask about trading..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSendMessage(e);
+                    }
+                  }}
+                  disabled={isLoading}
+                  className="flex-1 border-0 border-none bg-transparent focus:ring-0 focus:ring-offset-0 focus:border-0 focus:border-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0 focus-visible:border-none focus-visible:outline-none text-xs lg:text-sm py-2 lg:py-3 placeholder:text-gray-500 dark:placeholder:text-gray-400 text-gray-900 dark:text-gray-100"
+                />
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={isLoading || !input.trim()}
+                  className="m-0.5 lg:m-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-md lg:rounded-lg px-2 py-1.5 lg:px-3 lg:py-2 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  size="sm"
+                >
+                  <div className="flex items-center gap-0.5 lg:gap-1">
+                    <Send className="h-3 w-3 lg:h-3 lg:w-3" />
+                    <span className="text-xs font-medium hidden sm:inline">
+                      Send
+                    </span>
+                  </div>
+                </Button>
+              </div>
+
+              {plan === "free" && (
+                <div className="flex items-center justify-between mt-1 lg:mt-2 px-0.5 lg:px-1">
+                  <div className="flex items-center gap-0.5 lg:gap-1">
+                    <div className="w-1 h-1 lg:w-1.5 lg:h-1.5 bg-blue-500 rounded-full"></div>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                      {dailyQueries}/{maxQueries}
+                    </p>
+                  </div>
+                  <Link href="/pricing">
+                    <div className="flex items-center gap-0.5 lg:gap-1 text-xs text-blue-600 dark:text-blue-400 font-medium">
+                      <Sparkles className="h-2.5 w-2.5 lg:h-3 lg:w-3" />
+                      <span className="hidden sm:inline">Upgrade</span>
+                    </div>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
