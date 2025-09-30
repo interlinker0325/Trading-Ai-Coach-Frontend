@@ -98,7 +98,7 @@ export function SiteHeader() {
           </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
+          <div className="hidden lg:flex items-center space-x-2 lg:space-x-3">
             <div className="text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground">
               <ThemeToggle />
             </div>
@@ -203,7 +203,7 @@ export function SiteHeader() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Actions */}
           <div className="flex lg:hidden items-center space-x-2">
             <div className="text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground">
               <ThemeToggle />

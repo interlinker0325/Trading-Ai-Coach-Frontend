@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Send, Brain, User, Sparkles, Zap, MessageSquare } from "lucide-react";
-import { TradingViewChart } from "./tradingview-chart";
+import TradingViewChart from "./tradingview-chart";
 
 interface Message {
   id: string;
@@ -159,21 +159,21 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
 
   return (
     <div className="flex flex-col lg:flex-row h-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/30">
-      {/* Main Content Area - Full width on mobile, 7/10 on desktop */}
-      <div className="flex-1 lg:w-7/10 h-full lg:h-auto">
+      {/* Main Content Area - Full width on mobile, 3/4 on desktop */}
+      <div className="flex-1 lg:w-3/4 h-full lg:h-auto">
         {/* TradingView Chart */}
-        <div className="">
+        <div className="h-full w-full p-2 lg:p-4">
           <TradingViewChart
-            symbol="AAPL"
-            interval="1D"
-            // height={600}
+            symbol="NASDAQ:AAPL"
+            interval="D"
+            height="100%"
             plan={plan}
           />
         </div>
       </div>
 
-      {/* Chat Interface - Full width on mobile, 3/10 on desktop */}
-      <div className="w-full lg:w-3/10 flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200/50 dark:border-gray-700/50 h-96 lg:h-full">
+      {/* Chat Interface - Full width on mobile, 1/4 on desktop */}
+      <div className="w-full lg:w-1/4 flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200/50 dark:border-gray-700/50 h-96 lg:h-full">
         {/* Messages */}
         <ScrollArea className="flex-1 p-2 lg:p-4" ref={scrollAreaRef}>
           <div className="space-y-3 lg:space-y-4 max-w-full mx-auto">
