@@ -21,6 +21,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  fromCache?: boolean;
 }
 
 interface AICoachInterfaceProps {
@@ -32,10 +33,38 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [dailyQueries, setDailyQueries] = useState(0);
+  const [maxQueries, setMaxQueries] = useState(
+    plan === "free" ? 5 : Number.POSITIVE_INFINITY
+  );
   const [showLimitModal, setShowLimitModal] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const maxQueries = plan === "free" ? 5 : Number.POSITIVE_INFINITY;
+
+  // Load daily query count on component mount
+  useEffect(() => {
+    const loadDailyQueries = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/ai-coach/query-count`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setDailyQueries(data.daily_queries_used);
+          setMaxQueries(data.daily_queries_limit);
+        }
+      } catch (error) {
+        console.error("Error loading daily queries:", error);
+      }
+    };
+
+    loadDailyQueries();
+  }, []);
 
   useEffect(() => {
     // Scroll to bottom when messages change
@@ -63,7 +92,7 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
     }
 
     if (!input.trim() || isLoading) return;
-    if (plan === "free" && dailyQueries >= maxQueries) {
+    if (dailyQueries >= maxQueries) {
       setShowLimitModal(true);
       return;
     }
@@ -78,10 +107,6 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
-
-    if (plan === "free") {
-      setDailyQueries((prev) => prev + 1);
-    }
 
     try {
       // Call real AI API
@@ -116,18 +141,38 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
         role: "assistant",
         content: data.reply,
         timestamp: new Date(),
+        fromCache: data.from_cache || false,
       };
 
       setMessages((prev) => [...prev, aiResponse]);
+
+      // Update daily queries from backend response
+      setDailyQueries(data.daily_queries_used);
+      setMaxQueries(data.daily_queries_limit);
     } catch (error) {
       console.error("Error getting AI response:", error);
+
+      // Check if it's a rate limit error
+      let errorMessage =
+        "I'm sorry, I'm having trouble processing your request right now. Please try again later.";
+
+      if (error instanceof Error && error.message.includes("429")) {
+        errorMessage =
+          "You've reached your rate limit. Please wait a moment before trying again.";
+      } else if (
+        error instanceof Error &&
+        error.message.includes("Daily query limit")
+      ) {
+        errorMessage =
+          "You've reached your daily query limit. Upgrade to Pro for unlimited access!";
+        setShowLimitModal(true);
+      }
 
       // Fallback error message
       const errorResponse: Message = {
         id: Date.now().toString(),
         role: "assistant",
-        content:
-          "I'm sorry, I'm having trouble processing your request right now. Please try again later.",
+        content: errorMessage,
         timestamp: new Date(),
       };
 
@@ -159,8 +204,8 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
 
   return (
     <div className="flex flex-col lg:flex-row h-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/30">
-      {/* Main Content Area - Full width on mobile, 3/4 on desktop */}
-      <div className="flex-1 lg:w-3/4 h-full lg:h-auto">
+      {/* Main Content Area - Full width on mobile, 7/10 on desktop */}
+      <div className="flex-1 lg:w-7/10 h-full lg:h-auto">
         {/* TradingView Chart */}
         <div className="h-full w-full p-2 lg:p-4">
           <TradingViewChart
@@ -172,13 +217,13 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
         </div>
       </div>
 
-      {/* Chat Interface - Full width on mobile, 1/4 on desktop */}
-      <div className="w-full lg:w-1/4 flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200/50 dark:border-gray-700/50 h-96 lg:h-full">
+      {/* Chat Interface - Full width on mobile, 3/10 on desktop */}
+      <div className="w-full lg:w-3/10 flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200/50 dark:border-gray-700/50 h-96 lg:h-full">
         {/* Messages */}
         <ScrollArea className="flex-1 p-2 lg:p-4" ref={scrollAreaRef}>
           <div className="space-y-3 lg:space-y-4 max-w-full mx-auto">
             {messages.length === 0 && (
-              <div className="text-center py-8 lg:py-12">
+              <div className="text-center py-8">
                 <div className="inline-flex items-center justify-center w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
                   <Sparkles className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
                 </div>
@@ -323,10 +368,18 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
                 </Button>
               </div>
 
-              {plan === "free" && (
+              {maxQueries < Number.POSITIVE_INFINITY && (
                 <div className="flex items-center justify-between mt-1 lg:mt-2 px-0.5 lg:px-1">
                   <div className="flex items-center gap-0.5 lg:gap-1">
-                    <div className="w-1 h-1 lg:w-1.5 lg:h-1.5 bg-blue-500 rounded-full"></div>
+                    <div
+                      className={`w-1 h-1 lg:w-1.5 lg:h-1.5 rounded-full ${
+                        dailyQueries >= maxQueries
+                          ? "bg-red-500"
+                          : dailyQueries >= maxQueries * 0.8
+                          ? "bg-yellow-500"
+                          : "bg-blue-500"
+                      }`}
+                    ></div>
                     <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">
                       {dailyQueries}/{maxQueries}
                     </p>

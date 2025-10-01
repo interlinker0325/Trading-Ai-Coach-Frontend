@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, memo } from "react";
-import { useTheme } from "next-themes";
+import React, { useEffect, useRef, memo, useState } from "react";
 
 interface TradingViewChartProps {
   symbol?: string;
@@ -17,11 +16,41 @@ function TradingViewChart({
   plan = "free",
 }: TradingViewChartProps) {
   const container = useRef<HTMLDivElement>(null);
-  const { theme, resolvedTheme } = useTheme();
+  const [isDark, setIsDark] = useState(false);
 
-  // Use resolvedTheme to handle system theme preference
-  const currentTheme = resolvedTheme || theme || "light";
-  const isDark = currentTheme === "dark";
+  // Detect theme changes by listening to DOM class changes
+  useEffect(() => {
+    const detectTheme = () => {
+      const isDarkMode = document.documentElement.classList.contains("dark");
+      setIsDark(isDarkMode);
+    };
+
+    // Initial theme detection
+    detectTheme();
+
+    // Create a MutationObserver to watch for class changes on documentElement
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "class"
+        ) {
+          detectTheme();
+        }
+      });
+    });
+
+    // Start observing
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    // Cleanup
+    return () => {
+      observer.disconnect();
+    };
+  }, [symbol, interval, plan]);
 
   useEffect(() => {
     if (!container.current) return;
@@ -61,7 +90,9 @@ function TradingViewChart({
         "watchlist": [],
         "withdateranges": ${plan !== "free"},
         "compareSymbols": [],
-        "studies": [],
+        "studies": [
+          "STD;RSI"
+        ],
         "autosize": true
       }`;
 
@@ -78,6 +109,9 @@ function TradingViewChart({
   return (
     <div className="w-full h-full relative">
       <div
+        key={`tradingview-${symbol}-${interval}-${
+          isDark ? "dark" : "light"
+        }-${plan}`}
         className="tradingview-widget-container"
         ref={container}
         style={{ height: height, width: "100%" }}

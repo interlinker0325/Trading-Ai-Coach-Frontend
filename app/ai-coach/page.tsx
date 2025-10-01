@@ -14,7 +14,6 @@ export default function AICoachPage() {
         <div className="mx-auto">
           <Skeleton className="h-8 w-64 mb-4" />
           <Skeleton className="h-4 w-96 mb-8" />
-          {/* <Skeleton className="h-[600px] w-full" /> */}
         </div>
       </div>
     );
