@@ -22,6 +22,21 @@ interface Message {
   content: string;
   timestamp: Date;
   fromCache?: boolean;
+  chartUpdate?: {
+    needs_chart_update: boolean;
+    chart_config: {
+      symbol: string;
+      interval: string;
+      studies: string[];
+      chart_type: string;
+    };
+    extracted_info: {
+      symbols: string[];
+      indicators: string[];
+      timeframes: string[];
+      actions: string[];
+    };
+  };
 }
 
 interface AICoachInterfaceProps {
@@ -37,6 +52,12 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
     plan === "free" ? 5 : Number.POSITIVE_INFINITY
   );
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [chartConfig, setChartConfig] = useState({
+    symbol: "NASDAQ:AAPL",
+    interval: "D",
+    studies: [],
+    chart_type: "1",
+  });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -142,9 +163,15 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
         content: data.reply,
         timestamp: new Date(),
         fromCache: data.from_cache || false,
+        chartUpdate: data.chart_update || undefined,
       };
 
       setMessages((prev) => [...prev, aiResponse]);
+
+      // Update chart configuration if needed
+      if (data.chart_update && data.chart_update.needs_chart_update) {
+        setChartConfig(data.chart_update.chart_config);
+      }
 
       // Update daily queries from backend response
       setDailyQueries(data.daily_queries_used);
@@ -209,10 +236,11 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
         {/* TradingView Chart */}
         <div className="h-full w-full p-2 lg:p-4">
           <TradingViewChart
-            symbol="NASDAQ:AAPL"
-            interval="D"
+            symbol={chartConfig.symbol}
+            interval={chartConfig.interval}
             height="100%"
             plan={plan}
+            studies={chartConfig.studies}
           />
         </div>
       </div>
@@ -286,6 +314,23 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
                         >
                           {message.content}
                         </p>
+                        {message.role === "assistant" && message.fromCache && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                            <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                              Cached
+                            </span>
+                          </div>
+                        )}
+                        {message.role === "assistant" &&
+                          message.chartUpdate && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                Chart Updated
+                              </span>
+                            </div>
+                          )}
                       </div>
 
                       {/* Message timestamp */}
@@ -314,7 +359,7 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
                     </div>
                   </div>
                   <div className="bg-white/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 rounded-lg lg:rounded-xl px-2 py-1.5 lg:px-3 lg:py-2 shadow-lg backdrop-blur-sm">
-                    <div className="flex space-x-1 lg:space-x-2">
+                    <div className="flex space-x-1 lg:space-x-2 justify-center items-center">
                       <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-blue-500 rounded-full animate-bounce" />
                       <div
                         className="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-purple-500 rounded-full animate-bounce"

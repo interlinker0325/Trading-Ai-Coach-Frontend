@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AICoachInterface } from "@/components/ai-coach-interface";
 
 export default function AICoachPage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) {
     return (
@@ -15,6 +15,14 @@ export default function AICoachPage() {
           <Skeleton className="h-8 w-64 mb-4" />
           <Skeleton className="h-4 w-96 mb-8" />
         </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="text-center text-2xl font-bold">
+        Please login to access this page
       </div>
     );
   }

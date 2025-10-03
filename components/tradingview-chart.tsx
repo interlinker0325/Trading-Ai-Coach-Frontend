@@ -7,6 +7,7 @@ interface TradingViewChartProps {
   interval?: string;
   height?: string;
   plan?: "free" | "pro" | "elite";
+  studies?: string[];
 }
 
 function TradingViewChart({
@@ -14,6 +15,7 @@ function TradingViewChart({
   interval = "D",
   height = "100%",
   plan = "free",
+  studies = ["STD;RSI"],
 }: TradingViewChartProps) {
   const container = useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = useState(false);
@@ -90,9 +92,7 @@ function TradingViewChart({
         "watchlist": [],
         "withdateranges": ${plan !== "free"},
         "compareSymbols": [],
-        "studies": [
-          "STD;RSI"
-        ],
+               "studies": ${JSON.stringify(studies)},
         "autosize": true
       }`;
 
@@ -104,14 +104,14 @@ function TradingViewChart({
         script.parentNode.removeChild(script);
       }
     };
-  }, [symbol, interval, isDark, plan]);
+  }, [symbol, interval, isDark, plan, studies]);
 
   return (
     <div className="w-full h-full relative">
       <div
         key={`tradingview-${symbol}-${interval}-${
           isDark ? "dark" : "light"
-        }-${plan}`}
+        }-${plan}-${studies.join(",")}`}
         className="tradingview-widget-container"
         ref={container}
         style={{ height: height, width: "100%" }}
