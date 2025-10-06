@@ -11,11 +11,11 @@ interface TradingViewChartProps {
 }
 
 function TradingViewChart({
-  symbol = "NASDAQ:AAPL",
-  interval = "D",
-  height = "100%",
-  plan = "free",
-  studies = ["STD;RSI"],
+  symbol,
+  interval,
+  height,
+  plan,
+  studies,
 }: TradingViewChartProps) {
   const container = useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = useState(false);
@@ -111,7 +111,7 @@ function TradingViewChart({
       <div
         key={`tradingview-${symbol}-${interval}-${
           isDark ? "dark" : "light"
-        }-${plan}-${studies.join(",")}`}
+        }-${plan}-${studies?.join(",") || ""}`}
         className="tradingview-widget-container"
         ref={container}
         style={{ height: height, width: "100%" }}

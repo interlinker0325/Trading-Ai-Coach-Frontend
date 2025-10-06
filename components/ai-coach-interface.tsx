@@ -53,7 +53,7 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
   );
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [chartConfig, setChartConfig] = useState({
-    symbol: "NASDAQ:AAPL",
+    symbol: "BINANCE:BTCUSD",
     interval: "D",
     studies: [],
     chart_type: "1",
