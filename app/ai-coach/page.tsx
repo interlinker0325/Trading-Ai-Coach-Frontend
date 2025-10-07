@@ -21,7 +21,7 @@ export default function AICoachPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="text-center text-2xl font-bold">
+      <div className="flex justify-center items-center text-2xl font-bold h-[calc(100vh-64px)]">
         Please login to access this page
       </div>
     );

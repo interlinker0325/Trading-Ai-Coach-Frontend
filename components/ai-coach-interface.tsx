@@ -113,6 +113,11 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
     }
 
     if (!input.trim() || isLoading) return;
+
+    console.log(
+      "[AI Coach Frontend] Sending message, current count:",
+      dailyQueries
+    );
     if (dailyQueries >= maxQueries) {
       setShowLimitModal(true);
       return;
@@ -147,6 +152,7 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
               }))
               .concat([{ role: "user", content: input }]),
             plan: plan,
+            current_chart_config: chartConfig, // Send current chart state
           }),
         }
       );
@@ -170,7 +176,15 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
 
       // Update chart configuration if needed
       if (data.chart_update && data.chart_update.needs_chart_update) {
+        console.log(
+          "[Chart Update] Updating chart config:",
+          data.chart_update.chart_config
+        );
         setChartConfig(data.chart_update.chart_config);
+      } else {
+        console.log(
+          "[Chart Update] No chart update needed or chart_update missing"
+        );
       }
 
       // Update daily queries from backend response
