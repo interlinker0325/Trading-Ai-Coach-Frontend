@@ -152,7 +152,7 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
               }))
               .concat([{ role: "user", content: input }]),
             plan: plan,
-            current_chart_config: chartConfig, // Send current chart state
+            chart_state: chartConfig, // Send current chart state for preservation
           }),
         }
       );
