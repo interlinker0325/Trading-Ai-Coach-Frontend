@@ -92,7 +92,7 @@ function TradingViewChart({
         "watchlist": [],
         "withdateranges": ${plan !== "free"},
         "compareSymbols": [],
-               "studies": ${JSON.stringify(studies)},
+        "studies": ${JSON.stringify(studies || [])},
         "autosize": true
       }`;
 

@@ -43,6 +43,23 @@ interface AICoachInterfaceProps {
   plan: "free" | "pro" | "elite";
 }
 
+// Convert backend study format to TradingView format
+const convertStudyFormat = (backendStudies: string[]): string[] => {
+  const studyMap: Record<string, string> = {
+    "STD;BB": "BB@tv-basicstudies",
+    "STD;RSI": "RSI@tv-basicstudies",
+    "STD;MACD": "MACD@tv-basicstudies",
+    "STD;SMA": "MASimple@tv-basicstudies",
+    "STD;EMA": "MAExp@tv-basicstudies",
+    "STD;STOCH": "Stochastic@tv-basicstudies",
+    "STD;WPR": "WilliamR@tv-basicstudies",
+    "STD;CCI": "CCI@tv-basicstudies",
+    "STD;ATR": "ATR@tv-basicstudies",
+  };
+
+  return backendStudies.map((study) => studyMap[study] || study);
+};
+
 export function AICoachInterface({ plan }: AICoachInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -55,7 +72,7 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
   const [chartConfig, setChartConfig] = useState({
     symbol: "BINANCE:BTCUSD",
     interval: "D",
-    studies: [],
+    studies: [], // TradingView study IDs
     chart_type: "1",
   });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -180,7 +197,16 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
           "[Chart Update] Updating chart config:",
           data.chart_update.chart_config
         );
-        setChartConfig(data.chart_update.chart_config);
+
+        // Convert backend study format to TradingView format
+        const updatedConfig = {
+          ...data.chart_update.chart_config,
+          studies: convertStudyFormat(
+            data.chart_update.chart_config.studies || []
+          ),
+        };
+
+        setChartConfig(updatedConfig);
       } else {
         console.log(
           "[Chart Update] No chart update needed or chart_update missing"
