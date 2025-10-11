@@ -194,7 +194,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 </span>
               </div>
             </TableCell>
-            <TableCell>{stock.volume.toLocaleString()}</TableCell>
+            <TableCell>{stock.volume?.toLocaleString() || "0"}</TableCell>
             <TableCell>
               ${(stock.marketCap / 1000000000)?.toFixed(1) || "0.0"}B
             </TableCell>

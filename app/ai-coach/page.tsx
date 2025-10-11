@@ -43,7 +43,7 @@ export default function AICoachPage() {
 
         {/* AI Coach Interface - Takes remaining space */}
         <div className="flex-1 rounded-xl overflow-hidden min-h-0">
-          <AICoachInterface plan={userPlan as "free" | "pro" | "elite"} />
+          <AICoachInterface plan={userPlan} />
         </div>
       </div>
     </div>

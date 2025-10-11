@@ -55,6 +55,22 @@ const convertStudyFormat = (backendStudies: string[]): string[] => {
     "STD;WPR": "WilliamR@tv-basicstudies",
     "STD;CCI": "CCI@tv-basicstudies",
     "STD;ATR": "ATR@tv-basicstudies",
+    "STD;ADX": "ADX@tv-basicstudies",
+    "STD;MFI": "MFI@tv-basicstudies",
+    "STD;MOM": "Momentum@tv-basicstudies",
+    "STD;PPO": "PPO@tv-basicstudies",
+    "STD;PVO": "PVO@tv-basicstudies",
+    "STD;ROC": "ROC@tv-basicstudies",
+    "STD;RVI": "RVI@tv-basicstudies",
+    "STD;SAR": "SAR@tv-basicstudies",
+    "STD;TRIX": "TRIX@tv-basicstudies",
+    "STD;VWAP": "VWAP@tv-basicstudies",
+    "STD;WMA": "MAWeighted@tv-basicstudies",
+    "STD;BBANDS": "BB@tv-basicstudies",
+    "STD;DEMA": "MAExponential@tv-basicstudies",
+    "STD;TEMA": "MAExponential@tv-basicstudies",
+    "STD;VIDYA": "MAExponential@tv-basicstudies",
+    "STD;VWMA": "MAExponential@tv-basicstudies",
   };
 
   return backendStudies.map((study) => studyMap[study] || study);

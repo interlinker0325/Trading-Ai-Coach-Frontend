@@ -11,7 +11,6 @@ import { useAuth } from "@/contexts/auth-context";
 import {
   Menu,
   X,
-  BarChart3,
   Brain,
   Shield,
   Zap,
@@ -57,7 +56,6 @@ export function SiteHeader() {
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Charts", href: "/charts", icon: BarChart3 },
     { name: "Screener", href: "/screener", icon: Zap },
     { name: "Alerts", href: "/alerts", icon: Shield },
     { name: "Liquidity", href: "/liquidity", icon: Target },
@@ -99,9 +97,7 @@ export function SiteHeader() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center space-x-2 lg:space-x-3">
-            <div className="text-white dark:text-foreground hover:text-gray-300 dark:hover:text-muted-foreground">
-              <ThemeToggle />
-            </div>
+            <ThemeToggle />
 
             {isAuthenticated ? (
               <>
