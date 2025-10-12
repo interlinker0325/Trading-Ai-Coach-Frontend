@@ -159,7 +159,12 @@ export default function SignUpPage() {
                 <Label htmlFor="name">Full Name</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input id="name" name="name" className="pl-10" required />
+                  <Input
+                    id="name"
+                    name="name"
+                    className="pl-10 bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                    required
+                  />
                 </div>
               </div>
 
@@ -171,7 +176,7 @@ export default function SignUpPage() {
                     id="email"
                     name="email"
                     type="email"
-                    className="pl-10"
+                    className="pl-10 bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                     required
                   />
                 </div>
@@ -185,7 +190,7 @@ export default function SignUpPage() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                     required
                     minLength={8}
                   />

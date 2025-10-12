@@ -244,7 +244,7 @@ export default function SignInPage() {
                     name="email"
                     type="email"
                     placeholder="john@example.com"
-                    className="pl-10"
+                    className="pl-10 bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                     required
                   />
                 </div>
@@ -259,7 +259,7 @@ export default function SignInPage() {
                     name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                     required
                   />
                   <Button

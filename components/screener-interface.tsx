@@ -508,30 +508,34 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
 
   if (plan === "free" && activeTab !== "stocks") {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center space-y-4">
-            <Lock className="h-12 w-12 text-muted-foreground mx-auto" />
-            <h3 className="text-lg font-semibold">Premium Screener Required</h3>
-            <p className="text-muted-foreground">
-              {activeTab === "crypto"
-                ? "Crypto"
-                : activeTab === "forex"
-                ? "Forex"
-                : activeTab === "options"
-                ? "Options"
-                : "Commodities"}{" "}
-              screener is available with Pro or Elite plans
-            </p>
-            <Button>Upgrade to Pro</Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6 flex items-center justify-center">
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="text-center space-y-4">
+              <Lock className="h-12 w-12 text-muted-foreground mx-auto" />
+              <h3 className="text-lg font-semibold">
+                Premium Screener Required
+              </h3>
+              <p className="text-muted-foreground">
+                {activeTab === "crypto"
+                  ? "Crypto"
+                  : activeTab === "forex"
+                  ? "Forex"
+                  : activeTab === "options"
+                  ? "Options"
+                  : "Commodities"}{" "}
+                screener is available with Pro or Elite plans
+              </p>
+              <Button>Upgrade to Pro</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 rounded-2xl bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
       {/* Enhanced Filters */}
       <Card>
         <CardHeader>

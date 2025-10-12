@@ -234,9 +234,63 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsAuthenticated(false);
   };
 
+  const refreshAccessToken = async (): Promise<string | null> => {
+    try {
+      const refreshToken = localStorage.getItem("refresh_token");
+      if (!refreshToken) {
+        return null;
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/refresh`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Update tokens in localStorage
+        localStorage.setItem("access_token", data.access_token);
+
+        if (data.refresh_token) {
+          localStorage.setItem("refresh_token", data.refresh_token);
+        }
+
+        // Update cookies
+        const isSecure = window.location.protocol === "https:";
+        const accessTokenExpiry = 24 * 60 * 60; // 1 day default
+        const cookieOptions = `path=/; max-age=${accessTokenExpiry}${
+          isSecure ? "; secure" : ""
+        }; samesite=strict`;
+        document.cookie = `access_token=${data.access_token}; ${cookieOptions}`;
+
+        if (data.refresh_token) {
+          const refreshTokenExpiry = 7 * 24 * 60 * 60; // 7 days default
+          const refreshCookieOptions = `path=/; max-age=${refreshTokenExpiry}${
+            isSecure ? "; secure" : ""
+          }; samesite=strict`;
+          document.cookie = `refresh_token=${data.refresh_token}; ${refreshCookieOptions}`;
+        }
+
+        return data.access_token;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error("Token refresh failed:", error);
+      return null;
+    }
+  };
+
   const refreshUser = async () => {
     try {
-      const token = localStorage.getItem("access_token");
+      let token = localStorage.getItem("access_token");
       if (!token) {
         setIsAuthenticated(false);
         setUser(null);
@@ -244,7 +298,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       // Make request to get current user info
-      const response = await fetch(
+      let response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`,
         {
           headers: {
@@ -252,6 +306,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
           },
         }
       );
+
+      // If token is expired (401), try to refresh it
+      if (response.status === 401) {
+        console.log("Access token expired, attempting refresh...");
+        const newToken = await refreshAccessToken();
+
+        if (newToken) {
+          // Retry the request with new token
+          response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`,
+            {
+              headers: {
+                Authorization: `Bearer ${newToken}`,
+              },
+            }
+          );
+        } else {
+          // Refresh failed, logout
+          logout();
+          return null;
+        }
+      }
 
       if (response.ok) {
         const userData = await response.json();

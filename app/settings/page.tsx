@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
+import { apiClient } from "@/lib/api-client";
 
 export default function SettingsPage() {
   const { user, refreshUser } = useAuth();
@@ -28,19 +29,9 @@ export default function SettingsPage() {
 
     setIsSaving(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${user.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-          body: JSON.stringify({
-            full_name: fullName,
-          }),
-        }
-      );
+      const response = await apiClient.put(`/api/v1/users/${user.id}`, {
+        full_name: fullName,
+      });
 
       if (response.ok) {
         toast({
