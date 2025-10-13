@@ -1,112 +1,122 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react";
+import { apiClient } from "@/lib/api-client";
 
 interface MarketDataHook {
-  data: any[]
-  loading: boolean
-  error: string | null
-  refetch: () => void
+  data: any[];
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
 }
 
 export function useMarketData(
   type: "stocks" | "crypto" | "forex" | "commodities",
   symbols: string[],
   plan: "free" | "pro" | "elite",
-  refreshInterval = 30000, // 30 seconds
+  refreshInterval = 30000 // 30 seconds
 ): MarketDataHook {
-  const [data, setData] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     if (symbols.length === 0) {
-      setData([])
-      setLoading(false)
-      return
+      setData([]);
+      setLoading(false);
+      return;
     }
 
     try {
-      setError(null)
-      const symbolParam = type === "forex" ? "pairs" : "symbols"
-      const symbolsQuery = symbols.join(",")
+      setError(null);
+      const symbolParam = type === "forex" ? "pairs" : "symbols";
+      const symbolsQuery = symbols.join(",");
 
-      const response = await fetch(`/api/market-data/${type}?${symbolParam}=${symbolsQuery}&plan=${plan}`)
-      const result = await response.json()
+      const response = await fetch(
+        `/api/market-data/${type}?${symbolParam}=${symbolsQuery}&plan=${plan}`
+      );
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to fetch market data")
+        throw new Error(result.error || "Failed to fetch market data");
       }
 
-      setData(result.data || [])
+      setData(result.data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error occurred")
-      setData([])
+      setError(err instanceof Error ? err.message : "Unknown error occurred");
+      setData([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [type, symbols, plan])
+  }, [type, symbols, plan]);
 
   useEffect(() => {
-    fetchData()
+    fetchData();
 
     // Set up polling for real-time updates (only for Pro/Elite users)
     if (plan !== "free") {
-      const interval = setInterval(fetchData, refreshInterval)
-      return () => clearInterval(interval)
+      const interval = setInterval(fetchData, refreshInterval);
+      return () => clearInterval(interval);
     }
-  }, [fetchData, plan, refreshInterval])
+  }, [fetchData, plan, refreshInterval]);
 
   const refetch = useCallback(() => {
-    setLoading(true)
-    fetchData()
-  }, [fetchData])
+    setLoading(true);
+    fetchData();
+  }, [fetchData]);
 
-  return { data, loading, error, refetch }
+  return { data, loading, error, refetch };
 }
 
 export function useScreener(
-  type: "stocks" | "crypto" | "forex",
+  type: "stocks" | "crypto" | "forex" | "options" | "commodities",
   plan: "free" | "pro" | "elite",
-  filters: Record<string, any> = {},
+  filters: Record<string, any> = {}
 ): MarketDataHook {
-  const [data, setData] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
-      setError(null)
-      const params = new URLSearchParams({
-        type,
-        plan,
-        ...filters,
-      })
+      setError(null);
 
-      const response = await fetch(`/api/market-data/screener?${params}`)
-      const result = await response.json()
+      // Build query parameters
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          params.append(key, String(value));
+        }
+      });
+
+      // Call backend directly using apiClient
+      const response = await apiClient.get(
+        `/api/v1/screener/${type}?${params.toString()}`
+      );
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to fetch screener data")
+        const result = await response.json();
+        throw new Error(result.detail || "Failed to fetch screener data");
       }
 
-      setData(result.data || [])
+      const result = await response.json();
+      setData(result.data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error occurred")
-      setData([])
+      setError(err instanceof Error ? err.message : "Unknown error occurred");
+      setData([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [type, plan, filters])
+  }, [type, plan, filters]);
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    fetchData();
+  }, [fetchData]);
 
   const refetch = useCallback(() => {
-    setLoading(true)
-    fetchData()
-  }, [fetchData])
+    setLoading(true);
+    fetchData();
+  }, [fetchData]);
 
-  return { data, loading, error, refetch }
+  return { data, loading, error, refetch };
 }

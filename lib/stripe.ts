@@ -27,22 +27,28 @@ export const createCheckoutSession = async (
   planName: string
 ) => {
   try {
-    const response = await fetch("/api/create-checkout-session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        priceId,
-        userId,
-        planName,
-      }),
-    });
+    // Call backend directly
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/stripe/create-checkout-session`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          priceId,
+          userId,
+          planName,
+        }),
+      }
+    );
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || "Failed to create checkout session");
+      throw new Error(
+        data.detail || data.error || "Failed to create checkout session"
+      );
     }
 
     return data;
@@ -54,20 +60,26 @@ export const createCheckoutSession = async (
 
 export const createPortalSession = async (customerId: string) => {
   try {
-    const response = await fetch("/api/create-portal-session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        customerId,
-      }),
-    });
+    // Call backend directly
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/stripe/create-portal-session`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customerId,
+        }),
+      }
+    );
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || "Failed to create portal session");
+      throw new Error(
+        data.detail || data.error || "Failed to create portal session"
+      );
     }
 
     return data;

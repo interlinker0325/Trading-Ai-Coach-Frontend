@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { createPortalSession } from "@/lib/stripe";
 
 interface SubscriptionManagementProps {
   user: {
@@ -91,25 +92,10 @@ export function SubscriptionManagement({ user }: SubscriptionManagementProps) {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/create-portal-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          customerId: user.customerId,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      const data = await createPortalSession(user.customerId);
 
       // Redirect to Stripe Customer Portal
       if (data.url) {
-        // window.location.href = data.url
         router.push(data.url);
         router.refresh();
       }
