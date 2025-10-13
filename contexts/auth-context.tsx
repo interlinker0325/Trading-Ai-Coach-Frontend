@@ -338,6 +338,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           plan: userData.plan,
           is_verified: userData.is_verified,
         };
+        console.log("User data:", userInfo);
         setUser(userInfo);
         setIsAuthenticated(true);
         return userInfo; // Return user data for external use

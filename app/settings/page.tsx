@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SubscriptionManagement } from "@/components/subscription-management";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -21,8 +21,15 @@ import { apiClient } from "@/lib/api-client";
 export default function SettingsPage() {
   const { user, refreshUser } = useAuth();
   const { toast } = useToast();
-  const [fullName, setFullName] = useState(user?.full_name || "");
+  const [fullName, setFullName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+
+  // Update fullName when user data loads or changes
+  useEffect(() => {
+    if (user?.full_name) {
+      setFullName(user.full_name);
+    }
+  }, [user]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
