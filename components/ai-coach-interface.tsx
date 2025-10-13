@@ -437,15 +437,6 @@ export function AICoachInterface({ plan }: AICoachInterfaceProps) {
                             {message.content}
                           </p>
                           {message.role === "assistant" &&
-                            message.fromCache && (
-                              <div className="flex items-center gap-1 mt-1">
-                                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                                <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                                  Cached
-                                </span>
-                              </div>
-                            )}
-                          {message.role === "assistant" &&
                             message.chartUpdate && (
                               <div className="flex items-center gap-1 mt-1">
                                 <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
