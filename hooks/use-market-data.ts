@@ -1,81 +1,28 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { apiClient } from "@/lib/api-client";
 
-interface MarketDataHook {
+interface ScreenerHook {
   data: any[];
   loading: boolean;
   error: string | null;
   refetch: () => void;
 }
 
-export function useMarketData(
-  type: "stocks" | "crypto" | "forex" | "commodities",
-  symbols: string[],
-  plan: "free" | "pro" | "elite",
-  refreshInterval = 30000 // 30 seconds
-): MarketDataHook {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = useCallback(async () => {
-    if (symbols.length === 0) {
-      setData([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setError(null);
-      const symbolParam = type === "forex" ? "pairs" : "symbols";
-      const symbolsQuery = symbols.join(",");
-
-      const response = await fetch(
-        `/api/market-data/${type}?${symbolParam}=${symbolsQuery}&plan=${plan}`
-      );
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to fetch market data");
-      }
-
-      setData(result.data || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error occurred");
-      setData([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [type, symbols, plan]);
-
-  useEffect(() => {
-    fetchData();
-
-    // Set up polling for real-time updates (only for Pro/Elite users)
-    if (plan !== "free") {
-      const interval = setInterval(fetchData, refreshInterval);
-      return () => clearInterval(interval);
-    }
-  }, [fetchData, plan, refreshInterval]);
-
-  const refetch = useCallback(() => {
-    setLoading(true);
-    fetchData();
-  }, [fetchData]);
-
-  return { data, loading, error, refetch };
-}
-
 export function useScreener(
   type: "stocks" | "crypto" | "forex" | "options" | "commodities",
   plan: "free" | "pro" | "elite",
   filters: Record<string, any> = {}
-): MarketDataHook {
+): ScreenerHook {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Create a stable string representation of filters for dependency comparison
+  const filtersString = useMemo(() => {
+    return JSON.stringify(filters);
+  }, [filters]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -100,6 +47,7 @@ export function useScreener(
       }
 
       const result = await response.json();
+      console.log("result", result);
       setData(result.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error occurred");
@@ -107,7 +55,7 @@ export function useScreener(
     } finally {
       setLoading(false);
     }
-  }, [type, plan, filters]);
+  }, [type, plan, filtersString]);
 
   useEffect(() => {
     fetchData();

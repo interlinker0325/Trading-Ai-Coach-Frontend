@@ -27,7 +27,7 @@ export default function ScreenerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background dark:bg-black">
+    <div className="min-h-[calc(100vh-64px)] bg-background dark:bg-black">
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Market Screener</h1>
