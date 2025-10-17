@@ -50,7 +50,7 @@ interface ScreenerInterfaceProps {
 export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
   const [activeTab, setActiveTab] = useState("stocks");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
 
   const [stockFilters, setStockFilters] = useState({
@@ -218,9 +218,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           <TableHead>Change</TableHead>
           <TableHead>Volume</TableHead>
           <TableHead>Market Cap</TableHead>
-          <TableHead>P/E</TableHead>
           <TableHead>Div Yield</TableHead>
-          <TableHead>ROE</TableHead>
           <TableHead>Score</TableHead>
         </TableRow>
       </TableHeader>
@@ -239,16 +237,18 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <TableCell>
               <div
                 className={`flex items-center space-x-1 ${
-                  (stock.change || 0) > 0 ? "text-green-600" : "text-red-600"
+                  (stock.changePercent || 0) > 0
+                    ? "text-green-600"
+                    : "text-red-600"
                 }`}
               >
-                {(stock.change || 0) > 0 ? (
+                {(stock.changePercent || 0) > 0 ? (
                   <TrendingUp className="h-3 w-3" />
                 ) : (
                   <TrendingDown className="h-3 w-3" />
                 )}
                 <span>
-                  {(stock.change || 0) > 0 ? "+" : ""}
+                  {(stock.changePercent || 0) > 0 ? "+" : ""}
                   {stock.changePercent?.toFixed(2) || "0.00"}%
                 </span>
               </div>
@@ -257,9 +257,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <TableCell>
               ${((stock.marketCap || 0) / 1000000000)?.toFixed(1) || "0.0"}B
             </TableCell>
-            <TableCell>{stock.pe?.toFixed(1) || "0.0"}</TableCell>
             <TableCell>{stock.dividendYield?.toFixed(2)}%</TableCell>
-            <TableCell>{stock.roe?.toFixed(1)}%</TableCell>
             <TableCell>
               <Badge variant="secondary">
                 {stock.score?.toFixed(1) || "0.0"}
@@ -1109,10 +1107,10 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="5">5</SelectItem>
                               <SelectItem value="10">10</SelectItem>
                               <SelectItem value="20">20</SelectItem>
                               <SelectItem value="50">50</SelectItem>
+                              <SelectItem value="100">100</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
