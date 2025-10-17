@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -28,13 +27,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
 import { useScreener } from "@/hooks/use-market-data";
 import {
   TrendingUp,
   TrendingDown,
-  Search,
-  Filter,
   Lock,
   Target,
   Zap,
@@ -52,86 +48,21 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  const [stockFilters, setStockFilters] = useState({
-    sortBy: "score",
-    minScore: "7",
-    maxPE: "50",
-    minMarketCap: "1000",
-    maxMarketCap: "500000",
-    minVolume: "1000000",
-    sector: "all",
-    minDividendYield: "0",
-    maxDebtToEquity: "100",
-    minROE: "10",
-    priceRange: [10, 1000] as [number, number],
-  });
-
-  const [optionsFilters, setOptionsFilters] = useState({
-    strategy: "csp", // cash secured puts
-    minYield: "8",
-    maxYield: "25",
-    minDTE: "30",
-    maxDTE: "60",
-    minIVRank: "20",
-    maxIVRank: "80",
-    minLiquidity: "100",
-    underlyingType: "all",
-  });
-
-  const [cryptoFilters, setCryptoFilters] = useState({
-    sortBy: "whale_flow",
-    minMarketCap: "100",
-    maxMarketCap: "1000000",
-    minVolume24h: "10",
-    whaleActivity: "accumulation",
-    exchangeFlow: "all",
-    socialSentiment: "all",
-    technicalSignal: "all",
-  });
-
-  const [forexFilters, setForexFilters] = useState({
-    sortBy: "volatility",
-    pairType: "major", // major, minor, exotic
-    minVolatility: "0.5",
-    maxVolatility: "3.0",
-    trend: "all", // bullish, bearish, sideways
-    newsImpact: "all",
-    sessionTime: "all", // london, ny, tokyo, sydney
-  });
-
-  const [commoditiesFilters, setCommoditiesFilters] = useState({
-    sortBy: "momentum",
-    category: "all", // metals, energy, agriculture
-    seasonalPattern: "all",
-    inventoryLevel: "all",
-    newsEvents: "all",
-    technicalSetup: "all",
-  });
-
-  // Memoize filters to prevent infinite re-renders
-  const filters = useMemo(
+  // Memoize basic pagination parameters
+  const paginationParams = useMemo(
     () => ({
-      ...getCurrentFilters(),
       page: currentPage,
       limit: itemsPerPage,
     }),
-    [
-      activeTab,
-      currentPage,
-      itemsPerPage,
-      stockFilters,
-      optionsFilters,
-      cryptoFilters,
-      forexFilters,
-      commoditiesFilters,
-    ]
+    [currentPage, itemsPerPage]
   );
 
   const { data, loading, error, refetch } = useScreener(
     activeTab as any,
     plan,
-    filters
+    paginationParams
   );
 
   // Track when we've reached the end based on getting fewer results than requested
@@ -151,62 +82,39 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
   // For cursor-based pagination, we only disable Next if we've reached the end
   const hasMoreData = !hasReachedEnd;
 
-  // Reset to page 1 when filters change
-  const handleFilterChange = (
-    filterSetter: Function,
-    key: string,
-    value: any
-  ) => {
-    filterSetter((prev: any) => ({ ...prev, [key]: value }));
+  // Reset to page 1 when switching tabs
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
     setCurrentPage(1);
     setHasReachedEnd(false);
   };
+
+  // Handle pagination with loading states
+  const handlePreviousPage = async () => {
+    if (currentPage > 1 && !isNavigating) {
+      setIsNavigating(true);
+      setCurrentPage((p) => Math.max(1, p - 1));
+      setHasReachedEnd(false);
+    }
+  };
+
+  const handleNextPage = async () => {
+    if (!isNavigating && hasMoreData) {
+      setIsNavigating(true);
+      setCurrentPage((p) => p + 1);
+    }
+  };
+
+  // Reset navigation loading when data changes
+  useEffect(() => {
+    setIsNavigating(false);
+  }, [data]);
 
   // Handle items per page change
   const handleItemsPerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
     setCurrentPage(1); // Reset to first page when changing page size
     setHasReachedEnd(false);
-  };
-
-  function getCurrentFilters() {
-    switch (activeTab) {
-      case "stocks":
-        return stockFilters;
-      case "options":
-        return optionsFilters;
-      case "crypto":
-        return cryptoFilters;
-      case "forex":
-        return forexFilters;
-      case "commodities":
-        return commoditiesFilters;
-      default:
-        return stockFilters;
-    }
-  }
-
-  const handleStockFilterChange = (
-    key: string,
-    value: string | number | [number, number]
-  ) => {
-    setStockFilters((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleOptionsFilterChange = (key: string, value: string) => {
-    setOptionsFilters((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleCryptoFilterChange = (key: string, value: string) => {
-    setCryptoFilters((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleForexFilterChange = (key: string, value: string) => {
-    setForexFilters((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleCommoditiesFilterChange = (key: string, value: string) => {
-    setCommoditiesFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const renderStockResults = () => (
@@ -605,444 +513,6 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
 
   return (
     <div className="space-y-6 rounded-2xl bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
-      {/* Enhanced Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Filter className="h-5 w-5" />
-            <span>Advanced Screening Filters</span>
-          </CardTitle>
-          <CardDescription>
-            Customize your search criteria for {activeTab}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {/* Stock Filters */}
-          {activeTab === "stocks" && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label>Sort By</Label>
-                <Select
-                  value={stockFilters.sortBy}
-                  onValueChange={(value) =>
-                    handleStockFilterChange("sortBy", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="score">AI Score</SelectItem>
-                    <SelectItem value="change">Price Change</SelectItem>
-                    <SelectItem value="volume">Volume</SelectItem>
-                    <SelectItem value="marketCap">Market Cap</SelectItem>
-                    <SelectItem value="dividendYield">
-                      Dividend Yield
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Sector</Label>
-                <Select
-                  value={stockFilters.sector}
-                  onValueChange={(value) =>
-                    handleStockFilterChange("sector", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Sectors</SelectItem>
-                    <SelectItem value="technology">Technology</SelectItem>
-                    <SelectItem value="healthcare">Healthcare</SelectItem>
-                    <SelectItem value="financials">Financials</SelectItem>
-                    <SelectItem value="energy">Energy</SelectItem>
-                    <SelectItem value="consumer">Consumer</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Min Market Cap (M)</Label>
-                <Input
-                  type="number"
-                  value={stockFilters.minMarketCap}
-                  onChange={(e) =>
-                    handleStockFilterChange("minMarketCap", e.target.value)
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Min Dividend Yield (%)</Label>
-                <Input
-                  type="number"
-                  value={stockFilters.minDividendYield}
-                  onChange={(e) =>
-                    handleStockFilterChange("minDividendYield", e.target.value)
-                  }
-                  step="0.1"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>
-                  Price Range: ${stockFilters.priceRange[0]} - $
-                  {stockFilters.priceRange[1]}
-                </Label>
-                <Slider
-                  value={stockFilters.priceRange}
-                  onValueChange={(value) =>
-                    handleStockFilterChange(
-                      "priceRange",
-                      value as [number, number]
-                    )
-                  }
-                  max={1000}
-                  min={1}
-                  step={1}
-                  className="w-full"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Options Filters */}
-          {activeTab === "options" && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label>Strategy</Label>
-                <Select
-                  value={optionsFilters.strategy}
-                  onValueChange={(value) =>
-                    handleOptionsFilterChange("strategy", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="csp">Cash Secured Puts</SelectItem>
-                    <SelectItem value="cc">Covered Calls</SelectItem>
-                    <SelectItem value="wheel">Wheel Strategy</SelectItem>
-                    <SelectItem value="iron_condor">Iron Condor</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Min Yield (%)</Label>
-                <Input
-                  type="number"
-                  value={optionsFilters.minYield}
-                  onChange={(e) =>
-                    handleOptionsFilterChange("minYield", e.target.value)
-                  }
-                  step="0.1"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Days to Expiry</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={optionsFilters.minDTE}
-                    onChange={(e) =>
-                      handleOptionsFilterChange("minDTE", e.target.value)
-                    }
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={optionsFilters.maxDTE}
-                    onChange={(e) =>
-                      handleOptionsFilterChange("maxDTE", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>IV Rank Range</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={optionsFilters.minIVRank}
-                    onChange={(e) =>
-                      handleOptionsFilterChange("minIVRank", e.target.value)
-                    }
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={optionsFilters.maxIVRank}
-                    onChange={(e) =>
-                      handleOptionsFilterChange("maxIVRank", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Crypto Filters */}
-          {activeTab === "crypto" && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label>Sort By</Label>
-                <Select
-                  value={cryptoFilters.sortBy}
-                  onValueChange={(value) =>
-                    handleCryptoFilterChange("sortBy", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="whale_flow">Whale Flow</SelectItem>
-                    <SelectItem value="volume">Volume</SelectItem>
-                    <SelectItem value="marketCap">Market Cap</SelectItem>
-                    <SelectItem value="change">Price Change</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Whale Activity</Label>
-                <Select
-                  value={cryptoFilters.whaleActivity}
-                  onValueChange={(value) =>
-                    handleCryptoFilterChange("whaleActivity", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Activity</SelectItem>
-                    <SelectItem value="accumulation">Accumulation</SelectItem>
-                    <SelectItem value="distribution">Distribution</SelectItem>
-                    <SelectItem value="neutral">Neutral</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Exchange Flow</Label>
-                <Select
-                  value={cryptoFilters.exchangeFlow}
-                  onValueChange={(value) =>
-                    handleCryptoFilterChange("exchangeFlow", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Flows</SelectItem>
-                    <SelectItem value="inflow">Exchange Inflow</SelectItem>
-                    <SelectItem value="outflow">Exchange Outflow</SelectItem>
-                    <SelectItem value="stable">Stable</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Min Market Cap (M)</Label>
-                <Input
-                  type="number"
-                  value={cryptoFilters.minMarketCap}
-                  onChange={(e) =>
-                    handleCryptoFilterChange("minMarketCap", e.target.value)
-                  }
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Forex Filters */}
-          {activeTab === "forex" && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label>Pair Type</Label>
-                <Select
-                  value={forexFilters.pairType}
-                  onValueChange={(value) =>
-                    handleForexFilterChange("pairType", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Pairs</SelectItem>
-                    <SelectItem value="major">Major Pairs</SelectItem>
-                    <SelectItem value="minor">Minor Pairs</SelectItem>
-                    <SelectItem value="exotic">Exotic Pairs</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Trend</Label>
-                <Select
-                  value={forexFilters.trend}
-                  onValueChange={(value) =>
-                    handleForexFilterChange("trend", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Trends</SelectItem>
-                    <SelectItem value="bullish">Bullish</SelectItem>
-                    <SelectItem value="bearish">Bearish</SelectItem>
-                    <SelectItem value="sideways">Sideways</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Session Time</Label>
-                <Select
-                  value={forexFilters.sessionTime}
-                  onValueChange={(value) =>
-                    handleForexFilterChange("sessionTime", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Sessions</SelectItem>
-                    <SelectItem value="london">London</SelectItem>
-                    <SelectItem value="ny">New York</SelectItem>
-                    <SelectItem value="tokyo">Tokyo</SelectItem>
-                    <SelectItem value="sydney">Sydney</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Volatility Range (%)</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={forexFilters.minVolatility}
-                    onChange={(e) =>
-                      handleForexFilterChange("minVolatility", e.target.value)
-                    }
-                    step="0.1"
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={forexFilters.maxVolatility}
-                    onChange={(e) =>
-                      handleForexFilterChange("maxVolatility", e.target.value)
-                    }
-                    step="0.1"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Commodities Filters */}
-          {activeTab === "commodities" && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label>Category</Label>
-                <Select
-                  value={commoditiesFilters.category}
-                  onValueChange={(value) =>
-                    handleCommoditiesFilterChange("category", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="metals">Precious Metals</SelectItem>
-                    <SelectItem value="energy">Energy</SelectItem>
-                    <SelectItem value="agriculture">Agriculture</SelectItem>
-                    <SelectItem value="industrial">
-                      Industrial Metals
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Seasonal Pattern</Label>
-                <Select
-                  value={commoditiesFilters.seasonalPattern}
-                  onValueChange={(value) =>
-                    handleCommoditiesFilterChange("seasonalPattern", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Patterns</SelectItem>
-                    <SelectItem value="favorable">Favorable</SelectItem>
-                    <SelectItem value="neutral">Neutral</SelectItem>
-                    <SelectItem value="unfavorable">Unfavorable</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Technical Setup</Label>
-                <Select
-                  value={commoditiesFilters.technicalSetup}
-                  onValueChange={(value) =>
-                    handleCommoditiesFilterChange("technicalSetup", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Setups</SelectItem>
-                    <SelectItem value="breakout">Breakout</SelectItem>
-                    <SelectItem value="reversal">Reversal</SelectItem>
-                    <SelectItem value="continuation">Continuation</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>News Events</Label>
-                <Select
-                  value={commoditiesFilters.newsEvents}
-                  onValueChange={(value) =>
-                    handleCommoditiesFilterChange("newsEvents", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Events</SelectItem>
-                    <SelectItem value="opec">OPEC Meetings</SelectItem>
-                    <SelectItem value="inventory">Inventory Reports</SelectItem>
-                    <SelectItem value="weather">Weather Events</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between mt-4">
-            <Button onClick={refetch} disabled={loading}>
-              <Search className="mr-2 h-4 w-4" />
-              {loading ? "Searching..." : "Search"}
-            </Button>
-            <div className="text-sm text-muted-foreground">
-              {plan === "free"
-                ? "Top 5 results (upgrade for unlimited)"
-                : `Showing all results`}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Results */}
       <Card>
         <CardHeader>
@@ -1054,14 +524,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs
-            value={activeTab}
-            onValueChange={(tab) => {
-              setActiveTab(tab);
-              setCurrentPage(1); // Reset to page 1 when switching tabs
-              setHasReachedEnd(false); // Reset end detection when switching tabs
-            }}
-          >
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="stocks">Stocks</TabsTrigger>
               <TabsTrigger value="options" disabled={plan === "free"}>
@@ -1119,21 +582,21 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            setCurrentPage((p) => Math.max(1, p - 1))
+                          onClick={handlePreviousPage}
+                          disabled={
+                            currentPage === 1 || loading || isNavigating
                           }
-                          disabled={currentPage === 1 || loading}
                         >
                           <ChevronLeft className="h-4 w-4" />
-                          Previous
+                          {isNavigating ? "Loading..." : "Previous"}
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setCurrentPage((p) => p + 1)}
-                          disabled={loading || !hasMoreData}
+                          onClick={handleNextPage}
+                          disabled={loading || !hasMoreData || isNavigating}
                         >
-                          Next
+                          {isNavigating ? "Loading..." : "Next"}
                           <ChevronRight className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1181,21 +644,21 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            setCurrentPage((p) => Math.max(1, p - 1))
+                          onClick={handlePreviousPage}
+                          disabled={
+                            currentPage === 1 || loading || isNavigating
                           }
-                          disabled={currentPage === 1 || loading}
                         >
                           <ChevronLeft className="h-4 w-4" />
-                          Previous
+                          {isNavigating ? "Loading..." : "Previous"}
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setCurrentPage((p) => p + 1)}
-                          disabled={loading || !hasMoreData}
+                          onClick={handleNextPage}
+                          disabled={loading || !hasMoreData || isNavigating}
                         >
-                          Next
+                          {isNavigating ? "Loading..." : "Next"}
                           <ChevronRight className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1243,21 +706,21 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            setCurrentPage((p) => Math.max(1, p - 1))
+                          onClick={handlePreviousPage}
+                          disabled={
+                            currentPage === 1 || loading || isNavigating
                           }
-                          disabled={currentPage === 1 || loading}
                         >
                           <ChevronLeft className="h-4 w-4" />
-                          Previous
+                          {isNavigating ? "Loading..." : "Previous"}
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setCurrentPage((p) => p + 1)}
-                          disabled={loading || !hasMoreData}
+                          onClick={handleNextPage}
+                          disabled={loading || !hasMoreData || isNavigating}
                         >
-                          Next
+                          {isNavigating ? "Loading..." : "Next"}
                           <ChevronRight className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1305,21 +768,21 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            setCurrentPage((p) => Math.max(1, p - 1))
+                          onClick={handlePreviousPage}
+                          disabled={
+                            currentPage === 1 || loading || isNavigating
                           }
-                          disabled={currentPage === 1 || loading}
                         >
                           <ChevronLeft className="h-4 w-4" />
-                          Previous
+                          {isNavigating ? "Loading..." : "Previous"}
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setCurrentPage((p) => p + 1)}
-                          disabled={loading || !hasMoreData}
+                          onClick={handleNextPage}
+                          disabled={loading || !hasMoreData || isNavigating}
                         >
-                          Next
+                          {isNavigating ? "Loading..." : "Next"}
                           <ChevronRight className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1369,21 +832,21 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            setCurrentPage((p) => Math.max(1, p - 1))
+                          onClick={handlePreviousPage}
+                          disabled={
+                            currentPage === 1 || loading || isNavigating
                           }
-                          disabled={currentPage === 1 || loading}
                         >
                           <ChevronLeft className="h-4 w-4" />
-                          Previous
+                          {isNavigating ? "Loading..." : "Previous"}
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setCurrentPage((p) => p + 1)}
-                          disabled={loading || !hasMoreData}
+                          onClick={handleNextPage}
+                          disabled={loading || !hasMoreData || isNavigating}
                         >
-                          Next
+                          {isNavigating ? "Loading..." : "Next"}
                           <ChevronRight className="h-4 w-4" />
                         </Button>
                       </div>
