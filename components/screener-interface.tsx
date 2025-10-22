@@ -37,6 +37,7 @@ import {
   DollarSign,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 
 interface ScreenerInterfaceProps {
@@ -84,6 +85,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
 
   // Reset to page 1 when switching tabs
   const handleTabChange = (tab: string) => {
+    if (tab !== activeTab) {
+      setIsNavigating(true); // Show loading when switching tabs
+    }
     setActiveTab(tab);
     setCurrentPage(1);
     setHasReachedEnd(false);
@@ -124,7 +128,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           <TableHead>Symbol</TableHead>
           <TableHead>Price</TableHead>
           <TableHead>Change</TableHead>
-          <TableHead>Volume</TableHead>
+          <TableHead>Volume 24h</TableHead>
           <TableHead>Market Cap</TableHead>
           <TableHead>Div Yield</TableHead>
           <TableHead>Score</TableHead>
@@ -161,10 +165,8 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 </span>
               </div>
             </TableCell>
-            <TableCell>{stock.volume?.toLocaleString() || "0"}</TableCell>
-            <TableCell>
-              ${((stock.marketCap || 0) / 1000000000)?.toFixed(1) || "0.0"}B
-            </TableCell>
+            <TableCell>${stock.volume?.toFixed(2) || "0.00"}</TableCell>
+            <TableCell>${stock.marketCap?.toFixed(2) || "0.00"}</TableCell>
             <TableCell>{stock.dividendYield?.toFixed(2)}%</TableCell>
             <TableCell>
               <Badge variant="secondary">
@@ -241,9 +243,6 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           <TableHead>Price</TableHead>
           <TableHead>Change</TableHead>
           <TableHead>Volume 24h</TableHead>
-          <TableHead>Market Cap</TableHead>
-          <TableHead>Whale Flow</TableHead>
-          <TableHead>Exchange Flow</TableHead>
           <TableHead>Score</TableHead>
         </TableRow>
       </TableHeader>
@@ -252,7 +251,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           <TableRow key={index}>
             <TableCell>
               <div>
-                <div className="font-medium">{crypto.symbol || "N/A"}</div>
+                <div className="font-medium">
+                  {crypto.ticker.substring(2, crypto.ticker.length) || "N/A"}
+                </div>
                 <div className="text-sm text-muted-foreground">
                   {crypto.name || "N/A"}
                 </div>
@@ -276,28 +277,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 </span>
               </div>
             </TableCell>
-            <TableCell>
-              ${((crypto.volume24h || 0) / 1000000000)?.toFixed(1) || "0.0"}B
-            </TableCell>
-            <TableCell>
-              ${((crypto.marketCap || 0) / 1000000000)?.toFixed(1) || "0.0"}B
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant={
-                  crypto.whaleFlow === "accumulation"
-                    ? "secondary"
-                    : "destructive"
-                }
-              >
-                {crypto.whaleFlow || "unknown"}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant="outline">
-                {crypto.exchangeFlow || "unknown"}
-              </Badge>
-            </TableCell>
+            <TableCell>${crypto.volume.toFixed(2)}</TableCell>
             <TableCell>
               <Badge variant="secondary">
                 {crypto.score?.toFixed(1) || "0.0"}
@@ -316,10 +296,10 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           <TableHead>Pair</TableHead>
           <TableHead>Price</TableHead>
           <TableHead>Change</TableHead>
-          <TableHead>Volatility</TableHead>
-          <TableHead>Trend</TableHead>
-          <TableHead>Session</TableHead>
-          <TableHead>News Impact</TableHead>
+          <TableHead>Volume 24h</TableHead>
+          {/* <TableHead>Trend</TableHead> */}
+          {/* <TableHead>Session</TableHead> */}
+          {/* <TableHead>News Impact</TableHead> */}
           <TableHead>Score</TableHead>
         </TableRow>
       </TableHeader>
@@ -328,9 +308,11 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           <TableRow key={index}>
             <TableCell>
               <div>
-                <div className="font-medium">{forex.pair || "N/A"}</div>
+                <div className="font-medium">
+                  {forex.ticker.substring(2, forex.ticker.length) || "N/A"}
+                </div>
                 <div className="text-sm text-muted-foreground">
-                  {forex.type || "N/A"}
+                  {forex.name || "N/A"}
                 </div>
               </div>
             </TableCell>
@@ -352,34 +334,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 </span>
               </div>
             </TableCell>
-            <TableCell>{forex.volatility?.toFixed(2) || "0.00"}%</TableCell>
-            <TableCell>
-              <Badge
-                variant={
-                  forex.trend === "bullish"
-                    ? "secondary"
-                    : forex.trend === "bearish"
-                    ? "destructive"
-                    : "outline"
-                }
-              >
-                {forex.trend || "unknown"}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant="outline">
-                {forex.activeSession || "unknown"}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant={
-                  forex.newsImpact === "high" ? "destructive" : "secondary"
-                }
-              >
-                {forex.newsImpact || "unknown"}
-              </Badge>
-            </TableCell>
+            <TableCell>${forex.volume?.toFixed(2) || "0.00"}</TableCell>
             <TableCell>
               <Badge variant="secondary">
                 {forex.score?.toFixed(1) || "0.0"}
@@ -410,7 +365,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           <TableRow key={index}>
             <TableCell>
               <div>
-                <div className="font-medium">{commodity.symbol || "N/A"}</div>
+                <div className="font-medium">{commodity.ticker || "N/A"}</div>
                 <div className="text-sm text-muted-foreground">
                   {commodity.category || "N/A"}
                 </div>
@@ -527,10 +482,6 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="stocks">Stocks</TabsTrigger>
-              <TabsTrigger value="options" disabled={plan === "free"}>
-                <Target className="h-4 w-4 mr-1" />
-                Options
-              </TabsTrigger>
               <TabsTrigger value="crypto" disabled={plan === "free"}>
                 <Zap className="h-4 w-4 mr-1" />
                 Crypto
@@ -539,321 +490,468 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 <DollarSign className="h-4 w-4 mr-1" />
                 Forex
               </TabsTrigger>
+              <TabsTrigger value="options" disabled={plan === "free"}>
+                <Target className="h-4 w-4 mr-1" />
+                Options
+              </TabsTrigger>
               <TabsTrigger value="commodities" disabled={plan === "free"}>
                 Commodities
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="stocks" className="mt-6">
-              {loading ? (
-                <div className="text-center py-8">Loading stock data...</div>
-              ) : error ? (
-                <div className="text-center py-8 text-destructive">{error}</div>
-              ) : (
-                <>
-                  {renderStockResults()}
-                  {plan !== "free" && data.length > 0 && (
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <div className="flex items-center gap-4">
-                        <div className="text-sm text-muted-foreground">
-                          Page {currentPage}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor="items-per-page" className="text-sm">
-                            Show:
-                          </Label>
-                          <Select
-                            value={itemsPerPage.toString()}
-                            onValueChange={handleItemsPerPageChange}
-                          >
-                            <SelectTrigger className="w-20 h-8">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="10">10</SelectItem>
-                              <SelectItem value="20">20</SelectItem>
-                              <SelectItem value="50">50</SelectItem>
-                              <SelectItem value="100">100</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handlePreviousPage}
-                          disabled={
-                            currentPage === 1 || loading || isNavigating
-                          }
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                          {isNavigating ? "Loading..." : "Previous"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleNextPage}
-                          disabled={loading || !hasMoreData || isNavigating}
-                        >
-                          {isNavigating ? "Loading..." : "Next"}
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
+              <div className="relative">
+                {(loading || isNavigating) && data.length > 0 && (
+                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                    <div className="text-center">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                      <div>Loading stock data...</div>
                     </div>
-                  )}
-                </>
-              )}
-            </TabsContent>
-
-            <TabsContent value="options" className="mt-6">
-              {loading ? (
-                <div className="text-center py-8">Loading options data...</div>
-              ) : error ? (
-                <div className="text-center py-8 text-destructive">{error}</div>
-              ) : (
-                <>
-                  {renderOptionsResults()}
-                  {data.length > 0 && (
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <div className="flex items-center gap-4">
-                        <div className="text-sm text-muted-foreground">
-                          Page {currentPage}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor="items-per-page" className="text-sm">
-                            Show:
-                          </Label>
-                          <Select
-                            value={itemsPerPage.toString()}
-                            onValueChange={handleItemsPerPageChange}
-                          >
-                            <SelectTrigger className="w-20 h-8">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="10">10</SelectItem>
-                              <SelectItem value="20">20</SelectItem>
-                              <SelectItem value="50">50</SelectItem>
-                              <SelectItem value="100">100</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handlePreviousPage}
-                          disabled={
-                            currentPage === 1 || loading || isNavigating
-                          }
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                          {isNavigating ? "Loading..." : "Previous"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleNextPage}
-                          disabled={loading || !hasMoreData || isNavigating}
-                        >
-                          {isNavigating ? "Loading..." : "Next"}
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
+                  </div>
+                )}
+                {loading && data.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                    <div>Loading stock data...</div>
+                  </div>
+                ) : isNavigating && data.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                    <div>Loading stock data...</div>
+                  </div>
+                ) : error ? (
+                  <div className="text-center py-8 text-destructive">
+                    {error}
+                  </div>
+                ) : data.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-muted-foreground text-lg mb-2">
+                      No Data
                     </div>
-                  )}
-                </>
-              )}
+                    <div className="text-sm text-muted-foreground">
+                      No stocks found matching your criteria
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {renderStockResults()}
+                    {plan !== "free" && data.length > 0 && (
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-4">
+                          <div className="text-sm text-muted-foreground">
+                            Page {currentPage}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="items-per-page" className="text-sm">
+                              Show:
+                            </Label>
+                            <Select
+                              value={itemsPerPage.toString()}
+                              onValueChange={handleItemsPerPageChange}
+                            >
+                              <SelectTrigger className="w-20 h-8">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="20">20</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                                <SelectItem value="100">100</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handlePreviousPage}
+                            disabled={
+                              currentPage === 1 || loading || isNavigating
+                            }
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                            Previous
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleNextPage}
+                            disabled={loading || !hasMoreData || isNavigating}
+                          >
+                            Next
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </TabsContent>
 
             <TabsContent value="crypto" className="mt-6">
-              {loading ? (
-                <div className="text-center py-8">Loading crypto data...</div>
-              ) : error ? (
-                <div className="text-center py-8 text-destructive">{error}</div>
-              ) : (
-                <>
-                  {renderCryptoResults()}
-                  {data.length > 0 && (
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <div className="flex items-center gap-4">
-                        <div className="text-sm text-muted-foreground">
-                          Page {currentPage}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor="items-per-page" className="text-sm">
-                            Show:
-                          </Label>
-                          <Select
-                            value={itemsPerPage.toString()}
-                            onValueChange={handleItemsPerPageChange}
-                          >
-                            <SelectTrigger className="w-20 h-8">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="10">10</SelectItem>
-                              <SelectItem value="20">20</SelectItem>
-                              <SelectItem value="50">50</SelectItem>
-                              <SelectItem value="100">100</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handlePreviousPage}
-                          disabled={
-                            currentPage === 1 || loading || isNavigating
-                          }
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                          {isNavigating ? "Loading..." : "Previous"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleNextPage}
-                          disabled={loading || !hasMoreData || isNavigating}
-                        >
-                          {isNavigating ? "Loading..." : "Next"}
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
+              <div className="relative">
+                {(loading || isNavigating) && data.length > 0 && (
+                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                    <div className="text-center">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                      <div>Loading crypto data...</div>
                     </div>
-                  )}
-                </>
-              )}
+                  </div>
+                )}
+                {loading && data.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                    <div>Loading crypto data...</div>
+                  </div>
+                ) : isNavigating && data.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                    <div>Loading crypto data...</div>
+                  </div>
+                ) : error ? (
+                  <div className="text-center py-8 text-destructive">
+                    {error}
+                  </div>
+                ) : data.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-muted-foreground text-lg mb-2">
+                      No Data
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      No crypto found matching your criteria
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {renderCryptoResults()}
+                    {data.length > 0 && (
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-4">
+                          <div className="text-sm text-muted-foreground">
+                            Page {currentPage}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="items-per-page" className="text-sm">
+                              Show:
+                            </Label>
+                            <Select
+                              value={itemsPerPage.toString()}
+                              onValueChange={handleItemsPerPageChange}
+                            >
+                              <SelectTrigger className="w-20 h-8">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="20">20</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                                <SelectItem value="100">100</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handlePreviousPage}
+                            disabled={
+                              currentPage === 1 || loading || isNavigating
+                            }
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                            Previous
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleNextPage}
+                            disabled={loading || !hasMoreData || isNavigating}
+                          >
+                            Next
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </TabsContent>
 
             <TabsContent value="forex" className="mt-6">
-              {loading ? (
-                <div className="text-center py-8">Loading forex data...</div>
-              ) : error ? (
-                <div className="text-center py-8 text-destructive">{error}</div>
-              ) : (
-                <>
-                  {renderForexResults()}
-                  {data.length > 0 && (
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <div className="flex items-center gap-4">
-                        <div className="text-sm text-muted-foreground">
-                          Page {currentPage}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor="items-per-page" className="text-sm">
-                            Show:
-                          </Label>
-                          <Select
-                            value={itemsPerPage.toString()}
-                            onValueChange={handleItemsPerPageChange}
-                          >
-                            <SelectTrigger className="w-20 h-8">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="10">10</SelectItem>
-                              <SelectItem value="20">20</SelectItem>
-                              <SelectItem value="50">50</SelectItem>
-                              <SelectItem value="100">100</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handlePreviousPage}
-                          disabled={
-                            currentPage === 1 || loading || isNavigating
-                          }
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                          {isNavigating ? "Loading..." : "Previous"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleNextPage}
-                          disabled={loading || !hasMoreData || isNavigating}
-                        >
-                          {isNavigating ? "Loading..." : "Next"}
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
+              <div className="relative">
+                {(loading || isNavigating) && data.length > 0 && (
+                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                    <div className="text-center">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                      <div>Loading forex data...</div>
                     </div>
-                  )}
-                </>
-              )}
+                  </div>
+                )}
+                {loading && data.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                    <div>Loading forex data...</div>
+                  </div>
+                ) : isNavigating && data.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                    <div>Loading forex data...</div>
+                  </div>
+                ) : error ? (
+                  <div className="text-center py-8 text-destructive">
+                    {error}
+                  </div>
+                ) : data.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-muted-foreground text-lg mb-2">
+                      No Data
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      No forex pairs found matching your criteria
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {renderForexResults()}
+                    {data.length > 0 && (
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-4">
+                          <div className="text-sm text-muted-foreground">
+                            Page {currentPage}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="items-per-page" className="text-sm">
+                              Show:
+                            </Label>
+                            <Select
+                              value={itemsPerPage.toString()}
+                              onValueChange={handleItemsPerPageChange}
+                            >
+                              <SelectTrigger className="w-20 h-8">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="20">20</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                                <SelectItem value="100">100</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handlePreviousPage}
+                            disabled={
+                              currentPage === 1 || loading || isNavigating
+                            }
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                            Previous
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleNextPage}
+                            disabled={loading || !hasMoreData || isNavigating}
+                          >
+                            Next
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="options" className="mt-6">
+              <div className="relative">
+                {(loading || isNavigating) && data.length > 0 && (
+                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                    <div className="text-center">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                      <div>Loading options data...</div>
+                    </div>
+                  </div>
+                )}
+                {loading && data.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                    <div>Loading options data...</div>
+                  </div>
+                ) : isNavigating && data.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                    <div>Loading options data...</div>
+                  </div>
+                ) : error ? (
+                  <div className="text-center py-8 text-destructive">
+                    {error}
+                  </div>
+                ) : data.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-muted-foreground text-lg mb-2">
+                      No Data
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      No options found matching your criteria
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {renderOptionsResults()}
+                    {data.length > 0 && (
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-4">
+                          <div className="text-sm text-muted-foreground">
+                            Page {currentPage}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="items-per-page" className="text-sm">
+                              Show:
+                            </Label>
+                            <Select
+                              value={itemsPerPage.toString()}
+                              onValueChange={handleItemsPerPageChange}
+                            >
+                              <SelectTrigger className="w-20 h-8">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="20">20</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                                <SelectItem value="100">100</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handlePreviousPage}
+                            disabled={
+                              currentPage === 1 || loading || isNavigating
+                            }
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                            Previous
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleNextPage}
+                            disabled={loading || !hasMoreData || isNavigating}
+                          >
+                            Next
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </TabsContent>
 
             <TabsContent value="commodities" className="mt-6">
-              {loading ? (
-                <div className="text-center py-8">
-                  Loading commodities data...
-                </div>
-              ) : error ? (
-                <div className="text-center py-8 text-destructive">{error}</div>
-              ) : (
-                <>
-                  {renderCommoditiesResults()}
-                  {data.length > 0 && (
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <div className="flex items-center gap-4">
-                        <div className="text-sm text-muted-foreground">
-                          Page {currentPage}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor="items-per-page" className="text-sm">
-                            Show:
-                          </Label>
-                          <Select
-                            value={itemsPerPage.toString()}
-                            onValueChange={handleItemsPerPageChange}
-                          >
-                            <SelectTrigger className="w-20 h-8">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="10">10</SelectItem>
-                              <SelectItem value="20">20</SelectItem>
-                              <SelectItem value="50">50</SelectItem>
-                              <SelectItem value="100">100</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handlePreviousPage}
-                          disabled={
-                            currentPage === 1 || loading || isNavigating
-                          }
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                          {isNavigating ? "Loading..." : "Previous"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleNextPage}
-                          disabled={loading || !hasMoreData || isNavigating}
-                        >
-                          {isNavigating ? "Loading..." : "Next"}
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
+              <div className="relative">
+                {(loading || isNavigating) && data.length > 0 && (
+                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                    <div className="text-center">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                      <div>Loading commodities data...</div>
                     </div>
-                  )}
-                </>
-              )}
+                  </div>
+                )}
+                {loading && data.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                    <div>Loading commodities data...</div>
+                  </div>
+                ) : isNavigating && data.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                    <div>Loading commodities data...</div>
+                  </div>
+                ) : error ? (
+                  <div className="text-center py-8 text-destructive">
+                    {error}
+                  </div>
+                ) : data.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-muted-foreground text-lg mb-2">
+                      No Data
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      No commodities found matching your criteria
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {renderCommoditiesResults()}
+                    {data.length > 0 && (
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-4">
+                          <div className="text-sm text-muted-foreground">
+                            Page {currentPage}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="items-per-page" className="text-sm">
+                              Show:
+                            </Label>
+                            <Select
+                              value={itemsPerPage.toString()}
+                              onValueChange={handleItemsPerPageChange}
+                            >
+                              <SelectTrigger className="w-20 h-8">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="20">20</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                                <SelectItem value="100">100</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handlePreviousPage}
+                            disabled={
+                              currentPage === 1 || loading || isNavigating
+                            }
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                            Previous
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleNextPage}
+                            disabled={loading || !hasMoreData || isNavigating}
+                          >
+                            Next
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
