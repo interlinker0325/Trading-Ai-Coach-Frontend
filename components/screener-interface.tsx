@@ -346,98 +346,6 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
     </Table>
   );
 
-  const renderCommoditiesResults = () => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Commodity</TableHead>
-          <TableHead>Price</TableHead>
-          <TableHead>Change</TableHead>
-          <TableHead>Momentum</TableHead>
-          <TableHead>Seasonal</TableHead>
-          <TableHead>Inventory</TableHead>
-          <TableHead>News Events</TableHead>
-          <TableHead>Score</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((commodity: any, index: number) => (
-          <TableRow key={index}>
-            <TableCell>
-              <div>
-                <div className="font-medium">{commodity.ticker || "N/A"}</div>
-                <div className="text-sm text-muted-foreground">
-                  {commodity.category || "N/A"}
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>${commodity.price?.toFixed(2) || "0.00"}</TableCell>
-            <TableCell>
-              <div
-                className={`flex items-center space-x-1 ${
-                  (commodity.change || 0) > 0
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
-              >
-                {(commodity.change || 0) > 0 ? (
-                  <TrendingUp className="h-3 w-3" />
-                ) : (
-                  <TrendingDown className="h-3 w-3" />
-                )}
-                <span>
-                  {(commodity.change || 0) > 0 ? "+" : ""}
-                  {commodity.changePercent?.toFixed(2) || "0.00"}%
-                </span>
-              </div>
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant={
-                  commodity.momentum === "strong" ? "secondary" : "outline"
-                }
-              >
-                {commodity.momentum || "unknown"}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant={
-                  commodity.seasonal === "favorable" ? "secondary" : "outline"
-                }
-              >
-                {commodity.seasonal || "unknown"}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant={
-                  commodity.inventory === "low" ? "destructive" : "secondary"
-                }
-              >
-                {commodity.inventory || "unknown"}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant={
-                  (commodity.newsEvents || 0) > 0 ? "destructive" : "outline"
-                }
-              >
-                {commodity.newsEvents || "0"} events
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant="secondary">
-                {commodity.score?.toFixed(1) || "0.0"}
-              </Badge>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
-
   if (plan === "free" && activeTab !== "stocks") {
     return (
       <div className="bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6 flex items-center justify-center">
@@ -453,9 +361,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                   ? "Crypto"
                   : activeTab === "forex"
                   ? "Forex"
-                  : activeTab === "options"
-                  ? "Options"
-                  : "Commodities"}{" "}
+                  : "Options"}{" "}
                 screener is available with Pro or Elite plans
               </p>
               <Button>Upgrade to Pro</Button>
@@ -493,9 +399,6 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
               <TabsTrigger value="options" disabled={plan === "free"}>
                 <Target className="h-4 w-4 mr-1" />
                 Options
-              </TabsTrigger>
-              <TabsTrigger value="commodities" disabled={plan === "free"}>
-                Commodities
               </TabsTrigger>
             </TabsList>
 
@@ -808,97 +711,6 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 ) : (
                   <>
                     {renderOptionsResults()}
-                    {data.length > 0 && (
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                        <div className="flex items-center gap-4">
-                          <div className="text-sm text-muted-foreground">
-                            Page {currentPage}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Label htmlFor="items-per-page" className="text-sm">
-                              Show:
-                            </Label>
-                            <Select
-                              value={itemsPerPage.toString()}
-                              onValueChange={handleItemsPerPageChange}
-                            >
-                              <SelectTrigger className="w-20 h-8">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="10">10</SelectItem>
-                                <SelectItem value="20">20</SelectItem>
-                                <SelectItem value="50">50</SelectItem>
-                                <SelectItem value="100">100</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handlePreviousPage}
-                            disabled={
-                              currentPage === 1 || loading || isNavigating
-                            }
-                          >
-                            <ChevronLeft className="h-4 w-4" />
-                            Previous
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleNextPage}
-                            disabled={loading || !hasMoreData || isNavigating}
-                          >
-                            Next
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="commodities" className="mt-6">
-              <div className="relative">
-                {(loading || isNavigating) && data.length > 0 && (
-                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                      <div>Loading commodities data...</div>
-                    </div>
-                  </div>
-                )}
-                {loading && data.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                    <div>Loading commodities data...</div>
-                  </div>
-                ) : isNavigating && data.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                    <div>Loading commodities data...</div>
-                  </div>
-                ) : error ? (
-                  <div className="text-center py-8 text-destructive">
-                    {error}
-                  </div>
-                ) : data.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="text-muted-foreground text-lg mb-2">
-                      No Data
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      No commodities found matching your criteria
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {renderCommoditiesResults()}
                     {data.length > 0 && (
                       <div className="flex items-center justify-between mt-4 pt-4 border-t">
                         <div className="flex items-center gap-4">
