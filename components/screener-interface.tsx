@@ -50,6 +50,9 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // This will be sent to the API
+  const [isSearching, setIsSearching] = useState(false);
 
   // Memoize basic pagination parameters
   const paginationParams = useMemo(
@@ -63,7 +66,8 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
   const { data, loading, error, refetch } = useScreener(
     activeTab as any,
     plan,
-    paginationParams
+    paginationParams,
+    searchQuery
   );
 
   // Track when we've reached the end based on getting fewer results than requested
@@ -91,6 +95,21 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
     setActiveTab(tab);
     setCurrentPage(1);
     setHasReachedEnd(false);
+    setSearchTerm(""); // Reset search input when switching tabs
+    setSearchQuery(""); // Reset search query when switching tabs
+  };
+
+  // Handle search button click
+  const handleSearch = () => {
+    setIsSearching(true);
+    setSearchQuery(searchTerm.trim());
+  };
+
+  // Handle Enter key press in search input
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !loading && !isNavigating && !isSearching) {
+      handleSearch();
+    }
   };
 
   // Handle pagination with loading states
@@ -112,7 +131,14 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
   // Reset navigation loading when data changes
   useEffect(() => {
     setIsNavigating(false);
+    setIsSearching(false); // Reset search loading when data changes
   }, [data]);
+
+  // Reset pagination when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+    setHasReachedEnd(false);
+  }, [searchQuery]);
 
   // Handle items per page change
   const handleItemsPerPageChange = (value: string) => {
@@ -131,7 +157,6 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           <TableHead>Volume 24h</TableHead>
           <TableHead>Market Cap</TableHead>
           <TableHead>Div Yield</TableHead>
-          <TableHead>Score</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -168,11 +193,6 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <TableCell>${stock.volume?.toFixed(2) || "0.00"}</TableCell>
             <TableCell>${stock.marketCap?.toFixed(2) || "0.00"}</TableCell>
             <TableCell>{stock.dividendYield?.toFixed(2)}%</TableCell>
-            <TableCell>
-              <Badge variant="secondary">
-                {stock.score?.toFixed(1) || "0.0"}
-              </Badge>
-            </TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -243,7 +263,6 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           <TableHead>Price</TableHead>
           <TableHead>Change</TableHead>
           <TableHead>Volume 24h</TableHead>
-          <TableHead>Score</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -263,26 +282,23 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <TableCell>
               <div
                 className={`flex items-center space-x-1 ${
-                  (crypto.change || 0) > 0 ? "text-green-600" : "text-red-600"
+                  (crypto.changePercent || 0) > 0
+                    ? "text-green-600"
+                    : "text-red-600"
                 }`}
               >
-                {(crypto.change || 0) > 0 ? (
+                {(crypto.changePercent || 0) > 0 ? (
                   <TrendingUp className="h-3 w-3" />
                 ) : (
                   <TrendingDown className="h-3 w-3" />
                 )}
                 <span>
-                  {(crypto.change || 0) > 0 ? "+" : ""}
+                  {(crypto.changePercent || 0) > 0 ? "+" : ""}
                   {crypto.changePercent?.toFixed(2) || "0.00"}%
                 </span>
               </div>
             </TableCell>
             <TableCell>${crypto.volume.toFixed(2)}</TableCell>
-            <TableCell>
-              <Badge variant="secondary">
-                {crypto.score?.toFixed(1) || "0.0"}
-              </Badge>
-            </TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -300,7 +316,6 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           {/* <TableHead>Trend</TableHead> */}
           {/* <TableHead>Session</TableHead> */}
           {/* <TableHead>News Impact</TableHead> */}
-          <TableHead>Score</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -320,26 +335,23 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <TableCell>
               <div
                 className={`flex items-center space-x-1 ${
-                  (forex.change || 0) > 0 ? "text-green-600" : "text-red-600"
+                  (forex.changePercent || 0) > 0
+                    ? "text-green-600"
+                    : "text-red-600"
                 }`}
               >
-                {(forex.change || 0) > 0 ? (
+                {(forex.changePercent || 0) > 0 ? (
                   <TrendingUp className="h-3 w-3" />
                 ) : (
                   <TrendingDown className="h-3 w-3" />
                 )}
                 <span>
-                  {(forex.change || 0) > 0 ? "+" : ""}
+                  {(forex.changePercent || 0) > 0 ? "+" : ""}
                   {forex.changePercent?.toFixed(2) || "0.00"}%
                 </span>
               </div>
             </TableCell>
             <TableCell>${forex.volume?.toFixed(2) || "0.00"}</TableCell>
-            <TableCell>
-              <Badge variant="secondary">
-                {forex.score?.toFixed(1) || "0.0"}
-              </Badge>
-            </TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -385,18 +397,71 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Search Input */}
+          <div className="mb-6">
+            <Label htmlFor="search" className="text-sm font-medium mb-2 block">
+              Search {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+            </Label>
+            <div className="flex gap-2">
+              <input
+                id="search"
+                type="text"
+                placeholder={`Search ${activeTab} by ticker...`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={handleSearchKeyPress}
+                disabled={loading || isNavigating || isSearching}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              <Button
+                onClick={handleSearch}
+                className="px-6"
+                disabled={isSearching || loading || isNavigating}
+              >
+                {isSearching ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Searching...
+                  </>
+                ) : (
+                  "Search"
+                )}
+              </Button>
+            </div>
+          </div>
+
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="stocks">Stocks</TabsTrigger>
-              <TabsTrigger value="crypto" disabled={plan === "free"}>
+              <TabsTrigger
+                value="stocks"
+                disabled={loading || isNavigating || isSearching}
+              >
+                Stocks
+              </TabsTrigger>
+              <TabsTrigger
+                value="crypto"
+                disabled={
+                  plan === "free" || loading || isNavigating || isSearching
+                }
+              >
                 <Zap className="h-4 w-4 mr-1" />
                 Crypto
               </TabsTrigger>
-              <TabsTrigger value="forex" disabled={plan === "free"}>
+              <TabsTrigger
+                value="forex"
+                disabled={
+                  plan === "free" || loading || isNavigating || isSearching
+                }
+              >
                 <DollarSign className="h-4 w-4 mr-1" />
                 Forex
               </TabsTrigger>
-              <TabsTrigger value="options" disabled={plan === "free"}>
+              <TabsTrigger
+                value="options"
+                disabled={
+                  plan === "free" || loading || isNavigating || isSearching
+                }
+              >
                 <Target className="h-4 w-4 mr-1" />
                 Options
               </TabsTrigger>
@@ -404,20 +469,17 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
 
             <TabsContent value="stocks" className="mt-6">
               <div className="relative">
-                {(loading || isNavigating) && data.length > 0 && (
-                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                      <div>Loading stock data...</div>
+                {(loading || isNavigating || isSearching) &&
+                  data.length > 0 && (
+                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                      <div className="text-center">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                        <div>Loading stock data...</div>
+                      </div>
                     </div>
-                  </div>
-                )}
-                {loading && data.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                    <div>Loading stock data...</div>
-                  </div>
-                ) : isNavigating && data.length === 0 ? (
+                  )}
+                {(loading || isNavigating || isSearching) &&
+                data.length === 0 ? (
                   <div className="text-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
                     <div>Loading stock data...</div>
@@ -495,20 +557,17 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
 
             <TabsContent value="crypto" className="mt-6">
               <div className="relative">
-                {(loading || isNavigating) && data.length > 0 && (
-                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                      <div>Loading crypto data...</div>
+                {(loading || isNavigating || isSearching) &&
+                  data.length > 0 && (
+                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                      <div className="text-center">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                        <div>Loading crypto data...</div>
+                      </div>
                     </div>
-                  </div>
-                )}
-                {loading && data.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                    <div>Loading crypto data...</div>
-                  </div>
-                ) : isNavigating && data.length === 0 ? (
+                  )}
+                {(loading || isNavigating || isSearching) &&
+                data.length === 0 ? (
                   <div className="text-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
                     <div>Loading crypto data...</div>
@@ -586,20 +645,17 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
 
             <TabsContent value="forex" className="mt-6">
               <div className="relative">
-                {(loading || isNavigating) && data.length > 0 && (
-                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                      <div>Loading forex data...</div>
+                {(loading || isNavigating || isSearching) &&
+                  data.length > 0 && (
+                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                      <div className="text-center">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                        <div>Loading forex data...</div>
+                      </div>
                     </div>
-                  </div>
-                )}
-                {loading && data.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                    <div>Loading forex data...</div>
-                  </div>
-                ) : isNavigating && data.length === 0 ? (
+                  )}
+                {(loading || isNavigating || isSearching) &&
+                data.length === 0 ? (
                   <div className="text-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
                     <div>Loading forex data...</div>
@@ -677,20 +733,17 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
 
             <TabsContent value="options" className="mt-6">
               <div className="relative">
-                {(loading || isNavigating) && data.length > 0 && (
-                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                      <div>Loading options data...</div>
+                {(loading || isNavigating || isSearching) &&
+                  data.length > 0 && (
+                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                      <div className="text-center">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                        <div>Loading options data...</div>
+                      </div>
                     </div>
-                  </div>
-                )}
-                {loading && data.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                    <div>Loading options data...</div>
-                  </div>
-                ) : isNavigating && data.length === 0 ? (
+                  )}
+                {(loading || isNavigating || isSearching) &&
+                data.length === 0 ? (
                   <div className="text-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
                     <div>Loading options data...</div>

@@ -13,7 +13,8 @@ interface ScreenerHook {
 export function useScreener(
   type: "stocks" | "crypto" | "forex" | "options" | "commodities",
   plan: "free" | "pro" | "elite",
-  filters: Record<string, any> = {}
+  filters: Record<string, any> = {},
+  search?: string
 ): ScreenerHook {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +37,11 @@ export function useScreener(
         }
       });
 
+      // Add search parameter if provided
+      if (search && search.trim()) {
+        params.append("search", search.trim());
+      }
+
       // Call backend directly using apiClient
       const response = await apiClient.get(
         `/api/v1/screener/${type}?${params.toString()}`
@@ -55,7 +61,7 @@ export function useScreener(
     } finally {
       setLoading(false);
     }
-  }, [type, plan, filtersString]);
+  }, [type, plan, filtersString, search]);
 
   useEffect(() => {
     fetchData();
