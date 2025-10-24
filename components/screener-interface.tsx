@@ -63,11 +63,15 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
     [currentPage, itemsPerPage]
   );
 
-  const { data, loading, error, refetch } = useScreener(
+  // For options tab, only send search query if it's not empty
+  const effectiveSearchQuery =
+    activeTab === "options" && !searchQuery.trim() ? undefined : searchQuery;
+
+  const { data, loading, error } = useScreener(
     activeTab as any,
     plan,
     paginationParams,
-    searchQuery
+    effectiveSearchQuery
   );
 
   // Track when we've reached the end based on getting fewer results than requested
@@ -101,13 +105,35 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
 
   // Handle search button click
   const handleSearch = () => {
+    const trimmedSearch = searchTerm.trim();
+
+    // Don't search if the search term hasn't changed
+    if (trimmedSearch === searchQuery) {
+      return;
+    }
+
     setIsSearching(true);
-    setSearchQuery(searchTerm.trim());
+    setSearchQuery(trimmedSearch);
+  };
+
+  // Handle see list button click - clear search and show full list
+  const handleSeeList = () => {
+    setIsSearching(true);
+    setSearchTerm("");
+    setSearchQuery("");
+    setCurrentPage(1);
+    setHasReachedEnd(false);
   };
 
   // Handle Enter key press in search input
   const handleSearchKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !loading && !isNavigating && !isSearching) {
+    if (
+      e.key === "Enter" &&
+      !loading &&
+      !isNavigating &&
+      !isSearching &&
+      !(activeTab === "options" && !searchTerm.trim())
+    ) {
       handleSearch();
     }
   };
@@ -199,62 +225,6 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
     </Table>
   );
 
-  const renderOptionsResults = () => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Underlying</TableHead>
-          <TableHead>Strike</TableHead>
-          <TableHead>Expiry</TableHead>
-          <TableHead>Premium</TableHead>
-          <TableHead>Yield</TableHead>
-          <TableHead>IV Rank</TableHead>
-          <TableHead>Liquidity</TableHead>
-          <TableHead>Risk Score</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((option: any, index: number) => (
-          <TableRow key={index}>
-            <TableCell>
-              <div>
-                <div className="font-medium">{option.underlying || "N/A"}</div>
-                <div className="text-sm text-muted-foreground">
-                  {option.strategy || "N/A"}
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>${option.strike || "0"}</TableCell>
-            <TableCell>{option.dte || "0"} DTE</TableCell>
-            <TableCell>${option.premium?.toFixed(2) || "0.00"}</TableCell>
-            <TableCell>
-              <Badge variant="secondary" className="text-green-700">
-                {option.yield?.toFixed(1) || "0.0"}%
-              </Badge>
-            </TableCell>
-            <TableCell>{option.ivRank || "0"}%</TableCell>
-            <TableCell>
-              <Badge
-                variant={(option.liquidity || 0) > 500 ? "default" : "outline"}
-              >
-                {option.liquidity || "0"}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant={
-                  (option.riskScore || 0) < 5 ? "secondary" : "destructive"
-                }
-              >
-                {option.riskScore?.toFixed(1) || "0.0"}
-              </Badge>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
-
   const renderCryptoResults = () => (
     <Table>
       <TableHeader>
@@ -271,7 +241,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <TableCell>
               <div>
                 <div className="font-medium">
-                  {crypto.ticker.substring(2, crypto.ticker.length) || "N/A"}
+                  {crypto.ticker?.substring(2, crypto.ticker?.length) || "N/A"}
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {crypto.name || "N/A"}
@@ -298,7 +268,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 </span>
               </div>
             </TableCell>
-            <TableCell>${crypto.volume.toFixed(2)}</TableCell>
+            <TableCell>${crypto.volume?.toFixed(2) || "0.00"}</TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -324,7 +294,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <TableCell>
               <div>
                 <div className="font-medium">
-                  {forex.ticker.substring(2, forex.ticker.length) || "N/A"}
+                  {forex.ticker?.substring(2, forex.ticker?.length) || "N/A"}
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {forex.name || "N/A"}
@@ -352,6 +322,74 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
               </div>
             </TableCell>
             <TableCell>${forex.volume?.toFixed(2) || "0.00"}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+
+  const renderOptionsResults = () => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Underlying Ticker</TableHead>
+          <TableHead>Contract Type</TableHead>
+          <TableHead>Strike Price</TableHead>
+          <TableHead>Expiration Date</TableHead>
+          <TableHead>Price</TableHead>
+          <TableHead>Change Percent</TableHead>
+          <TableHead>Volume</TableHead>
+          <TableHead>Implied Volatility</TableHead>
+          <TableHead>Open Interest</TableHead>
+          <TableHead>Greek(Delta)</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {data.map((option: any, index: number) => (
+          <TableRow key={index}>
+            <TableCell>
+              <div>
+                <div className="font-medium">
+                  {option.underlying_asset?.ticker || "N/A"}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {option.details?.ticker || "N/A"}
+                </div>
+              </div>
+            </TableCell>
+            <TableCell>{option.details?.contract_type || "N/A"}</TableCell>
+            <TableCell>${option.details?.strike_price || "0"}</TableCell>
+            <TableCell>{option.details?.expiration_date || "N/A"}</TableCell>
+            <TableCell>${option.day?.close?.toFixed(2) || "0.00"}</TableCell>
+            <TableCell>
+              <div
+                className={`flex items-center space-x-1 ${
+                  (option.day?.change_percent || 0) > 0
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {(option.day?.change_percent || 0) > 0 ? (
+                  <TrendingUp className="h-3 w-3" />
+                ) : (
+                  <TrendingDown className="h-3 w-3" />
+                )}
+                <span>
+                  {(option.day?.change_percent || 0) > 0 ? "+" : ""}
+                  {option.day?.change_percent?.toFixed(2) || "0.00"}%
+                </span>
+              </div>
+            </TableCell>
+            <TableCell>{option.day?.volume?.toFixed(2) || "0.00"}</TableCell>
+            <TableCell>
+              {option.implied_volatility?.toFixed(2) || "0.00"}%
+            </TableCell>
+            <TableCell>{option.open_interest || 0}</TableCell>
+            <TableCell>
+              <Badge variant="secondary" className="text-green-700">
+                {option.greeks?.delta?.toFixed(1) || "0.0"}
+              </Badge>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -416,7 +454,12 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
               <Button
                 onClick={handleSearch}
                 className="px-6"
-                disabled={isSearching || loading || isNavigating}
+                disabled={
+                  isSearching ||
+                  loading ||
+                  isNavigating ||
+                  (activeTab === "options" && !searchTerm.trim())
+                }
               >
                 {isSearching ? (
                   <>
@@ -425,6 +468,26 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                   </>
                 ) : (
                   "Search"
+                )}
+              </Button>
+              <Button
+                onClick={handleSeeList}
+                variant="outline"
+                className="px-6"
+                disabled={
+                  isSearching ||
+                  loading ||
+                  isNavigating ||
+                  activeTab === "options"
+                }
+              >
+                {isSearching && searchQuery === "" ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Loading...
+                  </>
+                ) : (
+                  "See List"
                 )}
               </Button>
             </div>
@@ -747,6 +810,15 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                   <div className="text-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
                     <div>Loading options data...</div>
+                  </div>
+                ) : !searchQuery.trim() ? (
+                  <div className="text-center py-12">
+                    <div className="text-muted-foreground text-lg mb-2">
+                      Search Required
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Please enter a ticker symbol to search for options
+                    </div>
                   </div>
                 ) : error ? (
                   <div className="text-center py-8 text-destructive">
