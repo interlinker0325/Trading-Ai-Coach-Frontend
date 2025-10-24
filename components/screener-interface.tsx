@@ -174,226 +174,267 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
   };
 
   const renderStockResults = () => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Symbol</TableHead>
-          <TableHead>Price</TableHead>
-          <TableHead>Change</TableHead>
-          <TableHead>Volume 24h</TableHead>
-          <TableHead>Market Cap</TableHead>
-          <TableHead>Div Yield</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((stock: any, index: number) => (
-          <TableRow key={index}>
-            <TableCell>
-              <div>
-                <div className="font-medium">{stock.ticker || "N/A"}</div>
-                <div className="text-sm text-muted-foreground">
-                  {stock.name || "N/A"}
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>${stock.price?.toFixed(2) || "0.00"}</TableCell>
-            <TableCell>
-              <div
-                className={`flex items-center space-x-1 ${
-                  (stock.changePercent || 0) > 0
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
-              >
-                {(stock.changePercent || 0) > 0 ? (
-                  <TrendingUp className="h-3 w-3" />
-                ) : (
-                  <TrendingDown className="h-3 w-3" />
-                )}
-                <span>
-                  {(stock.changePercent || 0) > 0 ? "+" : ""}
-                  {stock.changePercent?.toFixed(2) || "0.00"}%
-                </span>
-              </div>
-            </TableCell>
-            <TableCell>${stock.volume?.toFixed(2) || "0.00"}</TableCell>
-            <TableCell>${stock.marketCap?.toFixed(2) || "0.00"}</TableCell>
-            <TableCell>{stock.dividendYield?.toFixed(2)}%</TableCell>
+    <div className="overflow-x-auto">
+      <Table className="min-w-[800px]">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="whitespace-nowrap">Symbol</TableHead>
+            <TableHead className="whitespace-nowrap">Price</TableHead>
+            <TableHead className="whitespace-nowrap">Change</TableHead>
+            <TableHead className="whitespace-nowrap">Volume 24h</TableHead>
+            <TableHead className="whitespace-nowrap">Market Cap</TableHead>
+            <TableHead className="whitespace-nowrap">Div Yield</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {data.map((stock: any, index: number) => (
+            <TableRow key={index}>
+              <TableCell className="whitespace-nowrap">
+                <div>
+                  <div className="font-medium">{stock.ticker || "N/A"}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {stock.name || "N/A"}
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                ${stock.price?.toFixed(2) || "0.00"}
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                <div
+                  className={`flex items-center space-x-1 ${
+                    (stock.changePercent || 0) > 0
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {(stock.changePercent || 0) > 0 ? (
+                    <TrendingUp className="h-3 w-3" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3" />
+                  )}
+                  <span>
+                    {(stock.changePercent || 0) > 0 ? "+" : ""}
+                    {stock.changePercent?.toFixed(2) || "0.00"}%
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                ${stock.volume?.toFixed(2) || "0.00"}
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                ${stock.marketCap?.toFixed(2) || "0.00"}
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                {stock.dividendYield?.toFixed(2)}%
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 
   const renderCryptoResults = () => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Symbol</TableHead>
-          <TableHead>Price</TableHead>
-          <TableHead>Change</TableHead>
-          <TableHead>Volume 24h</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((crypto: any, index: number) => (
-          <TableRow key={index}>
-            <TableCell>
-              <div>
-                <div className="font-medium">
-                  {crypto.ticker?.substring(2, crypto.ticker?.length) || "N/A"}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {crypto.name || "N/A"}
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>${crypto.price?.toLocaleString() || "0"}</TableCell>
-            <TableCell>
-              <div
-                className={`flex items-center space-x-1 ${
-                  (crypto.changePercent || 0) > 0
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
-              >
-                {(crypto.changePercent || 0) > 0 ? (
-                  <TrendingUp className="h-3 w-3" />
-                ) : (
-                  <TrendingDown className="h-3 w-3" />
-                )}
-                <span>
-                  {(crypto.changePercent || 0) > 0 ? "+" : ""}
-                  {crypto.changePercent?.toFixed(2) || "0.00"}%
-                </span>
-              </div>
-            </TableCell>
-            <TableCell>${crypto.volume?.toFixed(2) || "0.00"}</TableCell>
+    <div className="overflow-x-auto">
+      <Table className="min-w-[600px]">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="whitespace-nowrap">Symbol</TableHead>
+            <TableHead className="whitespace-nowrap">Price</TableHead>
+            <TableHead className="whitespace-nowrap">Change</TableHead>
+            <TableHead className="whitespace-nowrap">Volume 24h</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {data.map((crypto: any, index: number) => (
+            <TableRow key={index}>
+              <TableCell className="whitespace-nowrap">
+                <div>
+                  <div className="font-medium">
+                    {crypto.ticker?.substring(2, crypto.ticker?.length) ||
+                      "N/A"}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {crypto.name || "N/A"}
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                ${crypto.price?.toLocaleString() || "0"}
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                <div
+                  className={`flex items-center space-x-1 ${
+                    (crypto.changePercent || 0) > 0
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {(crypto.changePercent || 0) > 0 ? (
+                    <TrendingUp className="h-3 w-3" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3" />
+                  )}
+                  <span>
+                    {(crypto.changePercent || 0) > 0 ? "+" : ""}
+                    {crypto.changePercent?.toFixed(2) || "0.00"}%
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                ${crypto.volume?.toFixed(2) || "0.00"}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 
   const renderForexResults = () => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Pair</TableHead>
-          <TableHead>Price</TableHead>
-          <TableHead>Change</TableHead>
-          <TableHead>Volume 24h</TableHead>
-          {/* <TableHead>Trend</TableHead> */}
-          {/* <TableHead>Session</TableHead> */}
-          {/* <TableHead>News Impact</TableHead> */}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((forex: any, index: number) => (
-          <TableRow key={index}>
-            <TableCell>
-              <div>
-                <div className="font-medium">
-                  {forex.ticker?.substring(2, forex.ticker?.length) || "N/A"}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {forex.name || "N/A"}
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>{forex.price?.toFixed(4) || "0.0000"}</TableCell>
-            <TableCell>
-              <div
-                className={`flex items-center space-x-1 ${
-                  (forex.changePercent || 0) > 0
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
-              >
-                {(forex.changePercent || 0) > 0 ? (
-                  <TrendingUp className="h-3 w-3" />
-                ) : (
-                  <TrendingDown className="h-3 w-3" />
-                )}
-                <span>
-                  {(forex.changePercent || 0) > 0 ? "+" : ""}
-                  {forex.changePercent?.toFixed(2) || "0.00"}%
-                </span>
-              </div>
-            </TableCell>
-            <TableCell>${forex.volume?.toFixed(2) || "0.00"}</TableCell>
+    <div className="overflow-x-auto">
+      <Table className="min-w-[600px]">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="whitespace-nowrap">Pair</TableHead>
+            <TableHead className="whitespace-nowrap">Price</TableHead>
+            <TableHead className="whitespace-nowrap">Change</TableHead>
+            <TableHead className="whitespace-nowrap">Volume 24h</TableHead>
+            {/* <TableHead>Trend</TableHead> */}
+            {/* <TableHead>Session</TableHead> */}
+            {/* <TableHead>News Impact</TableHead> */}
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {data.map((forex: any, index: number) => (
+            <TableRow key={index}>
+              <TableCell className="whitespace-nowrap">
+                <div>
+                  <div className="font-medium">
+                    {forex.ticker?.substring(2, forex.ticker?.length) || "N/A"}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {forex.name || "N/A"}
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                {forex.price?.toFixed(4) || "0.0000"}
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                <div
+                  className={`flex items-center space-x-1 ${
+                    (forex.changePercent || 0) > 0
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {(forex.changePercent || 0) > 0 ? (
+                    <TrendingUp className="h-3 w-3" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3" />
+                  )}
+                  <span>
+                    {(forex.changePercent || 0) > 0 ? "+" : ""}
+                    {forex.changePercent?.toFixed(2) || "0.00"}%
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                ${forex.volume?.toFixed(2) || "0.00"}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 
   const renderOptionsResults = () => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Underlying Ticker</TableHead>
-          <TableHead>Contract Type</TableHead>
-          <TableHead>Strike Price</TableHead>
-          <TableHead>Expiration Date</TableHead>
-          <TableHead>Price</TableHead>
-          <TableHead>Change Percent</TableHead>
-          <TableHead>Volume</TableHead>
-          <TableHead>Implied Volatility</TableHead>
-          <TableHead>Open Interest</TableHead>
-          <TableHead>Greek(Delta)</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((option: any, index: number) => (
-          <TableRow key={index}>
-            <TableCell>
-              <div>
-                <div className="font-medium">
-                  {option.underlying_asset?.ticker || "N/A"}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {option.details?.ticker || "N/A"}
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>{option.details?.contract_type || "N/A"}</TableCell>
-            <TableCell>${option.details?.strike_price || "0"}</TableCell>
-            <TableCell>{option.details?.expiration_date || "N/A"}</TableCell>
-            <TableCell>${option.day?.close?.toFixed(2) || "0.00"}</TableCell>
-            <TableCell>
-              <div
-                className={`flex items-center space-x-1 ${
-                  (option.day?.change_percent || 0) > 0
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
-              >
-                {(option.day?.change_percent || 0) > 0 ? (
-                  <TrendingUp className="h-3 w-3" />
-                ) : (
-                  <TrendingDown className="h-3 w-3" />
-                )}
-                <span>
-                  {(option.day?.change_percent || 0) > 0 ? "+" : ""}
-                  {option.day?.change_percent?.toFixed(2) || "0.00"}%
-                </span>
-              </div>
-            </TableCell>
-            <TableCell>{option.day?.volume?.toFixed(2) || "0.00"}</TableCell>
-            <TableCell>
-              {option.implied_volatility?.toFixed(2) || "0.00"}%
-            </TableCell>
-            <TableCell>{option.open_interest || 0}</TableCell>
-            <TableCell>
-              <Badge variant="secondary" className="text-green-700">
-                {option.greeks?.delta?.toFixed(1) || "0.0"}
-              </Badge>
-            </TableCell>
+    <div className="overflow-x-auto">
+      <Table className="min-w-[1200px]">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="whitespace-nowrap">
+              Underlying Ticker
+            </TableHead>
+            <TableHead className="whitespace-nowrap">Contract Type</TableHead>
+            <TableHead className="whitespace-nowrap">Strike Price</TableHead>
+            <TableHead className="whitespace-nowrap">Expiration Date</TableHead>
+            <TableHead className="whitespace-nowrap">Price</TableHead>
+            <TableHead className="whitespace-nowrap">Change Percent</TableHead>
+            <TableHead className="whitespace-nowrap">Volume</TableHead>
+            <TableHead className="whitespace-nowrap">
+              Implied Volatility
+            </TableHead>
+            <TableHead className="whitespace-nowrap">Open Interest</TableHead>
+            <TableHead className="whitespace-nowrap">Greek(Delta)</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {data.map((option: any, index: number) => (
+            <TableRow key={index}>
+              <TableCell className="whitespace-nowrap">
+                <div>
+                  <div className="font-medium">
+                    {option.underlying_asset?.ticker || "N/A"}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {option.details?.ticker || "N/A"}
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                {option.details?.contract_type || "N/A"}
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                ${option.details?.strike_price || "0"}
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                {option.details?.expiration_date || "N/A"}
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                ${option.day?.close?.toFixed(2) || "0.00"}
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                <div
+                  className={`flex items-center space-x-1 ${
+                    (option.day?.change_percent || 0) > 0
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {(option.day?.change_percent || 0) > 0 ? (
+                    <TrendingUp className="h-3 w-3" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3" />
+                  )}
+                  <span>
+                    {(option.day?.change_percent || 0) > 0 ? "+" : ""}
+                    {option.day?.change_percent?.toFixed(2) || "0.00"}%
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                {option.day?.volume?.toFixed(2) || "0.00"}
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                {option.implied_volatility?.toFixed(2) || "0.00"}%
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                {option.open_interest || 0}
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                <Badge variant="secondary" className="text-green-700">
+                  {option.greeks?.delta?.toFixed(1) || "0.0"}
+                </Badge>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 
   if (plan === "free" && activeTab !== "stocks") {
@@ -440,7 +481,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
             <Label htmlFor="search" className="text-sm font-medium mb-2 block">
               Search {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
             </Label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 id="search"
                 type="text"
@@ -451,45 +492,47 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                 disabled={loading || isNavigating || isSearching}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               />
-              <Button
-                onClick={handleSearch}
-                className="px-6"
-                disabled={
-                  isSearching ||
-                  loading ||
-                  isNavigating ||
-                  (activeTab === "options" && !searchTerm.trim())
-                }
-              >
-                {isSearching ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Searching...
-                  </>
-                ) : (
-                  "Search"
-                )}
-              </Button>
-              <Button
-                onClick={handleSeeList}
-                variant="outline"
-                className="px-6"
-                disabled={
-                  isSearching ||
-                  loading ||
-                  isNavigating ||
-                  activeTab === "options"
-                }
-              >
-                {isSearching && searchQuery === "" ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Loading...
-                  </>
-                ) : (
-                  "See List"
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleSearch}
+                  className="px-6 flex-1 sm:flex-none"
+                  disabled={
+                    isSearching ||
+                    loading ||
+                    isNavigating ||
+                    (activeTab === "options" && !searchTerm.trim())
+                  }
+                >
+                  {isSearching ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Searching...
+                    </>
+                  ) : (
+                    "Search"
+                  )}
+                </Button>
+                <Button
+                  onClick={handleSeeList}
+                  variant="outline"
+                  className="px-6 flex-1 sm:flex-none"
+                  disabled={
+                    isSearching ||
+                    loading ||
+                    isNavigating ||
+                    activeTab === "options"
+                  }
+                >
+                  {isSearching && searchQuery === "" ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Loading...
+                    </>
+                  ) : (
+                    "See List"
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -534,7 +577,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
               <div className="relative">
                 {(loading || isNavigating || isSearching) &&
                   data.length > 0 && (
-                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-start justify-center pt-8">
                       <div className="text-center">
                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
                         <div>Loading stock data...</div>
@@ -564,8 +607,8 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                   <>
                     {renderStockResults()}
                     {plan !== "free" && data.length > 0 && (
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                        <div className="flex items-center gap-4">
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t">
+                        <div className="flex flex-col sm:flex-row items-center gap-4">
                           <div className="text-sm text-muted-foreground">
                             Page {currentPage}
                           </div>
@@ -599,7 +642,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                             }
                           >
                             <ChevronLeft className="h-4 w-4" />
-                            Previous
+                            <span className="hidden sm:inline">Previous</span>
                           </Button>
                           <Button
                             variant="outline"
@@ -607,7 +650,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                             onClick={handleNextPage}
                             disabled={loading || !hasMoreData || isNavigating}
                           >
-                            Next
+                            <span className="hidden sm:inline">Next</span>
                             <ChevronRight className="h-4 w-4" />
                           </Button>
                         </div>
@@ -622,7 +665,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
               <div className="relative">
                 {(loading || isNavigating || isSearching) &&
                   data.length > 0 && (
-                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-start justify-center pt-8">
                       <div className="text-center">
                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
                         <div>Loading crypto data...</div>
@@ -652,8 +695,8 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                   <>
                     {renderCryptoResults()}
                     {data.length > 0 && (
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                        <div className="flex items-center gap-4">
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t">
+                        <div className="flex flex-col sm:flex-row items-center gap-4">
                           <div className="text-sm text-muted-foreground">
                             Page {currentPage}
                           </div>
@@ -687,7 +730,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                             }
                           >
                             <ChevronLeft className="h-4 w-4" />
-                            Previous
+                            <span className="hidden sm:inline">Previous</span>
                           </Button>
                           <Button
                             variant="outline"
@@ -695,7 +738,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                             onClick={handleNextPage}
                             disabled={loading || !hasMoreData || isNavigating}
                           >
-                            Next
+                            <span className="hidden sm:inline">Next</span>
                             <ChevronRight className="h-4 w-4" />
                           </Button>
                         </div>
@@ -710,7 +753,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
               <div className="relative">
                 {(loading || isNavigating || isSearching) &&
                   data.length > 0 && (
-                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-start justify-center pt-8">
                       <div className="text-center">
                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
                         <div>Loading forex data...</div>
@@ -740,8 +783,8 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                   <>
                     {renderForexResults()}
                     {data.length > 0 && (
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                        <div className="flex items-center gap-4">
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t">
+                        <div className="flex flex-col sm:flex-row items-center gap-4">
                           <div className="text-sm text-muted-foreground">
                             Page {currentPage}
                           </div>
@@ -775,7 +818,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                             }
                           >
                             <ChevronLeft className="h-4 w-4" />
-                            Previous
+                            <span className="hidden sm:inline">Previous</span>
                           </Button>
                           <Button
                             variant="outline"
@@ -783,7 +826,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                             onClick={handleNextPage}
                             disabled={loading || !hasMoreData || isNavigating}
                           >
-                            Next
+                            <span className="hidden sm:inline">Next</span>
                             <ChevronRight className="h-4 w-4" />
                           </Button>
                         </div>
@@ -798,7 +841,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
               <div className="relative">
                 {(loading || isNavigating || isSearching) &&
                   data.length > 0 && (
-                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-start justify-center pt-8">
                       <div className="text-center">
                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
                         <div>Loading options data...</div>
@@ -837,8 +880,8 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                   <>
                     {renderOptionsResults()}
                     {data.length > 0 && (
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                        <div className="flex items-center gap-4">
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t">
+                        <div className="flex flex-col sm:flex-row items-center gap-4">
                           <div className="text-sm text-muted-foreground">
                             Page {currentPage}
                           </div>
@@ -872,7 +915,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                             }
                           >
                             <ChevronLeft className="h-4 w-4" />
-                            Previous
+                            <span className="hidden sm:inline">Previous</span>
                           </Button>
                           <Button
                             variant="outline"
@@ -880,7 +923,7 @@ export function ScreenerInterface({ plan }: ScreenerInterfaceProps) {
                             onClick={handleNextPage}
                             disabled={loading || !hasMoreData || isNavigating}
                           >
-                            Next
+                            <span className="hidden sm:inline">Next</span>
                             <ChevronRight className="h-4 w-4" />
                           </Button>
                         </div>
