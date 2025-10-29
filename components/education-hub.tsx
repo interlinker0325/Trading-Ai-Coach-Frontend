@@ -54,8 +54,8 @@ const courses = [
     description:
       "Learn the basics of stock trading, market analysis, and investment strategies",
     level: "Beginner",
-    duration: "4 hours",
-    progress: 75,
+    duration: "3h 20min",
+    progress: 38,
     modules: 8,
     icon: TrendingUp,
     category: "Stocks",
@@ -91,6 +91,34 @@ const courses = [
         type: "practice",
         completed: false,
       },
+      {
+        id: 5,
+        title: "Understanding Stock Prices & Quotes",
+        duration: "25 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 6,
+        title: "Dividends & Stock Splits",
+        duration: "20 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 7,
+        title: "Investment Strategies",
+        duration: "35 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 8,
+        title: "Building Your First Portfolio",
+        duration: "30 min",
+        type: "practice",
+        completed: false,
+      },
     ],
   },
   {
@@ -99,8 +127,8 @@ const courses = [
     description:
       "Advanced options strategies, Greeks, and risk management techniques",
     level: "Advanced",
-    duration: "6 hours",
-    progress: 30,
+    duration: "5h 15min",
+    progress: 17,
     modules: 12,
     icon: Target,
     category: "Options",
@@ -109,24 +137,80 @@ const courses = [
     students: 8920,
     lessons: [
       {
-        id: 1,
+        id: 9,
         title: "Options Basics",
         duration: "20 min",
         type: "video",
         completed: true,
       },
       {
-        id: 2,
+        id: 10,
         title: "The Greeks Explained",
         duration: "30 min",
         type: "video",
         completed: true,
       },
       {
-        id: 3,
+        id: 11,
         title: "Covered Calls Strategy",
         duration: "25 min",
         type: "video",
+        completed: false,
+      },
+      {
+        id: 21,
+        title: "Cash-Secured Puts (CSP)",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 22,
+        title: "Straddles & Strangles",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 23,
+        title: "Iron Condors & Butterflies",
+        duration: "35 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 24,
+        title: "Risk Management in Options",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 25,
+        title: "Volatility Trading",
+        duration: "25 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 26,
+        title: "Options Assignment & Exercise",
+        duration: "20 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 27,
+        title: "Options Portfolio Management",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 28,
+        title: "Practice: Building Options Strategies",
+        duration: "40 min",
+        type: "practice",
         completed: false,
       },
     ],
@@ -136,7 +220,7 @@ const courses = [
     title: "Cryptocurrency Trading",
     description: "Digital assets, DeFi, and crypto market dynamics",
     level: "Intermediate",
-    duration: "5 hours",
+    duration: "4h 30min",
     progress: 0,
     modules: 10,
     icon: DollarSign,
@@ -146,60 +230,159 @@ const courses = [
     students: 12560,
     lessons: [
       {
-        id: 1,
+        id: 12,
         title: "Crypto Basics & Wallets",
         duration: "25 min",
         type: "video",
         completed: false,
       },
       {
-        id: 2,
+        id: 13,
         title: "Trading Platforms",
         duration: "20 min",
         type: "video",
+        completed: false,
+      },
+      {
+        id: 31,
+        title: "Blockchain Technology",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 32,
+        title: "Crypto Markets & Exchanges",
+        duration: "25 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 33,
+        title: "DeFi Fundamentals",
+        duration: "35 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 34,
+        title: "NFTs & Digital Assets",
+        duration: "25 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 35,
+        title: "Crypto Trading Strategies",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 36,
+        title: "Risk Management in Crypto",
+        duration: "25 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 37,
+        title: "Tax & Regulatory Compliance",
+        duration: "25 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 38,
+        title: "Crypto Portfolio Building",
+        duration: "30 min",
+        type: "practice",
         completed: false,
       },
     ],
   },
   {
     id: 4,
-    title: "Technical Analysis Pro",
-    description: "Chart patterns, indicators, and trading psychology",
-    level: "Intermediate",
-    duration: "7 hours",
-    progress: 60,
-    modules: 14,
-    icon: BarChart3,
-    category: "Analysis",
-    instructor: "David Lee",
-    rating: 4.8,
-    students: 18950,
+    title: "Futures Trading Essentials",
+    description:
+      "Master futures contracts, hedging, and market speculation strategies",
+    level: "Advanced",
+    duration: "5h 5min",
+    progress: 20,
+    modules: 10,
+    icon: TrendingUp,
+    category: "Futures",
+    instructor: "Robert Anderson",
+    rating: 4.7,
+    students: 8765,
     lessons: [
       {
-        id: 1,
-        title: "Chart Patterns Mastery",
+        id: 16,
+        title: "Understanding Futures Contracts",
+        duration: "25 min",
+        type: "video",
+        completed: true,
+      },
+      {
+        id: 17,
+        title: "Futures vs Options",
         duration: "30 min",
         type: "video",
         completed: true,
       },
       {
-        id: 2,
-        title: "Indicators Deep Dive",
+        id: 18,
+        title: "Hedging Strategies",
         duration: "35 min",
         type: "video",
-        completed: true,
+        completed: false,
       },
       {
-        id: 3,
-        title: "Trading Psychology",
-        duration: "40 min",
+        id: 41,
+        title: "Futures Market Structure",
+        duration: "30 min",
         type: "video",
-        completed: true,
+        completed: false,
       },
       {
-        id: 4,
-        title: "Strategy Building",
-        duration: "45 min",
+        id: 42,
+        title: "Margin & Leverage",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 43,
+        title: "Futures Expiration & Rolling",
+        duration: "25 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 44,
+        title: "Spread Trading Strategies",
+        duration: "35 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 45,
+        title: "Commodity Futures Trading",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 46,
+        title: "Risk Management in Futures",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 47,
+        title: "Practice: Futures Portfolio",
+        duration: "35 min",
         type: "practice",
         completed: false,
       },
@@ -210,7 +393,7 @@ const courses = [
     title: "Forex & Commodities",
     description: "Currency pairs, commodity markets, and global economics",
     level: "Advanced",
-    duration: "5 hours",
+    duration: "5h 10min",
     progress: 0,
     modules: 11,
     icon: Zap,
@@ -220,17 +403,80 @@ const courses = [
     students: 11230,
     lessons: [
       {
-        id: 1,
+        id: 51,
         title: "Forex Market Basics",
         duration: "20 min",
         type: "video",
         completed: false,
       },
       {
-        id: 2,
+        id: 52,
         title: "Currency Pairs Explained",
         duration: "25 min",
         type: "video",
+        completed: false,
+      },
+      {
+        id: 53,
+        title: "Forex Market Sessions",
+        duration: "25 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 54,
+        title: "Leverage & Lot Sizes",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 55,
+        title: "Forex Trading Strategies",
+        duration: "35 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 56,
+        title: "Technical Analysis in Forex",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 57,
+        title: "Fundamental Analysis for Forex",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 58,
+        title: "Commodity Trading Basics",
+        duration: "25 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 59,
+        title: "Gold & Oil Trading",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 60,
+        title: "Risk Management in Forex",
+        duration: "30 min",
+        type: "video",
+        completed: false,
+      },
+      {
+        id: 61,
+        title: "Practice: Forex Portfolio",
+        duration: "30 min",
+        type: "practice",
         completed: false,
       },
     ],
@@ -755,7 +1001,7 @@ export function EducationHub() {
               return (
                 <Card
                   key={course.id}
-                  className="hover:shadow-lg transition-shadow"
+                  className="hover:shadow-lg transition-shadow h-full flex flex-col"
                 >
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -767,25 +1013,7 @@ export function EducationHub() {
                     <CardTitle className="text-lg">{course.title}</CardTitle>
                     <CardDescription>{course.description}</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Instructor */}
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="w-4 h-4" />
-                      <span>{course.instructor}</span>
-                    </div>
-
-                    {/* Rating and Students */}
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-medium">{course.rating}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Users className="w-4 h-4" />
-                        <span>{course.students.toLocaleString()}</span>
-                      </div>
-                    </div>
-
+                  <CardContent className="flex flex-col flex-1 space-y-4">
                     {/* Duration and Modules */}
                     <div className="flex justify-between text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
@@ -805,7 +1033,7 @@ export function EducationHub() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mt-auto pt-2">
                       <Button
                         className="flex-1"
                         variant={course.progress > 0 ? "default" : "outline"}
@@ -1428,9 +1656,6 @@ export function EducationHub() {
                           >
                             {selectedCourse.level}
                           </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            by {selectedCourse.instructor}
-                          </span>
                         </div>
                       </div>
                     </DialogTitle>
@@ -1441,26 +1666,7 @@ export function EducationHub() {
 
                   <div className="space-y-6">
                     {/* Course Stats */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-4 bg-muted rounded-lg">
-                        <div className="flex items-center justify-center gap-1 mb-1">
-                          <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                          <span className="text-2xl font-bold">
-                            {selectedCourse.rating}
-                          </span>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Rating
-                        </div>
-                      </div>
-                      <div className="text-center p-4 bg-muted rounded-lg">
-                        <div className="text-2xl font-bold mb-1">
-                          {selectedCourse.students.toLocaleString()}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Students
-                        </div>
-                      </div>
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 bg-muted rounded-lg">
                         <div className="text-2xl font-bold mb-1">
                           <Clock className="w-5 h-5 inline mr-1" />
@@ -1499,46 +1705,56 @@ export function EducationHub() {
                       </h3>
                       <div className="space-y-3">
                         {selectedCourse.lessons.map(
-                          (lesson: any, index: number) => (
-                            <div
-                              key={lesson.id}
-                              className="flex items-center gap-3 p-4 border rounded-lg hover:bg-muted transition-colors cursor-pointer"
-                              onClick={() => handleOpenLesson(lesson.id)}
-                            >
-                              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                <span className="text-sm font-medium">
-                                  {index + 1}
-                                </span>
-                              </div>
-                              <div className="flex-1">
-                                <div className="font-medium">
-                                  {lesson.title}
+                          (lesson: any, index: number) => {
+                            const firstIncompleteIndex =
+                              selectedCourse.lessons.findIndex(
+                                (l: any) => !l.completed
+                              );
+                            const isFirstIncomplete =
+                              index === firstIncompleteIndex;
+
+                            return (
+                              <div
+                                key={lesson.id}
+                                className="flex items-center gap-3 p-4 border rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                                onClick={() => handleOpenLesson(lesson.id)}
+                              >
+                                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                  <span className="text-sm font-medium">
+                                    {index + 1}
+                                  </span>
                                 </div>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                                  {lesson.type === "video" ? (
-                                    <Video className="w-4 h-4" />
-                                  ) : (
-                                    <FileText className="w-4 h-4" />
-                                  )}
-                                  <span>{lesson.duration}</span>
+                                <div className="flex-1">
+                                  <div className="font-medium">
+                                    {lesson.title}
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                                    {lesson.type === "video" ? (
+                                      <Video className="w-4 h-4" />
+                                    ) : (
+                                      <FileText className="w-4 h-4" />
+                                    )}
+                                    <span>{lesson.duration}</span>
+                                  </div>
                                 </div>
+                                {lesson.completed ? (
+                                  <CheckCircle className="w-5 h-5 text-green-500" />
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={!isFirstIncomplete}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleCompleteLesson(lesson.id);
+                                    }}
+                                  >
+                                    Mark Complete
+                                  </Button>
+                                )}
                               </div>
-                              {lesson.completed ? (
-                                <CheckCircle className="w-5 h-5 text-green-500" />
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleCompleteLesson(lesson.id);
-                                  }}
-                                >
-                                  Mark Complete
-                                </Button>
-                              )}
-                            </div>
-                          )
+                            );
+                          }
                         )}
                       </div>
                     </div>
