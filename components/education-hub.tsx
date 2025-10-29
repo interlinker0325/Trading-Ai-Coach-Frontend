@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -46,6 +46,7 @@ import {
   ChevronRight,
   Filter,
 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const courses = [
   {
@@ -69,13 +70,15 @@ const courses = [
         duration: "15 min",
         type: "video",
         completed: true,
+        content: "",
       },
       {
         id: 2,
         title: "Market Participants & Exchanges",
         duration: "20 min",
-        type: "video",
+        type: "description",
         completed: true,
+        content: "",
       },
       {
         id: 3,
@@ -83,6 +86,7 @@ const courses = [
         duration: "25 min",
         type: "video",
         completed: true,
+        content: "",
       },
       {
         id: 4,
@@ -90,6 +94,7 @@ const courses = [
         duration: "30 min",
         type: "practice",
         completed: false,
+        content: "",
       },
       {
         id: 5,
@@ -97,6 +102,7 @@ const courses = [
         duration: "25 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
         id: 6,
@@ -104,6 +110,7 @@ const courses = [
         duration: "20 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
         id: 7,
@@ -111,6 +118,7 @@ const courses = [
         duration: "35 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
         id: 8,
@@ -118,6 +126,7 @@ const courses = [
         duration: "30 min",
         type: "practice",
         completed: false,
+        content: "",
       },
     ],
   },
@@ -142,6 +151,7 @@ const courses = [
         duration: "20 min",
         type: "video",
         completed: true,
+        content: "",
       },
       {
         id: 10,
@@ -149,6 +159,7 @@ const courses = [
         duration: "30 min",
         type: "video",
         completed: true,
+        content: "",
       },
       {
         id: 11,
@@ -156,62 +167,71 @@ const courses = [
         duration: "25 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 21,
+        id: 12,
         title: "Cash-Secured Puts (CSP)",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 22,
+        id: 13,
         title: "Straddles & Strangles",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 23,
+        id: 14,
         title: "Iron Condors & Butterflies",
         duration: "35 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 24,
+        id: 15,
         title: "Risk Management in Options",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 25,
+        id: 16,
         title: "Volatility Trading",
         duration: "25 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 26,
+        id: 17,
         title: "Options Assignment & Exercise",
         duration: "20 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 27,
+        id: 18,
         title: "Options Portfolio Management",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 28,
+        id: 19,
         title: "Practice: Building Options Strategies",
         duration: "40 min",
         type: "practice",
         completed: false,
+        content: "",
       },
     ],
   },
@@ -230,74 +250,84 @@ const courses = [
     students: 12560,
     lessons: [
       {
-        id: 12,
+        id: 21,
         title: "Crypto Basics & Wallets",
         duration: "25 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 13,
+        id: 22,
         title: "Trading Platforms",
         duration: "20 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 31,
+        id: 23,
         title: "Blockchain Technology",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 32,
+        id: 24,
         title: "Crypto Markets & Exchanges",
         duration: "25 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 33,
+        id: 25,
         title: "DeFi Fundamentals",
         duration: "35 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 34,
+        id: 26,
         title: "NFTs & Digital Assets",
         duration: "25 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 35,
+        id: 27,
         title: "Crypto Trading Strategies",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 36,
+        id: 28,
         title: "Risk Management in Crypto",
         duration: "25 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 37,
+        id: 29,
         title: "Tax & Regulatory Compliance",
         duration: "25 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 38,
+        id: 30,
         title: "Crypto Portfolio Building",
         duration: "30 min",
         type: "practice",
         completed: false,
+        content: "",
       },
     ],
   },
@@ -317,74 +347,84 @@ const courses = [
     students: 8765,
     lessons: [
       {
-        id: 16,
+        id: 31,
         title: "Understanding Futures Contracts",
         duration: "25 min",
         type: "video",
         completed: true,
+        content: "",
       },
       {
-        id: 17,
+        id: 32,
         title: "Futures vs Options",
         duration: "30 min",
         type: "video",
         completed: true,
+        content: "",
       },
       {
-        id: 18,
+        id: 33,
         title: "Hedging Strategies",
         duration: "35 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 41,
+        id: 34,
         title: "Futures Market Structure",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 42,
+        id: 35,
         title: "Margin & Leverage",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 43,
+        id: 36,
         title: "Futures Expiration & Rolling",
         duration: "25 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 44,
+        id: 37,
         title: "Spread Trading Strategies",
         duration: "35 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 45,
+        id: 38,
         title: "Commodity Futures Trading",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 46,
+        id: 39,
         title: "Risk Management in Futures",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 47,
+        id: 40,
         title: "Practice: Futures Portfolio",
         duration: "35 min",
         type: "practice",
         completed: false,
+        content: "",
       },
     ],
   },
@@ -403,81 +443,92 @@ const courses = [
     students: 11230,
     lessons: [
       {
-        id: 51,
+        id: 41,
         title: "Forex Market Basics",
         duration: "20 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 52,
+        id: 42,
         title: "Currency Pairs Explained",
         duration: "25 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 53,
+        id: 43,
         title: "Forex Market Sessions",
         duration: "25 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 54,
+        id: 44,
         title: "Leverage & Lot Sizes",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 55,
+        id: 45,
         title: "Forex Trading Strategies",
         duration: "35 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 56,
+        id: 46,
         title: "Technical Analysis in Forex",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 57,
+        id: 47,
         title: "Fundamental Analysis for Forex",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 58,
+        id: 48,
         title: "Commodity Trading Basics",
         duration: "25 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 59,
+        id: 49,
         title: "Gold & Oil Trading",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 60,
+        id: 50,
         title: "Risk Management in Forex",
         duration: "30 min",
         type: "video",
         completed: false,
+        content: "",
       },
       {
-        id: 61,
+        id: 51,
         title: "Practice: Forex Portfolio",
         duration: "30 min",
         type: "practice",
         completed: false,
+        content: "",
       },
     ],
   },
@@ -763,6 +814,113 @@ export function EducationHub() {
     return filtered;
   })();
 
+  // Initialize courses data with localStorage sync on mount
+  useEffect(() => {
+    const updatedCourses = courses.map((course) => {
+      const updatedLessons = course.lessons.map((lesson: any) => {
+        const savedCompletion = localStorage.getItem(
+          `lesson_${lesson.id}_completed`
+        );
+        const isCompleted = savedCompletion === "true" || lesson.completed;
+        return { ...lesson, completed: isCompleted };
+      });
+
+      // Calculate progress based on actual completion status
+      const completedLessons = updatedLessons.filter(
+        (l: any) => l.completed
+      ).length;
+      const totalLessons = updatedLessons.length;
+      const newProgress = Math.round((completedLessons / totalLessons) * 100);
+
+      return { ...course, lessons: updatedLessons, progress: newProgress };
+    });
+
+    setCoursesData(updatedCourses);
+  }, []);
+
+  // Sync completion status from localStorage when course is selected
+  useEffect(() => {
+    if (selectedCourse) {
+      // Always get the latest from coursesData first
+      const currentCourse = coursesData.find((c) => c.id === selectedCourse.id);
+      const courseToSync = currentCourse || selectedCourse;
+
+      const updatedLessons = courseToSync.lessons.map((lesson: any) => {
+        const savedCompletion = localStorage.getItem(
+          `lesson_${lesson.id}_completed`
+        );
+        const isCompleted = savedCompletion === "true" || lesson.completed;
+        return { ...lesson, completed: isCompleted };
+      });
+
+      // Recalculate progress immediately
+      const completedLessons = updatedLessons.filter(
+        (l: any) => l.completed
+      ).length;
+      const totalLessons = updatedLessons.length;
+      const newProgress = Math.round((completedLessons / totalLessons) * 100);
+
+      const updatedCourse = {
+        ...courseToSync,
+        lessons: updatedLessons,
+        progress: newProgress,
+      };
+
+      setSelectedCourse(updatedCourse);
+
+      setCoursesData((prev) =>
+        prev.map((course) =>
+          course.id === selectedCourse.id ? updatedCourse : course
+        )
+      );
+    }
+  }, [selectedCourse?.id]);
+
+  // Sync when window regains focus (user returns from lesson page)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (selectedCourse) {
+        // Always get the latest from coursesData first
+        const currentCourse = coursesData.find(
+          (c) => c.id === selectedCourse.id
+        );
+        const courseToSync = currentCourse || selectedCourse;
+
+        const updatedLessons = courseToSync.lessons.map((lesson: any) => {
+          const savedCompletion = localStorage.getItem(
+            `lesson_${lesson.id}_completed`
+          );
+          const isCompleted = savedCompletion === "true" || lesson.completed;
+          return { ...lesson, completed: isCompleted };
+        });
+
+        // Recalculate progress immediately
+        const completedLessons = updatedLessons.filter(
+          (l: any) => l.completed
+        ).length;
+        const totalLessons = updatedLessons.length;
+        const newProgress = Math.round((completedLessons / totalLessons) * 100);
+
+        const updatedCourse = {
+          ...courseToSync,
+          lessons: updatedLessons,
+          progress: newProgress,
+        };
+
+        setSelectedCourse(updatedCourse);
+
+        setCoursesData((prev) =>
+          prev.map((course) =>
+            course.id === selectedCourse.id ? updatedCourse : course
+          )
+        );
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [selectedCourse?.id, coursesData]);
+
   // Course management functions
   const updateCourseProgress = (courseId: number) => {
     setCoursesData((prev) =>
@@ -809,12 +967,18 @@ export function EducationHub() {
     if (nextIncompleteLesson) {
       router.push(`/education/lesson/${nextIncompleteLesson.id}`);
     } else {
-      alert("Course completed! 🎉");
+      toast({
+        title: "Course completed",
+        description: "You have completed all lessons for this course",
+      });
     }
   };
 
   const handleCompleteLesson = (lessonId: number) => {
     if (!selectedCourse) return;
+
+    // Save to localStorage
+    localStorage.setItem(`lesson_${lessonId}_completed`, "true");
 
     const updatedLessons = selectedCourse.lessons.map((lesson: any) =>
       lesson.id === lessonId ? { ...lesson, completed: true } : lesson
@@ -1037,14 +1201,26 @@ export function EducationHub() {
                       <Button
                         className="flex-1"
                         variant={course.progress > 0 ? "default" : "outline"}
-                        onClick={() => setSelectedCourse(course)}
+                        onClick={() => {
+                          // Get the latest course data from coursesData to ensure we have synced data
+                          const latestCourse =
+                            coursesData.find((c) => c.id === course.id) ||
+                            course;
+                          setSelectedCourse(latestCourse);
+                        }}
                       >
                         <Play className="w-4 h-4 mr-2" />
                         {course.progress > 0 ? "Continue" : "Start Course"}
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => setSelectedCourse(course)}
+                        onClick={() => {
+                          // Get the latest course data from coursesData to ensure we have synced data
+                          const latestCourse =
+                            coursesData.find((c) => c.id === course.id) ||
+                            course;
+                          setSelectedCourse(latestCourse);
+                        }}
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
@@ -1731,6 +1907,8 @@ export function EducationHub() {
                                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                                     {lesson.type === "video" ? (
                                       <Video className="w-4 h-4" />
+                                    ) : lesson.type === "description" ? (
+                                      <BookOpen className="w-4 h-4" />
                                     ) : (
                                       <FileText className="w-4 h-4" />
                                     )}

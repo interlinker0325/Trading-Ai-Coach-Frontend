@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { AuthProvider } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ConditionalLayout } from "@/components/conditional-layout";
+import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -35,6 +36,7 @@ export default function RootLayout({
             <ConditionalLayout>
               <Suspense fallback={null}>{children}</Suspense>
             </ConditionalLayout>
+            <Toaster />
             <Analytics />
           </AuthProvider>
         </ThemeProvider>
