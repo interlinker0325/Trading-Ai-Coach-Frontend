@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -19,336 +20,7 @@ import {
   X,
   Maximize2,
 } from "lucide-react";
-
-// Import course data - in production, this would come from an API
-const courses = [
-  {
-    id: 1,
-    title: "Stock Market Fundamentals",
-    description:
-      "Learn the basics of stock trading, market analysis, and investment strategies",
-    level: "Beginner",
-    duration: "3h 20min",
-    progress: 38,
-    modules: 8,
-    icon: "TrendingUp",
-    category: "Stocks",
-    instructor: "Jane Smith",
-    rating: 4.8,
-    students: 15420,
-    lessons: [
-      {
-        id: 1,
-        title: "Introduction to Stock Market",
-        duration: "15 min",
-        type: "video",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 2,
-        title: "Market Participants & Exchanges",
-        duration: "20 min",
-        type: "description",
-        completed: true,
-        content: `Market Participants
-Market participants in the stock market include a diverse range of entities:
-
-Individual Investors: Private persons who buy and sell stocks for personal investment and wealth growth.
-
-Institutional Investors: Large entities such as mutual funds, pension funds, hedge funds, and insurance companies that trade large volumes of stocks.
-
-Brokers and Broker-Dealers: Brokers act as intermediaries for investors, executing buy and sell orders on their behalf, while broker-dealers can trade for themselves and others.
-
-Market Makers and Dealers: Firms that provide liquidity by continuously quoting buy and sell prices, helping to reduce price volatility.
-
-Portfolio Managers: Professionals who manage investment portfolios for institutional or individual clients, making buy and sell decisions.
-
-Investment Bankers: They facilitate companies going public (IPOs), mergers, and acquisitions, assisting in compliance with regulatory authorities.
-
-Custodians and Depository Participants: Institutions that hold and safeguard securities on behalf of investors and facilitate the transfer of securities.
-
-Arbitrageurs and Algorithmic Traders: Those who seek to profit from price inefficiencies and help maintain market efficiency by trading at high speeds.
-
-Regulators and Government Entities: Ensure markets operate fairly and transparently under established laws and regulations.
-
-Stock Exchanges
-Stock exchanges are organized marketplaces where stocks and other securities are traded between buyers and sellers. Key points about exchanges:
-
-They provide platforms for companies to raise capital by issuing shares in the primary market (e.g., IPOs).
-
-After issuance, shares trade in the secondary market where investors buy and sell among themselves.
-
-Exchanges match buy and sell orders electronically or on physical trading floors (e.g., NYSE).
-
-Exchanges rely on market makers to maintain liquidity and facilitate smooth price discovery.
-
-Examples of major exchanges include the New York Stock Exchange (NYSE), Nasdaq, and many others worldwide.
-
-Exchanges charge transaction fees for facilitating trades.
-
-Together, these market participants and exchanges create a dynamic ecosystem where capital flows efficiently from investors to companies, supporting economic growth and investment opportunities for the public. This system is regulated to protect investors and ensure transparency and fairness in trading.`,
-      },
-      {
-        id: 3,
-        title: "Stock Analysis Fundamentals",
-        duration: "25 min",
-        type: "video",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 4,
-        title: "Practice: Analyzing AAPL",
-        duration: "30 min",
-        type: "practice",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 5,
-        title: "Understanding Stock Prices & Quotes",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 6,
-        title: "Dividends & Stock Splits",
-        duration: "20 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 7,
-        title: "Investment Strategies",
-        duration: "35 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 8,
-        title: "Building Your First Portfolio",
-        duration: "30 min",
-        type: "practice",
-        completed: false,
-        content: "",
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "Options Trading Mastery",
-    description:
-      "Advanced options strategies, Greeks, and risk management techniques",
-    level: "Advanced",
-    duration: "5h 15min",
-    progress: 17,
-    modules: 12,
-    icon: "Target",
-    category: "Options",
-    instructor: "Mike Johnson",
-    rating: 4.9,
-    students: 8920,
-    lessons: [
-      {
-        id: 9,
-        title: "Options Basics",
-        duration: "20 min",
-        type: "video",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 10,
-        title: "The Greeks Explained",
-        duration: "30 min",
-        type: "video",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 11,
-        title: "Covered Calls Strategy",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 21,
-        title: "Cash-Secured Puts (CSP)",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 22,
-        title: "Straddles & Strangles",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 23,
-        title: "Iron Condors & Butterflies",
-        duration: "35 min",
-        type: "video",
-        completed: false,
-      },
-      {
-        id: 24,
-        title: "Risk Management in Options",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 25,
-        title: "Volatility Trading",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 26,
-        title: "Options Assignment & Exercise",
-        duration: "20 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 27,
-        title: "Options Portfolio Management",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 28,
-        title: "Practice: Building Options Strategies",
-        duration: "40 min",
-        type: "practice",
-        completed: false,
-        content: "",
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "Cryptocurrency Trading",
-    description: "Digital assets, DeFi, and crypto market dynamics",
-    level: "Intermediate",
-    duration: "4h 30min",
-    progress: 0,
-    modules: 10,
-    icon: "DollarSign",
-    category: "Crypto",
-    instructor: "Sarah Chen",
-    rating: 4.7,
-    students: 12560,
-    lessons: [
-      {
-        id: 12,
-        title: "Crypto Basics & Wallets",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 13,
-        title: "Trading Platforms",
-        duration: "20 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-    ],
-  },
-  {
-    id: 5,
-    title: "Futures Trading Essentials",
-    description:
-      "Master futures contracts, hedging, and market speculation strategies",
-    level: "Advanced",
-    duration: "5h 5min",
-    progress: 20,
-    modules: 10,
-    icon: "TrendingUp",
-    category: "Futures",
-    instructor: "Robert Anderson",
-    rating: 4.7,
-    students: 8765,
-    lessons: [
-      {
-        id: 16,
-        title: "Understanding Futures Contracts",
-        duration: "25 min",
-        type: "video",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 17,
-        title: "Futures vs Options",
-        duration: "30 min",
-        type: "video",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 18,
-        title: "Hedging Strategies",
-        duration: "35 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-    ],
-  },
-  {
-    id: 6,
-    title: "Forex & Commodities",
-    description: "Currency pairs, commodity markets, and global economics",
-    level: "Advanced",
-    duration: "5h 10min",
-    progress: 0,
-    modules: 11,
-    icon: "Zap",
-    category: "Forex",
-    instructor: "Emma Wilson",
-    rating: 4.6,
-    students: 11230,
-    lessons: [
-      {
-        id: 14,
-        title: "Forex Market Basics",
-        duration: "20 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 15,
-        title: "Currency Pairs Explained",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-    ],
-  },
-];
+import { apiClient } from "@/lib/api-client";
 
 export default function LessonPage() {
   const params = useParams();
@@ -361,39 +33,45 @@ export default function LessonPage() {
   const [isViewingContent, setIsViewingContent] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+  const [practiceAnswer, setPracticeAnswer] = useState("");
+  const [practiceChecks, setPracticeChecks] = useState<{
+    [k: string]: boolean;
+  }>({
+    understoodObjective: false,
+    completedSteps: false,
+  });
+  const [isSubmittingPractice, setIsSubmittingPractice] = useState(false);
 
   useEffect(() => {
-    // Simulate loading delay
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      // Find the lesson across all courses
-      let foundLesson: any = null;
-      let foundCourse: any = null;
-
-      for (const course of courses) {
-        const lesson = course.lessons.find((l: any) => l.id === lessonId);
-        if (lesson) {
-          foundLesson = lesson;
-          foundCourse = course;
-          break;
-        }
+    let cancelled = false;
+    const load = async () => {
+      try {
+        setIsLoading(true);
+        const resLesson = await apiClient.get(
+          `/api/v1/education/lessons/${lessonId}`
+        );
+        if (!resLesson.ok) throw new Error("Lesson not found");
+        const lesson = await resLesson.json();
+        const resCourse = await apiClient.get(
+          `/api/v1/education/courses/${lesson.course_id}`
+        );
+        if (!resCourse.ok) throw new Error("Course not found");
+        const course = await resCourse.json();
+        if (cancelled) return;
+        setCurrentLesson(lesson);
+        setParentCourse(course);
+        setLessonCompleted(!!lesson.completed);
+      } catch (e) {
+        // handle not found state by leaving currentLesson null
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
-
-      // Check localStorage for completion status
-      const savedCompletion = localStorage.getItem(
-        `lesson_${lessonId}_completed`
-      );
-      const isCompleted =
-        savedCompletion === "true" || foundLesson?.completed || false;
-
-      const lessonWithCompletion = { ...foundLesson, completed: isCompleted };
-      setCurrentLesson(lessonWithCompletion);
-      setParentCourse(foundCourse);
-      setLessonCompleted(isCompleted);
-      setIsLoading(false);
-    }, 500); // 500ms loading delay
-
-    return () => clearTimeout(timer);
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [lessonId]);
 
   if (isLoading) {
@@ -811,20 +489,32 @@ export default function LessonPage() {
             <Button
               size="lg"
               className="flex-1"
-              onClick={() => {
-                setLessonCompleted(true);
-                // Update the lesson object
-                setCurrentLesson({ ...currentLesson, completed: true });
-                // Save to localStorage
-                localStorage.setItem(`lesson_${lessonId}_completed`, "true");
-                toast({
-                  title: "Lesson Completed!",
-                  description: `You've successfully completed "${currentLesson.title}"`,
-                });
+              disabled={isSaving}
+              onClick={async () => {
+                try {
+                  setIsSaving(true);
+                  const res = await apiClient.post(
+                    `/api/v1/education/lessons/${lessonId}/complete`
+                  );
+                  if (!res.ok) throw new Error("Failed to save");
+                  setLessonCompleted(true);
+                  setCurrentLesson({ ...currentLesson, completed: true });
+                  toast({
+                    title: "Lesson Completed!",
+                    description: `You've successfully completed "${currentLesson.title}"`,
+                  });
+                } catch (e) {
+                  toast({
+                    title: "Failed to save",
+                    description: "Could not mark as complete.",
+                  });
+                } finally {
+                  setIsSaving(false);
+                }
               }}
             >
               <CheckCircle className="w-4 h-4 mr-2" />
-              Mark as Complete
+              {isSaving ? "Saving..." : "Mark as Complete"}
             </Button>
           )}
           <Button
@@ -872,7 +562,12 @@ export default function LessonPage() {
                         controlsList="nodownload"
                         style={{ maxHeight: "100%" }}
                       >
-                        <source src={`/videos/lesson.mp4`} type="video/mp4" />
+                        <source
+                          src={`${
+                            currentLesson.video_url || "/videos/lesson.mp4"
+                          }`}
+                          type="video/mp4"
+                        />
                         Your browser does not support the video tag.
                       </video>
                       <Button
@@ -1070,23 +765,133 @@ export default function LessonPage() {
                         <CardHeader>
                           <CardTitle>Practice Exercise</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                          <p className="text-muted-foreground">
-                            Interactive exercise content would appear here. This
-                            could include:
-                          </p>
-                          <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                            <li>Multiple choice questions</li>
-                            <li>Interactive charts and graphs</li>
-                            <li>Simulated trading scenarios</li>
-                            <li>Real-time feedback and scoring</li>
-                          </ul>
-                          <div className="mt-6 p-6 bg-muted rounded-lg text-center">
-                            <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                        <CardContent className="space-y-6">
+                          <div>
+                            <h3 className="font-semibold mb-2">Instructions</h3>
                             <p className="text-muted-foreground">
-                              Exercise interface would be loaded here in
-                              production
+                              Complete the exercise by writing your analysis or
+                              answer, then confirm the checklist and submit.
                             </p>
+                          </div>
+
+                          <div>
+                            <h4 className="font-medium mb-2">Your Answer</h4>
+                            <textarea
+                              className="w-full min-h-[120px] p-3 rounded-md border bg-background"
+                              placeholder="Write your answer or analysis here..."
+                              value={practiceAnswer}
+                              onChange={(e) =>
+                                setPracticeAnswer(e.target.value)
+                              }
+                            />
+                          </div>
+
+                          <div className="space-y-3">
+                            <div className="flex items-start gap-3">
+                              <Checkbox
+                                id="understoodObjective"
+                                checked={practiceChecks.understoodObjective}
+                                onCheckedChange={(val) =>
+                                  setPracticeChecks((p) => ({
+                                    ...p,
+                                    understoodObjective: Boolean(val),
+                                  }))
+                                }
+                                className="mt-0.5 h-4 w-4 border border-muted-foreground/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                              />
+                              <label
+                                htmlFor="understoodObjective"
+                                className="text-sm text-muted-foreground"
+                              >
+                                I understand the objective of this exercise
+                              </label>
+                            </div>
+                            <div className="flex items-start gap-3">
+                              <Checkbox
+                                id="completedSteps"
+                                checked={practiceChecks.completedSteps}
+                                onCheckedChange={(val) =>
+                                  setPracticeChecks((p) => ({
+                                    ...p,
+                                    completedSteps: Boolean(val),
+                                  }))
+                                }
+                                className="mt-0.5 h-4 w-4 border border-muted-foreground/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                              />
+                              <label
+                                htmlFor="completedSteps"
+                                className="text-sm text-muted-foreground"
+                              >
+                                I completed the required steps for this exercise
+                              </label>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-end gap-3 pt-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                setPracticeAnswer("");
+                                setPracticeChecks({
+                                  understoodObjective: false,
+                                  completedSteps: false,
+                                });
+                              }}
+                            >
+                              Reset
+                            </Button>
+                            <Button
+                              disabled={isSubmittingPractice}
+                              onClick={async () => {
+                                if (
+                                  !practiceAnswer.trim() ||
+                                  !practiceChecks.understoodObjective ||
+                                  !practiceChecks.completedSteps
+                                ) {
+                                  toast({
+                                    title: "Incomplete",
+                                    description:
+                                      "Please write an answer and check both confirmations.",
+                                  });
+                                  return;
+                                }
+                                try {
+                                  setIsSubmittingPractice(true);
+                                  const res = await apiClient.post(
+                                    `/api/v1/education/lessons/${lessonId}/complete`
+                                  );
+                                  if (!res.ok)
+                                    throw new Error("Failed to save");
+                                  setLessonCompleted(true);
+                                  setCurrentLesson({
+                                    ...currentLesson,
+                                    completed: true,
+                                  });
+                                  setIsViewingContent(false);
+                                  toast({
+                                    title: "Exercise Submitted",
+                                    description:
+                                      "Your practice submission was recorded and the lesson marked complete.",
+                                  });
+                                } catch (e) {
+                                  toast({
+                                    title: "Submission failed",
+                                    description: "Please try again.",
+                                  });
+                                } finally {
+                                  setIsSubmittingPractice(false);
+                                }
+                              }}
+                            >
+                              {isSubmittingPractice ? (
+                                <span className="inline-flex items-center">
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Submitting...
+                                </span>
+                              ) : (
+                                <>Submit Exercise</>
+                              )}
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -1105,23 +910,33 @@ export default function LessonPage() {
                 </Button>
                 {!lessonCompleted && (
                   <Button
-                    onClick={() => {
-                      setLessonCompleted(true);
-                      setCurrentLesson({ ...currentLesson, completed: true });
-                      // Save to localStorage
-                      localStorage.setItem(
-                        `lesson_${lessonId}_completed`,
-                        "true"
-                      );
-                      setIsViewingContent(false);
-                      toast({
-                        title: "Lesson Completed!",
-                        description: `You've successfully completed "${currentLesson.title}"`,
-                      });
+                    disabled={isSaving}
+                    onClick={async () => {
+                      try {
+                        setIsSaving(true);
+                        const res = await apiClient.post(
+                          `/api/v1/education/lessons/${lessonId}/complete`
+                        );
+                        if (!res.ok) throw new Error("Failed to save");
+                        setLessonCompleted(true);
+                        setCurrentLesson({ ...currentLesson, completed: true });
+                        setIsViewingContent(false);
+                        toast({
+                          title: "Lesson Completed!",
+                          description: `You've successfully completed "${currentLesson.title}"`,
+                        });
+                      } catch (e) {
+                        toast({
+                          title: "Failed to save",
+                          description: "Could not mark as complete.",
+                        });
+                      } finally {
+                        setIsSaving(false);
+                      }
                     }}
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Mark as Complete
+                    {isSaving ? "Saving..." : "Mark as Complete"}
                   </Button>
                 )}
               </div>

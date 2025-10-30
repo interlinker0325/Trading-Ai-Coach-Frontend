@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { apiClient } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -38,8 +39,7 @@ import {
   XCircle,
   MessageSquare,
   Clock,
-  Users,
-  Star,
+  Loader2,
   Search,
   Video,
   FileText,
@@ -48,491 +48,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-const courses = [
-  {
-    id: 1,
-    title: "Stock Market Fundamentals",
-    description:
-      "Learn the basics of stock trading, market analysis, and investment strategies",
-    level: "Beginner",
-    duration: "3h 20min",
-    progress: 38,
-    modules: 8,
-    icon: TrendingUp,
-    category: "Stocks",
-    instructor: "Jane Smith",
-    rating: 4.8,
-    students: 15420,
-    lessons: [
-      {
-        id: 1,
-        title: "Introduction to Stock Market",
-        duration: "15 min",
-        type: "video",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 2,
-        title: "Market Participants & Exchanges",
-        duration: "20 min",
-        type: "description",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 3,
-        title: "Stock Analysis Fundamentals",
-        duration: "25 min",
-        type: "video",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 4,
-        title: "Practice: Analyzing AAPL",
-        duration: "30 min",
-        type: "practice",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 5,
-        title: "Understanding Stock Prices & Quotes",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 6,
-        title: "Dividends & Stock Splits",
-        duration: "20 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 7,
-        title: "Investment Strategies",
-        duration: "35 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 8,
-        title: "Building Your First Portfolio",
-        duration: "30 min",
-        type: "practice",
-        completed: false,
-        content: "",
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "Options Trading Mastery",
-    description:
-      "Advanced options strategies, Greeks, and risk management techniques",
-    level: "Advanced",
-    duration: "5h 15min",
-    progress: 17,
-    modules: 12,
-    icon: Target,
-    category: "Options",
-    instructor: "Mike Johnson",
-    rating: 4.9,
-    students: 8920,
-    lessons: [
-      {
-        id: 9,
-        title: "Options Basics",
-        duration: "20 min",
-        type: "video",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 10,
-        title: "The Greeks Explained",
-        duration: "30 min",
-        type: "video",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 11,
-        title: "Covered Calls Strategy",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 12,
-        title: "Cash-Secured Puts (CSP)",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 13,
-        title: "Straddles & Strangles",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 14,
-        title: "Iron Condors & Butterflies",
-        duration: "35 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 15,
-        title: "Risk Management in Options",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 16,
-        title: "Volatility Trading",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 17,
-        title: "Options Assignment & Exercise",
-        duration: "20 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 18,
-        title: "Options Portfolio Management",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 19,
-        title: "Practice: Building Options Strategies",
-        duration: "40 min",
-        type: "practice",
-        completed: false,
-        content: "",
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "Cryptocurrency Trading",
-    description: "Digital assets, DeFi, and crypto market dynamics",
-    level: "Intermediate",
-    duration: "4h 30min",
-    progress: 0,
-    modules: 10,
-    icon: DollarSign,
-    category: "Crypto",
-    instructor: "Sarah Chen",
-    rating: 4.7,
-    students: 12560,
-    lessons: [
-      {
-        id: 21,
-        title: "Crypto Basics & Wallets",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 22,
-        title: "Trading Platforms",
-        duration: "20 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 23,
-        title: "Blockchain Technology",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 24,
-        title: "Crypto Markets & Exchanges",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 25,
-        title: "DeFi Fundamentals",
-        duration: "35 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 26,
-        title: "NFTs & Digital Assets",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 27,
-        title: "Crypto Trading Strategies",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 28,
-        title: "Risk Management in Crypto",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 29,
-        title: "Tax & Regulatory Compliance",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 30,
-        title: "Crypto Portfolio Building",
-        duration: "30 min",
-        type: "practice",
-        completed: false,
-        content: "",
-      },
-    ],
-  },
-  {
-    id: 4,
-    title: "Futures Trading Essentials",
-    description:
-      "Master futures contracts, hedging, and market speculation strategies",
-    level: "Advanced",
-    duration: "5h 5min",
-    progress: 20,
-    modules: 10,
-    icon: TrendingUp,
-    category: "Futures",
-    instructor: "Robert Anderson",
-    rating: 4.7,
-    students: 8765,
-    lessons: [
-      {
-        id: 31,
-        title: "Understanding Futures Contracts",
-        duration: "25 min",
-        type: "video",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 32,
-        title: "Futures vs Options",
-        duration: "30 min",
-        type: "video",
-        completed: true,
-        content: "",
-      },
-      {
-        id: 33,
-        title: "Hedging Strategies",
-        duration: "35 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 34,
-        title: "Futures Market Structure",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 35,
-        title: "Margin & Leverage",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 36,
-        title: "Futures Expiration & Rolling",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 37,
-        title: "Spread Trading Strategies",
-        duration: "35 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 38,
-        title: "Commodity Futures Trading",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 39,
-        title: "Risk Management in Futures",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 40,
-        title: "Practice: Futures Portfolio",
-        duration: "35 min",
-        type: "practice",
-        completed: false,
-        content: "",
-      },
-    ],
-  },
-  {
-    id: 5,
-    title: "Forex & Commodities",
-    description: "Currency pairs, commodity markets, and global economics",
-    level: "Advanced",
-    duration: "5h 10min",
-    progress: 0,
-    modules: 11,
-    icon: Zap,
-    category: "Forex",
-    instructor: "Emma Wilson",
-    rating: 4.6,
-    students: 11230,
-    lessons: [
-      {
-        id: 41,
-        title: "Forex Market Basics",
-        duration: "20 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 42,
-        title: "Currency Pairs Explained",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 43,
-        title: "Forex Market Sessions",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 44,
-        title: "Leverage & Lot Sizes",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 45,
-        title: "Forex Trading Strategies",
-        duration: "35 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 46,
-        title: "Technical Analysis in Forex",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 47,
-        title: "Fundamental Analysis for Forex",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 48,
-        title: "Commodity Trading Basics",
-        duration: "25 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 49,
-        title: "Gold & Oil Trading",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 50,
-        title: "Risk Management in Forex",
-        duration: "30 min",
-        type: "video",
-        completed: false,
-        content: "",
-      },
-      {
-        id: 51,
-        title: "Practice: Forex Portfolio",
-        duration: "30 min",
-        type: "practice",
-        completed: false,
-        content: "",
-      },
-    ],
-  },
-];
+// Removed mock courses; data now comes from backend API
 
 const achievements = [
   {
@@ -770,8 +286,88 @@ export function EducationHub() {
   const [aiQuery, setAiQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
-  const [sortBy, setSortBy] = useState("popular");
-  const [coursesData, setCoursesData] = useState(courses);
+  const [coursesData, setCoursesData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [completingLessonId, setCompletingLessonId] = useState<number | null>(
+    null
+  );
+
+  // Map string icon names (from backend) to Lucide components
+  const iconMap: Record<string, any> = {
+    TrendingUp,
+    Target,
+    DollarSign,
+    Zap,
+    BarChart3,
+    Trophy,
+    BookOpen,
+  };
+
+  const resolveIcon = (icon: any) => {
+    if (!icon) return TrendingUp;
+    if (typeof icon === "string") {
+      return iconMap[icon] || TrendingUp;
+    }
+    return icon; // already a component
+  };
+
+  // Fetch courses from backend API
+  useEffect(() => {
+    let isMounted = true;
+    const CACHE_KEY = "education_courses_cache_v1";
+    const CACHE_TTL_MS = 3_600_000; // 1 hour
+    const fetchCourses = async () => {
+      try {
+        // Try client-side cache first to avoid visible reloads
+        const cachedRaw = sessionStorage.getItem(CACHE_KEY);
+        if (cachedRaw) {
+          try {
+            const cached = JSON.parse(cachedRaw) as { ts: number; data: any[] };
+            const fresh = Date.now() - cached.ts < CACHE_TTL_MS;
+            if (fresh && Array.isArray(cached.data)) {
+              setCoursesData(cached.data);
+              setIsLoading(false);
+              // If fresh, skip network fetch entirely
+              return;
+            }
+          } catch {}
+        }
+
+        setIsLoading(true);
+        const res = await apiClient.get("/api/v1/education/courses");
+        if (!res.ok) throw new Error("Failed to load courses");
+        const data = await res.json();
+        if (!isMounted) return;
+        // Ensure minimal shape compatibility
+        const normalized = Array.isArray(data)
+          ? data.map((c: any) => ({
+              ...c,
+              lessons: Array.isArray(c.lessons)
+                ? c.lessons.map((l: any, idx: number) => ({
+                    ...l,
+                    completed: !!l.completed,
+                    order: l.order ?? idx + 1,
+                  }))
+                : [],
+            }))
+          : [];
+        setCoursesData(normalized);
+        // Save to client-side cache
+        sessionStorage.setItem(
+          CACHE_KEY,
+          JSON.stringify({ ts: Date.now(), data: normalized })
+        );
+      } catch (e) {
+        // Keep empty or previously loaded data if backend unavailable
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+    fetchCourses();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const filteredCourses = (() => {
     let filtered = coursesData;
@@ -795,63 +391,19 @@ export function EducationHub() {
       );
     }
 
-    // Sort courses
-    filtered = [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case "rating":
-          return b.rating - a.rating;
-        case "students":
-          return b.students - a.students;
-        case "duration":
-          return parseFloat(a.duration) - parseFloat(b.duration);
-        case "title":
-          return a.title.localeCompare(b.title);
-        default: // popular
-          return b.students * b.rating - a.students * a.rating;
-      }
-    });
-
     return filtered;
   })();
 
-  // Initialize courses data with localStorage sync on mount
-  useEffect(() => {
-    const updatedCourses = courses.map((course) => {
-      const updatedLessons = course.lessons.map((lesson: any) => {
-        const savedCompletion = localStorage.getItem(
-          `lesson_${lesson.id}_completed`
-        );
-        const isCompleted = savedCompletion === "true" || lesson.completed;
-        return { ...lesson, completed: isCompleted };
-      });
+  // Removed mock initialization; progress/completion will sync when selecting a course or on focus
 
-      // Calculate progress based on actual completion status
-      const completedLessons = updatedLessons.filter(
-        (l: any) => l.completed
-      ).length;
-      const totalLessons = updatedLessons.length;
-      const newProgress = Math.round((completedLessons / totalLessons) * 100);
-
-      return { ...course, lessons: updatedLessons, progress: newProgress };
-    });
-
-    setCoursesData(updatedCourses);
-  }, []);
-
-  // Sync completion status from localStorage when course is selected
+  // Sync completion status when course is selected (no localStorage; rely on in-memory/backend)
   useEffect(() => {
     if (selectedCourse) {
       // Always get the latest from coursesData first
       const currentCourse = coursesData.find((c) => c.id === selectedCourse.id);
       const courseToSync = currentCourse || selectedCourse;
 
-      const updatedLessons = courseToSync.lessons.map((lesson: any) => {
-        const savedCompletion = localStorage.getItem(
-          `lesson_${lesson.id}_completed`
-        );
-        const isCompleted = savedCompletion === "true" || lesson.completed;
-        return { ...lesson, completed: isCompleted };
-      });
+      const updatedLessons = courseToSync.lessons;
 
       // Recalculate progress immediately
       const completedLessons = updatedLessons.filter(
@@ -886,13 +438,7 @@ export function EducationHub() {
         );
         const courseToSync = currentCourse || selectedCourse;
 
-        const updatedLessons = courseToSync.lessons.map((lesson: any) => {
-          const savedCompletion = localStorage.getItem(
-            `lesson_${lesson.id}_completed`
-          );
-          const isCompleted = savedCompletion === "true" || lesson.completed;
-          return { ...lesson, completed: isCompleted };
-        });
+        const updatedLessons = courseToSync.lessons;
 
         // Recalculate progress immediately
         const completedLessons = updatedLessons.filter(
@@ -974,27 +520,37 @@ export function EducationHub() {
     }
   };
 
-  const handleCompleteLesson = (lessonId: number) => {
+  const handleCompleteLesson = async (lessonId: number) => {
     if (!selectedCourse) return;
 
-    // Save to localStorage
-    localStorage.setItem(`lesson_${lessonId}_completed`, "true");
+    try {
+      setCompletingLessonId(lessonId);
+      // Persist to backend
+      await apiClient.post(`/api/v1/education/lessons/${lessonId}/complete`);
 
-    const updatedLessons = selectedCourse.lessons.map((lesson: any) =>
-      lesson.id === lessonId ? { ...lesson, completed: true } : lesson
-    );
+      const updatedLessons = selectedCourse.lessons.map((lesson: any) =>
+        lesson.id === lessonId ? { ...lesson, completed: true } : lesson
+      );
 
-    const updatedCourse = { ...selectedCourse, lessons: updatedLessons };
-    setSelectedCourse(updatedCourse);
+      const updatedCourse = { ...selectedCourse, lessons: updatedLessons };
+      setSelectedCourse(updatedCourse);
 
-    setCoursesData((prev) =>
-      prev.map((course) =>
-        course.id === selectedCourse.id ? updatedCourse : course
-      )
-    );
+      setCoursesData((prev) =>
+        prev.map((course) =>
+          course.id === selectedCourse.id ? updatedCourse : course
+        )
+      );
 
-    // Recalculate progress
-    setTimeout(() => updateCourseProgress(selectedCourse.id), 100);
+      // Recalculate progress
+      setTimeout(() => updateCourseProgress(selectedCourse.id), 100);
+    } catch (err) {
+      toast({
+        title: "Failed to save",
+        description: "Could not mark lesson as complete.",
+      });
+    } finally {
+      setCompletingLessonId(null);
+    }
   };
 
   const handleQuizAnswer = (questionIndex: number, answer: any) => {
@@ -1117,20 +673,6 @@ export function EducationHub() {
                 className="pl-10"
               />
             </div>
-            <div className="flex gap-2">
-              <Filter className="w-4 h-4 text-muted-foreground self-center" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 border rounded-md bg-background"
-              >
-                <option value="popular">Most Popular</option>
-                <option value="rating">Highest Rated</option>
-                <option value="students">Most Students</option>
-                <option value="duration">Shortest</option>
-                <option value="title">Alphabetical</option>
-              </select>
-            </div>
           </div>
 
           {/* Course Filters */}
@@ -1142,101 +684,108 @@ export function EducationHub() {
             >
               All Courses
             </Button>
-            {["stocks", "options", "crypto", "analysis", "forex"].map(
-              (category) => (
-                <Button
-                  key={category}
-                  variant={
-                    selectedCategory === category ? "default" : "outline"
-                  }
-                  size="sm"
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
-                </Button>
-              )
-            )}
+            {["stocks", "options", "crypto", "forex"].map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </Button>
+            ))}
           </div>
 
-          {/* Courses Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCourses.map((course) => {
-              const IconComponent = course.icon;
-              return (
-                <Card
-                  key={course.id}
-                  className="hover:shadow-lg transition-shadow h-full flex flex-col"
-                >
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <IconComponent className="w-8 h-8 text-primary" />
-                      <Badge className={getLevelColor(course.level)}>
-                        {course.level}
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-lg">{course.title}</CardTitle>
-                    <CardDescription>{course.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex flex-col flex-1 space-y-4">
-                    {/* Duration and Modules */}
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{course.duration}</span>
+          {/* Loading State */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <span className="text-sm text-muted-foreground">
+                  Loading courses...
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCourses.map((course) => {
+                const IconComponent = resolveIcon(course.icon);
+                return (
+                  <Card
+                    key={course.id}
+                    className="hover:shadow-lg transition-shadow h-full flex flex-col"
+                  >
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <IconComponent className="w-8 h-8 text-primary" />
+                        <Badge className={getLevelColor(course.level)}>
+                          {course.level}
+                        </Badge>
                       </div>
-                      <span>{course.modules} modules</span>
-                    </div>
-
-                    {/* Progress */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Your Progress</span>
-                        <span>{course.progress}%</span>
+                      <CardTitle className="text-lg">{course.title}</CardTitle>
+                      <CardDescription>{course.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col flex-1 space-y-4">
+                      {/* Duration and Modules */}
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{course.duration}</span>
+                        </div>
+                        <span>{course.modules} modules</span>
                       </div>
-                      <Progress value={course.progress} className="h-2" />
-                    </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-2 mt-auto pt-2">
-                      <Button
-                        className="flex-1"
-                        variant={course.progress > 0 ? "default" : "outline"}
-                        onClick={() => {
-                          // Get the latest course data from coursesData to ensure we have synced data
-                          const latestCourse =
-                            coursesData.find((c) => c.id === course.id) ||
-                            course;
-                          setSelectedCourse(latestCourse);
-                        }}
-                      >
-                        <Play className="w-4 h-4 mr-2" />
-                        {course.progress > 0 ? "Continue" : "Start Course"}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          // Get the latest course data from coursesData to ensure we have synced data
-                          const latestCourse =
-                            coursesData.find((c) => c.id === course.id) ||
-                            course;
-                          setSelectedCourse(latestCourse);
-                        }}
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                      {/* Progress */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Your Progress</span>
+                          <span>{course.progress}%</span>
+                        </div>
+                        <Progress value={course.progress} className="h-2" />
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 mt-auto pt-2">
+                        <Button
+                          className="flex-1"
+                          variant={course.progress > 0 ? "default" : "outline"}
+                          onClick={() => {
+                            // Get the latest course data from coursesData to ensure we have synced data
+                            const latestCourse =
+                              coursesData.find((c) => c.id === course.id) ||
+                              course;
+                            setSelectedCourse(latestCourse);
+                          }}
+                        >
+                          <Play className="w-4 h-4 mr-2" />
+                          {course.progress > 0 ? "Continue" : "Start Course"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            // Get the latest course data from coursesData to ensure we have synced data
+                            const latestCourse =
+                              coursesData.find((c) => c.id === course.id) ||
+                              course;
+                            setSelectedCourse(latestCourse);
+                          }}
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </TabsContent>
 
         {/* Playbooks Section */}
         <TabsContent value="playbooks" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {playbooks.map((playbook) => {
-              const IconComponent = playbook.icon;
+              const IconComponent = resolveIcon(playbook.icon);
               return (
                 <Card
                   key={playbook.id}
@@ -1818,7 +1367,7 @@ export function EducationHub() {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           {selectedCourse &&
             (() => {
-              const IconComponent = selectedCourse.icon;
+              const IconComponent = resolveIcon(selectedCourse.icon);
               return (
                 <>
                   <DialogHeader>
@@ -1921,13 +1470,23 @@ export function EducationHub() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    disabled={!isFirstIncomplete}
+                                    disabled={
+                                      !isFirstIncomplete ||
+                                      completingLessonId === lesson.id
+                                    }
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleCompleteLesson(lesson.id);
                                     }}
                                   >
-                                    Mark Complete
+                                    {completingLessonId === lesson.id ? (
+                                      <span className="inline-flex items-center">
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Saving...
+                                      </span>
+                                    ) : (
+                                      "Mark Complete"
+                                    )}
                                   </Button>
                                 )}
                               </div>
