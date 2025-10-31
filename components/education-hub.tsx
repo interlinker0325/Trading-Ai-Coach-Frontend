@@ -34,17 +34,12 @@ import {
   BarChart3,
   Zap,
   BookOpen,
-  Brain,
   CheckCircle,
   XCircle,
-  MessageSquare,
   Clock,
   Loader2,
   Search,
-  Video,
-  FileText,
   ChevronRight,
-  Filter,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -86,110 +81,6 @@ const achievements = [
     title: "Options Expert",
     description: "Execute 50 options trades",
     earned: false,
-  },
-];
-
-const playbooks = [
-  {
-    id: 1,
-    title: "Stock Trading Playbook",
-    category: "Stocks",
-    description:
-      "Complete guide to stock analysis, entry/exit strategies, and risk management",
-    sections: [
-      "Fundamental Analysis Framework",
-      "Technical Entry Signals",
-      "Position Sizing Rules",
-      "Stop Loss Strategies",
-      "Profit Taking Methods",
-    ],
-    icon: TrendingUp,
-  },
-  {
-    id: 2,
-    title: "Options Strategies Playbook",
-    category: "Options",
-    description:
-      "Master covered calls, cash-secured puts, and advanced spreads",
-    sections: [
-      "Covered Call Strategy",
-      "Cash-Secured Puts",
-      "Iron Condors",
-      "Butterfly Spreads",
-      "Greeks Management",
-    ],
-    icon: Target,
-  },
-  {
-    id: 3,
-    title: "Crypto Trading Playbook",
-    category: "Crypto",
-    description: "Navigate DeFi, spot trading, and crypto market cycles",
-    sections: [
-      "Market Cycle Analysis",
-      "DeFi Yield Strategies",
-      "Altcoin Selection",
-      "Risk Management",
-      "Whale Watching",
-    ],
-    icon: DollarSign,
-  },
-  {
-    id: 4,
-    title: "Forex Trading Playbook",
-    category: "Forex",
-    description:
-      "Currency pair analysis, carry trades, and economic indicators",
-    sections: [
-      "Major Pairs Analysis",
-      "Economic Calendar Trading",
-      "Carry Trade Strategies",
-      "Risk-Off/Risk-On",
-      "Central Bank Policy",
-    ],
-    icon: Zap,
-  },
-  {
-    id: 5,
-    title: "Commodities Playbook",
-    category: "Commodities",
-    description:
-      "Trade gold, oil, and agricultural commodities with confidence",
-    sections: [
-      "Gold Trading Strategies",
-      "Oil Market Dynamics",
-      "Agricultural Seasonality",
-      "Inflation Hedging",
-      "Supply/Demand Analysis",
-    ],
-    icon: BarChart3,
-  },
-];
-
-const aiExplainers = [
-  {
-    question: "How to trade EUR/USD safely?",
-    category: "Forex",
-    answer:
-      "EUR/USD is the most liquid currency pair. Key safety measures: 1) Trade during London/NY overlap for best spreads, 2) Use 1-2% position sizing, 3) Watch ECB and Fed policy divergence, 4) Set stops at key support/resistance levels, 5) Avoid trading during major news releases unless experienced.",
-  },
-  {
-    question: "What affects oil price?",
-    category: "Commodities",
-    answer:
-      "Oil prices are driven by: 1) Supply factors (OPEC+ decisions, US shale production, geopolitical tensions), 2) Demand factors (economic growth, seasonal driving patterns, industrial activity), 3) Dollar strength (inverse correlation), 4) Inventory levels (EIA reports), 5) Geopolitical events in major oil regions.",
-  },
-  {
-    question: "When should I sell covered calls?",
-    category: "Options",
-    answer:
-      "Sell covered calls when: 1) You own 100+ shares of stock, 2) Stock is in sideways/slightly bullish trend, 3) Implied volatility is elevated (>30th percentile), 4) You're willing to sell shares at strike price, 5) 30-45 days to expiration for optimal theta decay.",
-  },
-  {
-    question: "How to identify crypto whale movements?",
-    category: "Crypto",
-    answer:
-      "Track whale activity through: 1) On-chain analysis (large wallet movements), 2) Exchange inflows/outflows, 3) Order book analysis for large bids/asks, 4) Social sentiment shifts, 5) Unusual volume spikes. Use tools like Whale Alert, Glassnode, or CryptoQuant for real-time monitoring.",
   },
 ];
 
@@ -248,42 +139,12 @@ const quizzes = [
   },
 ];
 
-const checklists = [
-  {
-    id: 1,
-    title: "Pre-Trade Checklist",
-    category: "General",
-    items: [
-      "Market direction analysis completed",
-      "Risk/reward ratio calculated (min 1:2)",
-      "Position size determined (max 2% risk)",
-      "Entry and exit points identified",
-      "Stop loss level set",
-      "Market hours and liquidity confirmed",
-    ],
-  },
-  {
-    id: 2,
-    title: "Options Trade Checklist",
-    category: "Options",
-    items: [
-      "Implied volatility rank checked",
-      "Time to expiration optimal (30-45 days)",
-      "Strike selection based on delta",
-      "Greeks impact understood",
-      "Assignment risk evaluated",
-      "Exit strategy planned",
-    ],
-  },
-];
-
 export function EducationHub() {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
   const [quizAnswers, setQuizAnswers] = useState<any>({});
   const [quizResults, setQuizResults] = useState<any>(null);
-  const [aiQuery, setAiQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [coursesData, setCoursesData] = useState<any[]>([]);
@@ -621,24 +482,12 @@ export function EducationHub() {
 
       <Tabs defaultValue="courses" className="space-y-6">
         <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-          <TabsList className="inline-flex w-full md:grid md:w-full md:grid-cols-6 h-auto min-w-max md:min-w-0">
+          <TabsList className="inline-flex w-full md:grid md:w-full md:grid-cols-4 h-auto min-w-max md:min-w-0">
             <TabsTrigger
               value="courses"
               className="whitespace-nowrap text-xs sm:text-sm"
             >
               Courses
-            </TabsTrigger>
-            <TabsTrigger
-              value="playbooks"
-              className="whitespace-nowrap text-xs sm:text-sm"
-            >
-              Playbooks
-            </TabsTrigger>
-            <TabsTrigger
-              value="ai-explainer"
-              className="whitespace-nowrap text-xs sm:text-sm"
-            >
-              AI Explainer
             </TabsTrigger>
             <TabsTrigger
               value="quizzes"
@@ -779,137 +628,6 @@ export function EducationHub() {
               })}
             </div>
           )}
-        </TabsContent>
-
-        {/* Playbooks Section */}
-        <TabsContent value="playbooks" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {playbooks.map((playbook) => {
-              const IconComponent = resolveIcon(playbook.icon);
-              return (
-                <Card
-                  key={playbook.id}
-                  className="hover:shadow-lg transition-shadow"
-                >
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <IconComponent className="w-8 h-8 text-primary" />
-                      <Badge variant="outline">{playbook.category}</Badge>
-                    </div>
-                    <CardTitle className="text-lg">{playbook.title}</CardTitle>
-                    <CardDescription>{playbook.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">
-                        Sections Included:
-                      </h4>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        {playbook.sections.map((section, index) => (
-                          <li key={index} className="flex items-center gap-2">
-                            <CheckCircle className="w-3 h-3 text-green-500" />
-                            {section}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <Button className="w-full">
-                      <BookOpen className="w-4 h-4 mr-2" />
-                      Open Playbook
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {/* Checklists Section */}
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Trading Checklists</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {checklists.map((checklist) => (
-                <Card key={checklist.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="w-5 h-5" />
-                      {checklist.title}
-                    </CardTitle>
-                    <Badge variant="secondary">{checklist.category}</Badge>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {checklist.items.map((item, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox id={`${checklist.id}-${index}`} />
-                          <Label
-                            htmlFor={`${checklist.id}-${index}`}
-                            className="text-sm"
-                          >
-                            {item}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* AI Explainer Section */}
-        <TabsContent value="ai-explainer" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="w-5 h-5" />
-                AI Trading Explainer
-              </CardTitle>
-              <CardDescription>
-                Ask any trading question and get AI-powered explanations
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Ask a trading question... (e.g., How to trade EUR/USD safely?)"
-                  value={aiQuery}
-                  onChange={(e) => setAiQuery(e.target.value)}
-                  className="flex-1"
-                />
-                <Button>
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Ask AI
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold">Popular Questions</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {aiExplainers.map((explainer, index) => (
-                <Card key={index} className="hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline">{explainer.category}</Badge>
-                    </div>
-                    <CardTitle className="text-lg">
-                      {explainer.question}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {explainer.answer}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
         </TabsContent>
 
         {/* Quizzes Section */}
@@ -1454,13 +1172,7 @@ export function EducationHub() {
                                     {lesson.title}
                                   </div>
                                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                                    {lesson.type === "video" ? (
-                                      <Video className="w-4 h-4" />
-                                    ) : lesson.type === "description" ? (
-                                      <BookOpen className="w-4 h-4" />
-                                    ) : (
-                                      <FileText className="w-4 h-4" />
-                                    )}
+                                    <BookOpen className="w-4 h-4" />
                                     <span>{lesson.duration}</span>
                                   </div>
                                 </div>
