@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Play,
   Clock,
-  Target,
   CheckCircle,
   ArrowLeft,
   BookOpen,
@@ -29,6 +28,17 @@ export default function LessonPage() {
   const [isViewingContent, setIsViewingContent] = useState(false);
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
+
+  // Check if this lesson is the first incomplete lesson
+  const isFirstIncompleteLesson = (() => {
+    if (!parentCourse || !currentLesson || lessonCompleted) return false;
+    const lessons = parentCourse.lessons || [];
+    const sortedLessons = [...lessons].sort(
+      (a: any, b: any) => (a.order || 0) - (b.order || 0)
+    );
+    const firstIncomplete = sortedLessons.find((l: any) => !l.completed);
+    return firstIncomplete?.id === currentLesson.id;
+  })();
 
   useEffect(() => {
     let cancelled = false;
@@ -221,36 +231,89 @@ export default function LessonPage() {
       <div className="space-y-6">
         <div className="flex gap-3 pt-4">
           {!lessonCompleted && (
-            <Button
-              size="lg"
-              className="flex-1"
-              disabled={isSaving}
-              onClick={async () => {
-                try {
-                  setIsSaving(true);
-                  const res = await apiClient.post(
-                    `/api/v1/education/lessons/${lessonId}/complete`
-                  );
-                  if (!res.ok) throw new Error("Failed to save");
-                  setLessonCompleted(true);
-                  setCurrentLesson({ ...currentLesson, completed: true });
-                  toast({
-                    title: "Lesson Completed!",
-                    description: `You've successfully completed "${currentLesson.title}"`,
-                  });
-                } catch (e) {
-                  toast({
-                    title: "Failed to save",
-                    description: "Could not mark as complete.",
-                  });
-                } finally {
-                  setIsSaving(false);
-                }
-              }}
-            >
-              <CheckCircle className="w-4 h-4 mr-2" />
-              {isSaving ? "Saving..." : "Mark as Complete"}
-            </Button>
+            <div className="flex-1">
+              <Button
+                size="lg"
+                className="w-full"
+                disabled={isSaving || !isFirstIncompleteLesson}
+                onClick={async () => {
+                  try {
+                    setIsSaving(true);
+                    const res = await apiClient.post(
+                      `/api/v1/education/lessons/${lessonId}/complete`
+                    );
+                    if (!res.ok) throw new Error("Failed to save");
+                    setLessonCompleted(true);
+                    setCurrentLesson({ ...currentLesson, completed: true });
+
+                    // Update sessionStorage cache
+                    try {
+                      const CACHE_KEY = "education_courses_cache_v1";
+                      const cachedRaw = sessionStorage.getItem(CACHE_KEY);
+                      if (cachedRaw) {
+                        const cached = JSON.parse(cachedRaw) as {
+                          ts: number;
+                          data: any[];
+                        };
+                        const updatedCoursesData = cached.data.map((course) => {
+                          if (course.id === parentCourse.id) {
+                            const updatedLessons = course.lessons.map(
+                              (l: any) =>
+                                l.id === lessonId
+                                  ? { ...l, completed: true }
+                                  : l
+                            );
+                            const completedLessons = updatedLessons.filter(
+                              (l: any) => l.completed
+                            ).length;
+                            const totalLessons = updatedLessons.length;
+                            const newProgress = Math.round(
+                              (completedLessons / totalLessons) * 100
+                            );
+                            return {
+                              ...course,
+                              lessons: updatedLessons,
+                              progress: newProgress,
+                            };
+                          }
+                          return course;
+                        });
+                        sessionStorage.setItem(
+                          CACHE_KEY,
+                          JSON.stringify({
+                            ts: Date.now(),
+                            data: updatedCoursesData,
+                          })
+                        );
+                      }
+                    } catch (e) {
+                      // If cache update fails, it's not critical
+                      console.warn("Failed to update cache:", e);
+                    }
+
+                    toast({
+                      title: "Lesson Completed!",
+                      description: `You've successfully completed "${currentLesson.title}"`,
+                    });
+                  } catch (e) {
+                    toast({
+                      title: "Failed to save",
+                      description: "Could not mark as complete.",
+                    });
+                  } finally {
+                    setIsSaving(false);
+                  }
+                }}
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                {isSaving ? "Saving..." : "Mark as Complete"}
+              </Button>
+              {!isFirstIncompleteLesson && !isSaving && (
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Complete previous lessons first to unlock this lesson
+                </p>
+              )}
+            </div>
           )}
           <Button
             size="lg"
@@ -338,7 +401,7 @@ export default function LessonPage() {
                 </Button>
                 {!lessonCompleted && (
                   <Button
-                    disabled={isSaving}
+                    disabled={isSaving || !isFirstIncompleteLesson}
                     onClick={async () => {
                       try {
                         setIsSaving(true);
@@ -349,6 +412,55 @@ export default function LessonPage() {
                         setLessonCompleted(true);
                         setCurrentLesson({ ...currentLesson, completed: true });
                         setIsViewingContent(false);
+
+                        // Update sessionStorage cache
+                        try {
+                          const CACHE_KEY = "education_courses_cache_v1";
+                          const cachedRaw = sessionStorage.getItem(CACHE_KEY);
+                          if (cachedRaw) {
+                            const cached = JSON.parse(cachedRaw) as {
+                              ts: number;
+                              data: any[];
+                            };
+                            const updatedCoursesData = cached.data.map(
+                              (course) => {
+                                if (course.id === parentCourse.id) {
+                                  const updatedLessons = course.lessons.map(
+                                    (l: any) =>
+                                      l.id === lessonId
+                                        ? { ...l, completed: true }
+                                        : l
+                                  );
+                                  const completedLessons =
+                                    updatedLessons.filter(
+                                      (l: any) => l.completed
+                                    ).length;
+                                  const totalLessons = updatedLessons.length;
+                                  const newProgress = Math.round(
+                                    (completedLessons / totalLessons) * 100
+                                  );
+                                  return {
+                                    ...course,
+                                    lessons: updatedLessons,
+                                    progress: newProgress,
+                                  };
+                                }
+                                return course;
+                              }
+                            );
+                            sessionStorage.setItem(
+                              CACHE_KEY,
+                              JSON.stringify({
+                                ts: Date.now(),
+                                data: updatedCoursesData,
+                              })
+                            );
+                          }
+                        } catch (e) {
+                          // If cache update fails, it's not critical
+                          console.warn("Failed to update cache:", e);
+                        }
+
                         toast({
                           title: "Lesson Completed!",
                           description: `You've successfully completed "${currentLesson.title}"`,

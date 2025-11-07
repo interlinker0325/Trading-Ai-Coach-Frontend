@@ -10,7 +10,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -111,6 +110,32 @@ export default function QuizPage() {
           }));
         }
         setSelectedQuiz(updatedQuiz);
+
+        // Update sessionStorage cache with new quiz data (best_score, attempts_count)
+        try {
+          const CACHE_KEY = "education_quizzes_cache_v1";
+          const cachedRaw = sessionStorage.getItem(CACHE_KEY);
+          if (cachedRaw) {
+            const cached = JSON.parse(cachedRaw) as { ts: number; data: any[] };
+            const updatedQuizzesData = cached.data.map((quiz) => {
+              if (quiz.id === selectedQuiz.id) {
+                return {
+                  ...quiz,
+                  best_score: updatedQuiz.best_score,
+                  attempts_count: updatedQuiz.attempts_count,
+                };
+              }
+              return quiz;
+            });
+            sessionStorage.setItem(
+              CACHE_KEY,
+              JSON.stringify({ ts: Date.now(), data: updatedQuizzesData })
+            );
+          }
+        } catch (e) {
+          // If cache update fails, it's not critical
+          console.warn("Failed to update quiz cache:", e);
+        }
       }
     } catch (err) {
       toast({
@@ -155,9 +180,12 @@ export default function QuizPage() {
         <Card>
           <CardContent className="p-6">
             <p className="text-center text-muted-foreground">Quiz not found</p>
-            <Button onClick={() => router.push("/education")} className="mt-4">
+            <Button
+              onClick={() => router.push("/education/quizzes")}
+              className="mt-4"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Education Hub
+              Back to Quizzes
             </Button>
           </CardContent>
         </Card>
@@ -170,7 +198,10 @@ export default function QuizPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => router.push("/education")}>
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/education/quizzes")}
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
@@ -966,7 +997,7 @@ export default function QuizPage() {
               variant="outline"
               size="lg"
               className="flex-1"
-              onClick={() => router.push("/education")}
+              onClick={() => router.push("/education/quizzes")}
             >
               <Trophy className="w-4 h-4 mr-2" />
               Try Another Quiz

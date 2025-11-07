@@ -264,7 +264,7 @@ export default function HomePage() {
               </div>
 
               <Button size="lg" className="w-full sm:w-auto" asChild>
-                <Link href="/coach">
+                <Link href="/ai-coach">
                   Try AI Coach
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

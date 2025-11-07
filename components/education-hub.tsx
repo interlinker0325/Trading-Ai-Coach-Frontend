@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 import {
@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -35,57 +34,12 @@ import {
   Zap,
   BookOpen,
   CheckCircle,
-  XCircle,
   Clock,
   Loader2,
   Search,
   ChevronRight,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-
-// Removed mock courses; data now comes from backend API
-
-const achievements = [
-  {
-    id: 1,
-    title: "First Trade",
-    description: "Complete your first simulated trade",
-    earned: true,
-  },
-  {
-    id: 2,
-    title: "Profit Streak",
-    description: "5 consecutive profitable trades",
-    earned: true,
-  },
-  {
-    id: 3,
-    title: "Risk Manager",
-    description: "Never risk more than 2% per trade for 30 days",
-    earned: false,
-  },
-  {
-    id: 4,
-    title: "Diversified",
-    description: "Trade across 5 different asset classes",
-    earned: false,
-  },
-  {
-    id: 5,
-    title: "Technical Analyst",
-    description: "Complete Technical Analysis course",
-    earned: true,
-  },
-  {
-    id: 6,
-    title: "Options Expert",
-    description: "Execute 50 options trades",
-    earned: false,
-  },
-];
-
-// Removed mock quizzes; data now comes from backend API
-// Removed mock playbooks; data now comes from backend API
 
 export function EducationHub() {
   const router = useRouter();
@@ -434,7 +388,7 @@ export function EducationHub() {
   };
 
   const handleOpenLesson = (lessonId: number) => {
-    router.push(`/education/lesson/${lessonId}`);
+    router.push(`/education/courses/${lessonId}`);
   };
 
   const handleStartContinueCourse = () => {
@@ -445,7 +399,7 @@ export function EducationHub() {
     );
 
     if (nextIncompleteLesson) {
-      router.push(`/education/lesson/${nextIncompleteLesson.id}`);
+      router.push(`/education/courses/${nextIncompleteLesson.id}`);
     } else {
       toast({
         title: "Course completed",
@@ -466,17 +420,31 @@ export function EducationHub() {
         lesson.id === lessonId ? { ...lesson, completed: true } : lesson
       );
 
-      const updatedCourse = { ...selectedCourse, lessons: updatedLessons };
+      // Recalculate progress
+      const completedLessons = updatedLessons.filter(
+        (l: any) => l.completed
+      ).length;
+      const totalLessons = updatedLessons.length;
+      const newProgress = Math.round((completedLessons / totalLessons) * 100);
+
+      const updatedCourse = {
+        ...selectedCourse,
+        lessons: updatedLessons,
+        progress: newProgress,
+      };
       setSelectedCourse(updatedCourse);
 
-      setCoursesData((prev) =>
-        prev.map((course) =>
-          course.id === selectedCourse.id ? updatedCourse : course
-        )
+      const updatedCoursesData = coursesData.map((course) =>
+        course.id === selectedCourse.id ? updatedCourse : course
       );
+      setCoursesData(updatedCoursesData);
 
-      // Recalculate progress
-      setTimeout(() => updateCourseProgress(selectedCourse.id), 100);
+      // Update sessionStorage cache
+      const CACHE_KEY = "education_courses_cache_v1";
+      sessionStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({ ts: Date.now(), data: updatedCoursesData })
+      );
     } catch (err) {
       toast({
         title: "Failed to save",
@@ -493,7 +461,7 @@ export function EducationHub() {
 
   const handleSelectQuiz = async (quiz: any) => {
     // Navigate to quiz detail page instead
-    router.push(`/education/quiz/${quiz.id}`);
+    router.push(`/education/quizzes/${quiz.id}`);
   };
 
   const submitQuiz = async () => {
@@ -531,7 +499,7 @@ export function EducationHub() {
 
       <Tabs defaultValue="courses" className="space-y-6">
         <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-          <TabsList className="inline-flex w-full md:grid md:w-full md:grid-cols-5 h-auto min-w-max md:min-w-0">
+          <TabsList className="inline-flex w-full md:grid md:w-full md:grid-cols-4 h-auto min-w-max md:min-w-0">
             <TabsTrigger
               value="courses"
               className="whitespace-nowrap text-xs sm:text-sm"
@@ -555,12 +523,6 @@ export function EducationHub() {
               className="whitespace-nowrap text-xs sm:text-sm"
             >
               Simulator
-            </TabsTrigger>
-            <TabsTrigger
-              value="achievements"
-              className="whitespace-nowrap text-xs sm:text-sm"
-            >
-              Achievements
             </TabsTrigger>
           </TabsList>
         </div>
@@ -844,7 +806,7 @@ export function EducationHub() {
                       key={quiz.id}
                       className="hover:shadow-xl transition-all duration-300 cursor-pointer group border-2 hover:border-primary/50 flex flex-col h-full"
                       onClick={() => {
-                        router.push(`/education/quiz/${quiz.id}`);
+                        router.push(`/education/quizzes/${quiz.id}`);
                       }}
                     >
                       <CardHeader className="pb-3">
@@ -909,7 +871,7 @@ export function EducationHub() {
                           className="w-full mt-auto group-hover:shadow-md transition-shadow"
                           onClick={(e) => {
                             e.stopPropagation(); // Prevent card click
-                            router.push(`/education/quiz/${quiz.id}`);
+                            router.push(`/education/quizzes/${quiz.id}`);
                           }}
                         >
                           {hasBestScore ? "Retake Quiz" : "Start Quiz"}
@@ -1142,36 +1104,6 @@ export function EducationHub() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="achievements" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {achievements.map((achievement) => (
-              <Card
-                key={achievement.id}
-                className={`${
-                  achievement.earned ? "border-primary" : "opacity-60"
-                }`}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <Trophy
-                      className={`w-6 h-6 ${
-                        achievement.earned
-                          ? "text-yellow-500"
-                          : "text-muted-foreground"
-                      }`}
-                    />
-                    {achievement.earned && (
-                      <Badge variant="secondary">Earned</Badge>
-                    )}
-                  </div>
-                  <CardTitle className="text-lg">{achievement.title}</CardTitle>
-                  <CardDescription>{achievement.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
         </TabsContent>
       </Tabs>
 
@@ -1412,7 +1344,7 @@ export function EducationHub() {
                         onClick={() => {
                           // Navigate to practice page
                           router.push(
-                            `/education/practice/${selectedPlaybook.id}`
+                            `/education/playbooks/${selectedPlaybook.id}`
                           );
                         }}
                       >

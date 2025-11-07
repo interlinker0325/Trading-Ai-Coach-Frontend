@@ -33,56 +33,6 @@ import {
 import { apiClient } from "@/lib/api-client";
 import TradingViewChart from "@/components/tradingview-chart";
 
-// Mock playbooks data - same as in education-hub.tsx
-const mockPlaybooks = [
-  {
-    id: 1,
-    title: "Day Trading Momentum Strategy",
-    description: "Capture intraday momentum moves with entry and exit signals",
-    category: "Stocks",
-    level: "Intermediate",
-    icon: "TrendingUp",
-    steps: [
-      {
-        step: 1,
-        title: "Identify High Volume Stocks",
-        description: "Scan for stocks with volume 50% above average",
-        details:
-          "Use a scanner to find stocks trading with significantly higher volume than their 20-day average. This indicates strong institutional interest.",
-      },
-      {
-        step: 2,
-        title: "Confirm Trend Direction",
-        description: "Verify price is above key moving averages",
-        details:
-          "Check that price is above both 9 EMA and 21 EMA on the 5-minute chart. This confirms bullish momentum.",
-      },
-      {
-        step: 3,
-        title: "Entry Signal",
-        description: "Buy on pullback to support with bullish candlestick",
-        details:
-          "Wait for price to pull back to the 9 EMA or a key support level, then enter when you see a bullish engulfing or hammer candlestick pattern.",
-      },
-      {
-        step: 4,
-        title: "Set Stop Loss",
-        description: "Place stop loss below the recent swing low",
-        details:
-          "Set your stop loss 1-2 cents below the most recent swing low to limit downside risk.",
-      },
-      {
-        step: 5,
-        title: "Take Profit Targets",
-        description: "Scale out at 2:1 and 3:1 risk-reward ratios",
-        details:
-          "Take partial profits at 2R (2x your risk) and let the rest run to 3R or trail stop for larger gains.",
-      },
-    ],
-  },
-  // Add other playbooks as needed...
-];
-
 export default function PracticePage() {
   const params = useParams();
   const router = useRouter();
@@ -96,6 +46,7 @@ export default function PracticePage() {
   const [currentPrice, setCurrentPrice] = useState<number>(150.0); // Mock price
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [isExecutingTrade, setIsExecutingTrade] = useState(false);
+  const [isCompletingStep, setIsCompletingStep] = useState(false);
 
   // Trade form state
   const [tradeForm, setTradeForm] = useState({
@@ -107,12 +58,41 @@ export default function PracticePage() {
   });
 
   useEffect(() => {
-    // Find playbook from mock data
-    const foundPlaybook = mockPlaybooks.find((p) => p.id === playbookId);
-    if (foundPlaybook) {
-      setPlaybook(foundPlaybook);
-      setIsLoading(false);
-    }
+    let cancelled = false;
+    const loadPlaybook = async () => {
+      try {
+        setIsLoading(true);
+        const res = await apiClient.get(
+          `/api/v1/education/playbooks/${playbookId}`
+        );
+        if (!res.ok) {
+          if (res.status === 404) {
+            // Playbook not found
+            if (!cancelled) {
+              setPlaybook(null);
+              setIsLoading(false);
+            }
+            return;
+          }
+          throw new Error("Failed to load playbook");
+        }
+        const playbookData = await res.json();
+        if (!cancelled) {
+          setPlaybook(playbookData);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Failed to load playbook:", error);
+        if (!cancelled) {
+          setPlaybook(null);
+          setIsLoading(false);
+        }
+      }
+    };
+    loadPlaybook();
+    return () => {
+      cancelled = true;
+    };
   }, [playbookId]);
 
   const createSession = async () => {
@@ -223,6 +203,7 @@ export default function PracticePage() {
     if (!session) return;
 
     try {
+      setIsCompletingStep(true);
       const response = await apiClient.post(
         `/api/v1/education/practice/sessions/${session.id}/complete-step`,
         {
@@ -233,7 +214,15 @@ export default function PracticePage() {
       if (!response.ok) throw new Error("Failed to complete step");
 
       const result = await response.json();
-      await loadSession();
+
+      // Reload session to get updated current_step
+      const sessionResponse = await apiClient.get(
+        `/api/v1/education/practice/sessions/${session.id}`
+      );
+      if (sessionResponse.ok) {
+        const updatedSession = await sessionResponse.json();
+        setSession(updatedSession);
+      }
 
       toast({
         title: "Step completed!",
@@ -245,6 +234,28 @@ export default function PracticePage() {
           title: "Congratulations!",
           description: "You've completed all steps in this strategy!",
         });
+
+        // Update sessionStorage cache when playbook is completed
+        try {
+          const CACHE_KEY = "education_playbooks_cache_v1";
+          const cachedRaw = sessionStorage.getItem(CACHE_KEY);
+          if (cachedRaw) {
+            const cached = JSON.parse(cachedRaw) as { ts: number; data: any[] };
+            const updatedPlaybooksData = cached.data.map((pb) => {
+              if (pb.id === playbookId) {
+                return { ...pb, completed: true };
+              }
+              return pb;
+            });
+            sessionStorage.setItem(
+              CACHE_KEY,
+              JSON.stringify({ ts: Date.now(), data: updatedPlaybooksData })
+            );
+          }
+        } catch (e) {
+          // If cache update fails, it's not critical
+          console.warn("Failed to update playbook cache:", e);
+        }
       }
     } catch (error: any) {
       toast({
@@ -252,6 +263,8 @@ export default function PracticePage() {
         description: error.message || "Could not complete step",
         variant: "destructive",
       });
+    } finally {
+      setIsCompletingStep(false);
     }
   };
 
@@ -314,9 +327,12 @@ export default function PracticePage() {
             <p className="text-center text-muted-foreground">
               Playbook not found
             </p>
-            <Button onClick={() => router.push("/education")} className="mt-4">
+            <Button
+              onClick={() => router.push("/education/playbooks")}
+              className="mt-4"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Education Hub
+              Back to Playbooks
             </Button>
           </CardContent>
         </Card>
@@ -325,11 +341,14 @@ export default function PracticePage() {
   }
 
   const currentStep = playbook?.steps?.find(
-    (s: any) => s.step === session?.current_step || 1
+    (s: any) => s.step === (session?.current_step ?? 1)
   );
   const totalSteps = playbook?.steps?.length || 0;
+  // Progress is based on completed steps, not current step
+  // If current_step is 1, no steps are completed yet (0%)
+  // If current_step is 2, step 1 is completed (20% for 5 steps)
   const progressPercentage = session
-    ? (session.current_step / totalSteps) * 100
+    ? Math.max(0, ((session.current_step - 1) / totalSteps) * 100)
     : 0;
 
   return (
@@ -337,13 +356,23 @@ export default function PracticePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => router.push("/education")}>
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/education/playbooks")}
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold">{playbook?.title}</h1>
-            <p className="text-muted-foreground">{playbook?.description}</p>
+          <div className="flex items-center gap-3">
+            <div>
+              <h1 className="text-2xl font-bold">{playbook?.title}</h1>
+              <p className="text-muted-foreground">{playbook?.description}</p>
+            </div>
+            {playbook?.completed && (
+              <Badge className="bg-green-500 hover:bg-green-600">
+                Completed
+              </Badge>
+            )}
           </div>
         </div>
         {session && (
@@ -445,10 +474,19 @@ export default function PracticePage() {
                   <Button
                     onClick={completeStep}
                     className="w-full"
-                    disabled={session.status !== "active"}
+                    disabled={session.status !== "active" || isCompletingStep}
                   >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Complete Step
+                    {isCompletingStep ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Complete Step
+                      </>
+                    )}
                   </Button>
                 </CardContent>
               </Card>
