@@ -14,6 +14,13 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft,
@@ -43,10 +50,76 @@ export default function PracticePage() {
   const [playbook, setPlaybook] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
   const [trades, setTrades] = useState<any[]>([]);
-  const [currentPrice, setCurrentPrice] = useState<number>(150.0); // Mock price
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [isExecutingTrade, setIsExecutingTrade] = useState(false);
   const [isCompletingStep, setIsCompletingStep] = useState(false);
+
+  // Get default symbol based on playbook category
+  const getDefaultSymbol = (category: string): string => {
+    const categoryLower = category?.toLowerCase() || "";
+    switch (categoryLower) {
+      case "stocks":
+        return "AAPL";
+      case "crypto":
+        return "BTC/USD";
+      case "forex":
+        return "EUR/USD";
+      case "options":
+        return "SPY";
+      default:
+        return "AAPL";
+    }
+  };
+
+  // Convert symbol to TradingView format
+  const formatSymbolForTradingView = (symbol: string, category?: string): string => {
+    if (!symbol) return "NASDAQ:AAPL";
+    
+    // If already in TradingView format (contains :), return as is
+    if (symbol.includes(":")) {
+      return symbol;
+    }
+
+    const categoryLower = category?.toLowerCase() || "";
+    const symbolUpper = symbol.toUpperCase().replace("/", "");
+
+    // Handle different categories
+    switch (categoryLower) {
+      case "stocks":
+        // Common stock exchanges
+        if (["SPY", "QQQ", "IWM", "DIA"].includes(symbolUpper)) {
+          return `AMEX:${symbolUpper}`;
+        }
+        // Default to NASDAQ for most stocks
+        return `NASDAQ:${symbolUpper}`;
+      
+      case "crypto":
+        // Convert BTC/USD to BINANCE:BTCUSD
+        if (symbol.includes("/")) {
+          const [base, quote] = symbol.toUpperCase().split("/");
+          return `BINANCE:${base}${quote}`;
+        }
+        // If no slash, assume USD pair
+        return `BINANCE:${symbolUpper}USD`;
+      
+      case "forex":
+        // Convert EUR/USD to FX:EURUSD
+        if (symbol.includes("/")) {
+          const [base, quote] = symbol.toUpperCase().split("/");
+          return `FX:${base}${quote}`;
+        }
+        // If no slash, assume USD pair
+        return `FX:${symbolUpper}USD`;
+      
+      case "options":
+        // Options typically use underlying stock symbol
+        return `NASDAQ:${symbolUpper}`;
+      
+      default:
+        // Default to NASDAQ for unknown categories
+        return `NASDAQ:${symbolUpper}`;
+    }
+  };
 
   // Trade form state
   const [tradeForm, setTradeForm] = useState({
@@ -79,6 +152,57 @@ export default function PracticePage() {
         const playbookData = await res.json();
         if (!cancelled) {
           setPlaybook(playbookData);
+        }
+
+        // Check for existing active or paused session for this playbook
+        try {
+          // Check for active sessions first
+          const activeSessionsRes = await apiClient.get(
+            `/api/v1/education/practice/sessions?status=active`
+          );
+          let existingSession = null;
+          
+          if (activeSessionsRes.ok && !cancelled) {
+            const sessions = await activeSessionsRes.json();
+            existingSession = sessions.find(
+              (s: any) => s.playbook_id === playbookId
+            );
+          }
+          
+          // If no active session, check for paused sessions
+          if (!existingSession && !cancelled) {
+            const pausedSessionsRes = await apiClient.get(
+              `/api/v1/education/practice/sessions?status=paused`
+            );
+            if (pausedSessionsRes.ok) {
+              const sessions = await pausedSessionsRes.json();
+              existingSession = sessions.find(
+                (s: any) => s.playbook_id === playbookId
+              );
+            }
+          }
+          
+          if (existingSession && !cancelled) {
+            setSession(existingSession);
+            // Load trades for the existing session
+            try {
+              const tradesRes = await apiClient.get(
+                `/api/v1/education/practice/sessions/${existingSession.id}/trades`
+              );
+              if (tradesRes.ok && !cancelled) {
+                const tradesData = await tradesRes.json();
+                setTrades(tradesData);
+              }
+            } catch (tradesError) {
+              console.error("Failed to load trades:", tradesError);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to load existing session:", error);
+          // Don't fail the whole page load if session loading fails
+        }
+
+        if (!cancelled) {
           setIsLoading(false);
         }
       } catch (error) {
@@ -107,12 +231,13 @@ export default function PracticePage() {
 
     try {
       setIsCreatingSession(true);
+      const defaultSymbol = getDefaultSymbol(playbook.category);
       const response = await apiClient.post(
         "/api/v1/education/practice/sessions",
         {
           playbook_id: playbookId,
           playbook_data: playbook,
-          symbol: "AAPL", // Default symbol
+          symbol: defaultSymbol,
           initial_balance: 100000.0,
         }
       );
@@ -140,7 +265,9 @@ export default function PracticePage() {
 
     try {
       setIsExecutingTrade(true);
-      const entryPrice = parseFloat(tradeForm.entryPrice) || currentPrice;
+      const entryPrice = tradeForm.entryPrice
+        ? parseFloat(tradeForm.entryPrice)
+        : undefined;
       const quantity = parseFloat(tradeForm.quantity);
 
       if (!quantity || quantity <= 0) {
@@ -151,6 +278,10 @@ export default function PracticePage() {
         });
         return;
       }
+
+      // For market orders (no entry_price), use entry_price as current_price
+      // For limit orders, use the provided entry_price as current_price
+      const currentPrice = entryPrice || 100; // Fallback for market orders
 
       const response = await apiClient.post(
         `/api/v1/education/practice/sessions/${session.id}/trades?current_price=${currentPrice}`,
@@ -385,37 +516,84 @@ export default function PracticePage() {
       </div>
 
       {!session ? (
-        /* Start Practice Session */
-        <Card>
-          <CardContent className="p-8">
-            <div className="text-center space-y-4">
-              <Target className="w-16 h-16 mx-auto text-primary" />
-              <h2 className="text-2xl font-bold">Ready to Practice?</h2>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Start a practice session to follow along with this strategy
-                step-by-step. You'll execute trades in a simulated environment
-                while learning.
-              </p>
-              <Button
-                onClick={createSession}
-                disabled={isCreatingSession}
-                size="lg"
-              >
-                {isCreatingSession ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Starting...
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Practice Session
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        /* Playbook Content View */
+        <div className="space-y-6">
+          {/* Playbook Steps */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Strategy Steps</CardTitle>
+              <CardDescription>
+                Review the strategy steps below, then start a practice session
+                to follow along step-by-step.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {playbook?.steps?.map((step: any) => (
+                <Card
+                  key={step.step}
+                  className="border-l-4 border-l-primary"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center">
+                        {step.step}
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <h4 className="text-lg font-semibold">
+                          {step.title}
+                        </h4>
+                        <p className="text-muted-foreground">
+                          {step.description}
+                        </p>
+                        {step.details && (
+                          <div className="mt-3 p-4 bg-muted rounded-lg">
+                            <p className="text-sm text-muted-foreground">
+                              💡{" "}
+                              <span className="font-medium">Details:</span>{" "}
+                              {step.details}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Start Practice Button */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Ready to Practice?</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Start a practice session to execute trades in a simulated
+                    environment while learning.
+                  </p>
+                </div>
+                <Button
+                  onClick={createSession}
+                  disabled={isCreatingSession}
+                  size="lg"
+                >
+                  {isCreatingSession ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Starting...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4 mr-2" />
+                      Start Practice Session
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       ) : (
         /* Practice Session Active */
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -501,8 +679,8 @@ export default function PracticePage() {
               <CardContent>
                 <div className="h-[400px]">
                   <TradingViewChart
-                    symbol={session.symbol}
-                    interval="5m"
+                    symbol={formatSymbolForTradingView(session.symbol, playbook?.category)}
+                    interval="1d"
                     height="400px"
                     plan="pro"
                   />
@@ -590,22 +768,26 @@ export default function PracticePage() {
               <CardHeader>
                 <CardTitle>Execute Trade</CardTitle>
                 <CardDescription>
-                  Current Price: ${currentPrice.toFixed(2)}
+                  Check the chart above for current prices
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Trade Type</Label>
-                  <select
-                    className="w-full px-3 py-2 border rounded-md"
+                  <Select
                     value={tradeForm.tradeType}
-                    onChange={(e) =>
-                      setTradeForm({ ...tradeForm, tradeType: e.target.value })
+                    onValueChange={(value) =>
+                      setTradeForm({ ...tradeForm, tradeType: value })
                     }
                   >
-                    <option value="buy">Buy</option>
-                    <option value="sell">Sell</option>
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select trade type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="buy">Buy</SelectItem>
+                      <SelectItem value="sell">Sell</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -617,6 +799,7 @@ export default function PracticePage() {
                     onChange={(e) =>
                       setTradeForm({ ...tradeForm, quantity: e.target.value })
                     }
+                    className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   />
                 </div>
 
@@ -624,11 +807,12 @@ export default function PracticePage() {
                   <Label>Entry Price (leave empty for market order)</Label>
                   <Input
                     type="number"
-                    placeholder={currentPrice.toFixed(2)}
+                    placeholder="Enter price from chart"
                     value={tradeForm.entryPrice}
                     onChange={(e) =>
                       setTradeForm({ ...tradeForm, entryPrice: e.target.value })
                     }
+                    className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   />
                 </div>
 
@@ -641,6 +825,7 @@ export default function PracticePage() {
                     onChange={(e) =>
                       setTradeForm({ ...tradeForm, stopLoss: e.target.value })
                     }
+                    className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   />
                 </div>
 
@@ -653,6 +838,7 @@ export default function PracticePage() {
                     onChange={(e) =>
                       setTradeForm({ ...tradeForm, takeProfit: e.target.value })
                     }
+                    className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   />
                 </div>
 

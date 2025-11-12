@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts"
 import { Play, Settings, Target, Brain, Activity } from "lucide-react"
+import { apiClient } from "@/lib/api-client"
+import { useToast } from "@/hooks/use-toast"
 
 const indicators = [
   { value: "sma", label: "Simple Moving Average (SMA)" },
@@ -44,95 +46,8 @@ const assetTypes = [
   { value: "options", label: "Options" },
 ]
 
-// Mock backtest results data
-const equityCurveData = [
-  { date: "2023-01", value: 100000, drawdown: 0 },
-  { date: "2023-02", value: 102500, drawdown: -1.2 },
-  { date: "2023-03", value: 98750, drawdown: -3.8 },
-  { date: "2023-04", value: 105200, drawdown: 0 },
-  { date: "2023-05", value: 108900, drawdown: 0 },
-  { date: "2023-06", value: 106300, drawdown: -2.4 },
-  { date: "2023-07", value: 112800, drawdown: 0 },
-  { date: "2023-08", value: 109500, drawdown: -2.9 },
-  { date: "2023-09", value: 115600, drawdown: 0 },
-  { date: "2023-10", value: 118200, drawdown: 0 },
-  { date: "2023-11", value: 121500, drawdown: 0 },
-  { date: "2023-12", value: 125300, drawdown: 0 },
-]
-
-const monthlyReturns = [
-  { month: "Jan", return: 2.5 },
-  { month: "Feb", return: -3.7 },
-  { month: "Mar", return: 6.5 },
-  { month: "Apr", return: 3.5 },
-  { month: "May", return: -2.4 },
-  { month: "Jun", return: 6.1 },
-  { month: "Jul", return: -2.9 },
-  { month: "Aug", return: 5.6 },
-  { month: "Sep", return: 2.2 },
-  { month: "Oct", return: 2.7 },
-  { month: "Nov", return: 3.0 },
-]
-
-const tradeLog = [
-  {
-    id: 1,
-    date: "2023-12-15",
-    symbol: "AAPL",
-    type: "Long",
-    entry: 195.5,
-    exit: 198.25,
-    quantity: 100,
-    pnl: 275,
-    duration: "2 days",
-  },
-  {
-    id: 2,
-    date: "2023-12-13",
-    symbol: "TSLA",
-    type: "Short",
-    entry: 245.8,
-    exit: 242.1,
-    quantity: 50,
-    pnl: 185,
-    duration: "1 day",
-  },
-  {
-    id: 3,
-    date: "2023-12-12",
-    symbol: "MSFT",
-    type: "Long",
-    entry: 375.2,
-    exit: 371.5,
-    quantity: 75,
-    pnl: -277.5,
-    duration: "3 days",
-  },
-  {
-    id: 4,
-    date: "2023-12-10",
-    symbol: "GOOGL",
-    type: "Long",
-    entry: 142.3,
-    exit: 145.8,
-    quantity: 200,
-    pnl: 700,
-    duration: "4 days",
-  },
-  {
-    id: 5,
-    date: "2023-12-08",
-    symbol: "NVDA",
-    type: "Long",
-    entry: 485.6,
-    exit: 492.4,
-    quantity: 25,
-    pnl: 170,
-    duration: "2 days",
-  },
-]
-
 export function Backtester() {
+  const { toast } = useToast()
   const [strategy, setStrategy] = useState({
     name: "",
     symbol: "",
@@ -152,7 +67,10 @@ export function Backtester() {
   const [naturalLanguageQuery, setNaturalLanguageQuery] = useState("")
   const [isRunning, setIsRunning] = useState(false)
   const [results, setResults] = useState<any>(null)
+  const [trades, setTrades] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState("builder")
+  const [resultId, setResultId] = useState<number | null>(null)
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null)
 
   const handleIndicatorChange = (indicator: string, checked: boolean) => {
     if (checked) {
@@ -169,75 +87,175 @@ export function Backtester() {
   }
 
   const runBacktest = async () => {
-    setIsRunning(true)
-
-    // Simulate backtest running
-    await new Promise((resolve) => setTimeout(resolve, 3000))
-
-    // Mock results
-    setResults({
-      totalReturn: 25.3,
-      annualizedReturn: 18.7,
-      sharpeRatio: 1.42,
-      maxDrawdown: -8.5,
-      winRate: 68.2,
-      profitFactor: 1.85,
-      totalTrades: 247,
-      avgWin: 2.8,
-      avgLoss: -1.9,
-      largestWin: 12.4,
-      largestLoss: -5.2,
-      consecutiveWins: 8,
-      consecutiveLosses: 3,
-      calmarRatio: 2.2,
-      sortinoRatio: 2.1,
-      volatility: 13.2,
-    })
-
-    setIsRunning(false)
-  }
-
-  const runNaturalLanguageBacktest = async () => {
-    if (!naturalLanguageQuery.trim()) return
+    // Validate required fields
+    if (!strategy.name || !strategy.symbol || !strategy.assetType || !strategy.timeframe || !strategy.startDate || !strategy.endDate) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields (name, symbol, asset type, timeframe, start date, end date)",
+        variant: "destructive",
+      })
+      return
+    }
 
     setIsRunning(true)
     setActiveTab("results")
+    setResults(null)
+    setTrades([])
 
-    // Simulate AI processing the natural language query
-    await new Promise((resolve) => setTimeout(resolve, 4000))
+    try {
+      // Prepare strategy data
+      const strategyData = {
+        name: strategy.name,
+        symbol: strategy.symbol,
+        asset_type: strategy.assetType,
+        timeframe: strategy.timeframe,
+        start_date: new Date(strategy.startDate).toISOString(),
+        end_date: new Date(strategy.endDate).toISOString(),
+        initial_capital: parseFloat(strategy.initialCapital),
+        indicators: strategy.indicators,
+        entry_rules: strategy.entryRules || null,
+        exit_rules: strategy.exitRules || null,
+        stop_loss: strategy.stopLoss ? parseFloat(strategy.stopLoss) : null,
+        take_profit: strategy.takeProfit ? parseFloat(strategy.takeProfit) : null,
+        position_size: strategy.positionSize ? parseFloat(strategy.positionSize) : null,
+      }
 
-    // Mock results for natural language query
-    setResults({
-      query: naturalLanguageQuery,
-      totalReturn: 32.1,
-      annualizedReturn: 22.4,
-      sharpeRatio: 1.68,
-      maxDrawdown: -6.2,
-      winRate: 72.5,
-      profitFactor: 2.12,
-      totalTrades: 189,
-      avgWin: 3.2,
-      avgLoss: -1.5,
-      largestWin: 15.8,
-      largestLoss: -4.1,
-      consecutiveWins: 12,
-      consecutiveLosses: 2,
-      calmarRatio: 3.6,
-      sortinoRatio: 2.8,
-      volatility: 11.8,
-    })
+      // Create and run backtest
+      const response = await apiClient.post("/api/v1/backtest/run", {
+        strategy: strategyData,
+        run_async: true,
+      })
 
-    setIsRunning(false)
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.detail || "Failed to start backtest")
+      }
+
+      const data = await response.json()
+      setResultId(data.result_id)
+
+      // Start polling for results
+      startPolling(data.result_id)
+    } catch (error: any) {
+      console.error("Error running backtest:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to run backtest",
+        variant: "destructive",
+      })
+      setIsRunning(false)
+    }
   }
 
+  const runNaturalLanguageBacktest = async () => {
+    if (!naturalLanguageQuery.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a strategy description",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsRunning(true)
+    setActiveTab("results")
+    setResults(null)
+    setTrades([])
+
+    try {
+      const response = await apiClient.post("/api/v1/backtest/run/ai", {
+        query: naturalLanguageQuery,
+        initial_capital: parseFloat(strategy.initialCapital) || 100000,
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.detail || "Failed to parse natural language query")
+      }
+
+      const data = await response.json()
+      setResultId(data.result_id)
+
+      // Start polling for results
+      startPolling(data.result_id)
+    } catch (error: any) {
+      console.error("Error running AI backtest:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to run AI backtest",
+        variant: "destructive",
+      })
+      setIsRunning(false)
+    }
+  }
+
+  const startPolling = (id: number) => {
+    // Clear any existing polling
+    if (pollingInterval) {
+      clearInterval(pollingInterval)
+    }
+
+    // Poll every 2 seconds
+    const interval = setInterval(async () => {
+      try {
+        const response = await apiClient.get(`/api/v1/backtest/results/${id}`)
+        if (response.ok) {
+          const result = await response.json()
+          
+          if (result.status === "completed") {
+            // Backtest completed, stop polling
+            clearInterval(interval)
+            setPollingInterval(null)
+            setIsRunning(false)
+            
+            // Load results and trades
+            setResults(result)
+            
+            // Load trades
+            const tradesResponse = await apiClient.get(`/api/v1/backtest/results/${id}/trades`)
+            if (tradesResponse.ok) {
+              const tradesData = await tradesResponse.json()
+              setTrades(tradesData)
+            }
+          } else if (result.status === "failed") {
+            // Backtest failed, stop polling
+            clearInterval(interval)
+            setPollingInterval(null)
+            setIsRunning(false)
+            
+            toast({
+              title: "Backtest Failed",
+              description: result.error_message || "Backtest execution failed",
+              variant: "destructive",
+            })
+          }
+          // If status is "pending" or "running", continue polling
+        }
+      } catch (error) {
+        console.error("Error polling backtest status:", error)
+      }
+    }, 2000)
+
+    setPollingInterval(interval)
+  }
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval)
+      }
+    }
+  }, [pollingInterval])
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Trade Simulation Backtester</h1>
-          <p className="text-muted-foreground">Build and test trading strategies with historical data</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Trade Simulation Backtester</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Build and test trading strategies with historical data</p>
         </div>
-        <Button onClick={runBacktest} disabled={isRunning}>
+        <Button onClick={runBacktest} disabled={isRunning} className="w-full sm:w-auto">
           {isRunning ? (
             <>
               <Activity className="w-4 h-4 mr-2 animate-spin" />
@@ -252,16 +270,26 @@ export function Backtester() {
         </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="builder">Strategy Builder</TabsTrigger>
-          <TabsTrigger value="ai-query">AI Natural Language</TabsTrigger>
-          <TabsTrigger value="results">Results</TabsTrigger>
-          <TabsTrigger value="trades">Trade Log</TabsTrigger>
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+        <div className="overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
+          <TabsList className="inline-flex w-full sm:w-auto min-w-full sm:min-w-0 h-auto p-1 bg-muted rounded-lg">
+            <TabsTrigger value="builder" className="flex-1 sm:flex-initial text-xs sm:text-sm px-3 sm:px-4 py-2 whitespace-nowrap">
+              Strategy Builder
+            </TabsTrigger>
+            <TabsTrigger value="ai-query" className="flex-1 sm:flex-initial text-xs sm:text-sm px-3 sm:px-4 py-2 whitespace-nowrap">
+              AI Query
+            </TabsTrigger>
+            <TabsTrigger value="results" className="flex-1 sm:flex-initial text-xs sm:text-sm px-3 sm:px-4 py-2 whitespace-nowrap">
+              Results
+            </TabsTrigger>
+            <TabsTrigger value="trades" className="flex-1 sm:flex-initial text-xs sm:text-sm px-3 sm:px-4 py-2 whitespace-nowrap">
+              Trade Log
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="builder" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="builder" className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Strategy Configuration */}
             <Card>
               <CardHeader>
@@ -272,7 +300,7 @@ export function Backtester() {
                 <CardDescription>Define your trading strategy parameters</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="strategy-name">Strategy Name</Label>
                     <Input
@@ -280,6 +308,7 @@ export function Backtester() {
                       placeholder="My RSI Strategy"
                       value={strategy.name}
                       onChange={(e) => setStrategy((prev) => ({ ...prev, name: e.target.value }))}
+                      className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -289,11 +318,12 @@ export function Backtester() {
                       placeholder="AAPL, BTC-USD, EUR/USD"
                       value={strategy.symbol}
                       onChange={(e) => setStrategy((prev) => ({ ...prev, symbol: e.target.value }))}
+                      className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Asset Type</Label>
                     <Select
@@ -332,7 +362,7 @@ export function Backtester() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="start-date">Start Date</Label>
                     <Input
@@ -340,6 +370,7 @@ export function Backtester() {
                       type="date"
                       value={strategy.startDate}
                       onChange={(e) => setStrategy((prev) => ({ ...prev, startDate: e.target.value }))}
+                      className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -349,6 +380,7 @@ export function Backtester() {
                       type="date"
                       value={strategy.endDate}
                       onChange={(e) => setStrategy((prev) => ({ ...prev, endDate: e.target.value }))}
+                      className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                     />
                   </div>
                 </div>
@@ -360,6 +392,7 @@ export function Backtester() {
                     type="number"
                     value={strategy.initialCapital}
                     onChange={(e) => setStrategy((prev) => ({ ...prev, initialCapital: e.target.value }))}
+                    className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   />
                 </div>
               </CardContent>
@@ -393,7 +426,7 @@ export function Backtester() {
           </div>
 
           {/* Trading Rules */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Entry Rules</CardTitle>
@@ -404,7 +437,7 @@ export function Backtester() {
                   placeholder="Example: Buy when RSI < 30 AND price > SMA(20) AND MACD crosses above signal line"
                   value={strategy.entryRules}
                   onChange={(e) => setStrategy((prev) => ({ ...prev, entryRules: e.target.value }))}
-                  className="min-h-24"
+                  className="min-h-24 bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                 />
               </CardContent>
             </Card>
@@ -419,7 +452,7 @@ export function Backtester() {
                   placeholder="Example: Sell when RSI > 70 OR price hits stop loss OR take profit target reached"
                   value={strategy.exitRules}
                   onChange={(e) => setStrategy((prev) => ({ ...prev, exitRules: e.target.value }))}
-                  className="min-h-24"
+                  className="min-h-24 bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                 />
               </CardContent>
             </Card>
@@ -432,7 +465,7 @@ export function Backtester() {
               <CardDescription>Set stop loss, take profit, and position sizing rules</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="stop-loss">Stop Loss (%)</Label>
                   <Input
@@ -441,6 +474,7 @@ export function Backtester() {
                     placeholder="5"
                     value={strategy.stopLoss}
                     onChange={(e) => setStrategy((prev) => ({ ...prev, stopLoss: e.target.value }))}
+                    className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   />
                 </div>
                 <div className="space-y-2">
@@ -451,6 +485,7 @@ export function Backtester() {
                     placeholder="10"
                     value={strategy.takeProfit}
                     onChange={(e) => setStrategy((prev) => ({ ...prev, takeProfit: e.target.value }))}
+                    className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   />
                 </div>
                 <div className="space-y-2">
@@ -461,6 +496,7 @@ export function Backtester() {
                     placeholder="2"
                     value={strategy.positionSize}
                     onChange={(e) => setStrategy((prev) => ({ ...prev, positionSize: e.target.value }))}
+                    className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   />
                 </div>
               </div>
@@ -468,31 +504,31 @@ export function Backtester() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="ai-query" className="space-y-6">
+        <TabsContent value="ai-query" className="space-y-4 sm:space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                 <Brain className="w-5 h-5" />
                 AI Natural Language Backtesting
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-sm sm:text-base">
                 Describe your strategy in plain English and let AI build and test it for you
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="ai-query">Strategy Description</Label>
+                <Label htmlFor="ai-query" className="text-sm sm:text-base">Strategy Description</Label>
                 <Textarea
                   id="ai-query"
                   placeholder="Backtest buying gold when RSI < 30, sell when RSI > 70, last 5 years with 2% position sizing and 5% stop loss"
                   value={naturalLanguageQuery}
                   onChange={(e) => setNaturalLanguageQuery(e.target.value)}
-                  className="min-h-32"
+                  className="min-h-32 sm:min-h-40 bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 text-sm sm:text-base resize-y"
                 />
               </div>
 
-              <div className="flex gap-4">
-                <Button onClick={runNaturalLanguageBacktest} disabled={isRunning || !naturalLanguageQuery.trim()}>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <Button onClick={runNaturalLanguageBacktest} disabled={isRunning || !naturalLanguageQuery.trim()} className="w-full sm:w-auto">
                   {isRunning ? (
                     <>
                       <Activity className="w-4 h-4 mr-2 animate-spin" />
@@ -505,29 +541,28 @@ export function Backtester() {
                     </>
                   )}
                 </Button>
-                <Button variant="outline" onClick={() => setNaturalLanguageQuery("")}>
+                <Button variant="outline" onClick={() => setNaturalLanguageQuery("")} className="w-full sm:w-auto">
                   Clear
                 </Button>
               </div>
 
               {/* Example Queries */}
-              <div className="mt-6">
-                <h3 className="font-medium mb-3">Example Queries:</h3>
-                <div className="space-y-2">
+              <div className="mt-6 pt-6 border-t">
+                <h3 className="font-medium mb-4 text-sm sm:text-base">Example Queries:</h3>
+                <div className="space-y-3">
                   {[
                     "Buy AAPL when price crosses above 20-day moving average, sell when it crosses below",
                     "Trade Bitcoin using RSI divergence strategy with 3% stop loss over last 2 years",
                     "Backtest EUR/USD carry trade strategy during high volatility periods",
                     "Test oil futures momentum strategy using MACD crossovers with 1% position size",
                   ].map((example, index) => (
-                    <Button
+                    <button
                       key={index}
-                      variant="ghost"
-                      className="text-left h-auto p-2 text-sm text-muted-foreground hover:text-foreground"
                       onClick={() => setNaturalLanguageQuery(example)}
+                      className="w-full text-left p-3 rounded-lg border border-border bg-card hover:bg-primary/10 hover:border-primary/50 transition-colors text-sm sm:text-base text-foreground break-words"
                     >
-                      "{example}"
-                    </Button>
+                      <span className="text-foreground">"{example}"</span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -535,79 +570,99 @@ export function Backtester() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="results" className="space-y-6">
+        <TabsContent value="results" className="space-y-4 sm:space-y-6">
           {isRunning ? (
             <Card>
-              <CardContent className="flex items-center justify-center py-12">
-                <div className="text-center space-y-4">
-                  <Activity className="w-12 h-12 animate-spin mx-auto text-primary" />
+              <CardContent className="flex items-center justify-center py-8 sm:py-12">
+                <div className="text-center space-y-4 px-4">
+                  <Activity className="w-10 h-10 sm:w-12 sm:h-12 animate-spin mx-auto text-primary" />
                   <div>
-                    <h3 className="text-lg font-medium">Running Backtest...</h3>
-                    <p className="text-muted-foreground">Analyzing historical data and executing strategy</p>
+                    <h3 className="text-base sm:text-lg font-medium">Running Backtest...</h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">Analyzing historical data and executing strategy</p>
                   </div>
-                  <Progress value={66} className="w-64" />
+                  <Progress value={66} className="w-full max-w-xs mx-auto" />
                 </div>
               </CardContent>
             </Card>
           ) : results ? (
             <>
               {/* Performance Summary */}
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-green-600">+{results.totalReturn}%</div>
-                    <div className="text-sm text-muted-foreground">Total Return</div>
+                  <CardContent className="p-3 sm:p-4 text-center">
+                    <div className="text-xl sm:text-2xl font-bold text-green-600">
+                      {results.total_return !== undefined ? `${results.total_return >= 0 ? "+" : ""}${results.total_return.toFixed(2)}%` : "-"}
+                    </div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Total Return</div>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold">{results.sharpeRatio}</div>
-                    <div className="text-sm text-muted-foreground">Sharpe Ratio</div>
+                  <CardContent className="p-3 sm:p-4 text-center">
+                    <div className="text-xl sm:text-2xl font-bold">
+                      {results.sharpe_ratio !== undefined ? results.sharpe_ratio.toFixed(2) : "-"}
+                    </div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Sharpe Ratio</div>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-red-600">{results.maxDrawdown}%</div>
-                    <div className="text-sm text-muted-foreground">Max Drawdown</div>
+                  <CardContent className="p-3 sm:p-4 text-center">
+                    <div className="text-xl sm:text-2xl font-bold text-red-600">
+                      {results.max_drawdown !== undefined ? `${results.max_drawdown.toFixed(2)}%` : "-"}
+                    </div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Max Drawdown</div>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-green-600">{results.winRate}%</div>
-                    <div className="text-sm text-muted-foreground">Win Rate</div>
+                  <CardContent className="p-3 sm:p-4 text-center">
+                    <div className="text-xl sm:text-2xl font-bold text-green-600">
+                      {results.win_rate !== undefined ? `${results.win_rate.toFixed(2)}%` : "-"}
+                    </div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Win Rate</div>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold">{results.totalTrades}</div>
-                    <div className="text-sm text-muted-foreground">Total Trades</div>
+                  <CardContent className="p-3 sm:p-4 text-center">
+                    <div className="text-xl sm:text-2xl font-bold">{results.total_trades || 0}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Total Trades</div>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold">{results.profitFactor}</div>
-                    <div className="text-sm text-muted-foreground">Profit Factor</div>
+                  <CardContent className="p-3 sm:p-4 text-center">
+                    <div className="text-xl sm:text-2xl font-bold">
+                      {results.profit_factor !== undefined ? results.profit_factor.toFixed(2) : "-"}
+                    </div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Profit Factor</div>
                   </CardContent>
                 </Card>
               </div>
 
               {/* Charts */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Equity Curve</CardTitle>
                     <CardDescription>Portfolio value over time</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={equityCurveData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Line type="monotone" dataKey="value" stroke="#22c55e" strokeWidth={2} />
-                      </LineChart>
-                    </ResponsiveContainer>
+                    {results?.equity_curve && results.equity_curve.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
+                        <LineChart data={results.equity_curve.map((point: any) => ({
+                          date: new Date(point.date).toLocaleDateString(),
+                          value: point.value,
+                          drawdown: point.drawdown,
+                        }))}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                          <YAxis tick={{ fontSize: 12 }} />
+                          <Tooltip />
+                          <Line type="monotone" dataKey="value" stroke="#22c55e" strokeWidth={2} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-[250px] sm:h-[300px] text-muted-foreground text-sm">
+                        No equity curve data available
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -617,15 +672,24 @@ export function Backtester() {
                     <CardDescription>Monthly performance breakdown</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={monthlyReturns}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="return" fill="#3b82f6" />
-                      </BarChart>
-                    </ResponsiveContainer>
+                    {trades && trades.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
+                        <BarChart data={trades.slice(0, 20).map((trade: any, index: number) => ({
+                          trade: `T${index + 1}`,
+                          pnl: trade.pnl || 0,
+                        }))}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="trade" tick={{ fontSize: 12 }} />
+                          <YAxis tick={{ fontSize: 12 }} />
+                          <Tooltip />
+                          <Bar dataKey="pnl" fill="#3b82f6" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-[250px] sm:h-[300px] text-muted-foreground text-sm">
+                        No trade data available
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -633,24 +697,30 @@ export function Backtester() {
               {/* Detailed Metrics */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Detailed Performance Metrics</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Detailed Performance Metrics</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                     <div className="space-y-4">
                       <h4 className="font-medium text-sm text-muted-foreground">RETURNS</h4>
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-sm">Total Return</span>
-                          <span className="text-sm font-medium text-green-600">+{results.totalReturn}%</span>
+                          <span className="text-sm font-medium text-green-600">
+                            {results.total_return !== undefined ? `${results.total_return >= 0 ? "+" : ""}${results.total_return.toFixed(2)}%` : "-"}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Annualized Return</span>
-                          <span className="text-sm font-medium">+{results.annualizedReturn}%</span>
+                          <span className="text-sm font-medium">
+                            {results.annualized_return !== undefined ? `${results.annualized_return >= 0 ? "+" : ""}${results.annualized_return.toFixed(2)}%` : "-"}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Volatility</span>
-                          <span className="text-sm font-medium">{results.volatility}%</span>
+                          <span className="text-sm font-medium">
+                            {results.volatility !== undefined ? `${results.volatility.toFixed(2)}%` : "-"}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -660,19 +730,27 @@ export function Backtester() {
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-sm">Sharpe Ratio</span>
-                          <span className="text-sm font-medium">{results.sharpeRatio}</span>
+                          <span className="text-sm font-medium">
+                            {results.sharpe_ratio !== undefined ? results.sharpe_ratio.toFixed(2) : "-"}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Sortino Ratio</span>
-                          <span className="text-sm font-medium">{results.sortinoRatio}</span>
+                          <span className="text-sm font-medium">
+                            {results.sortino_ratio !== undefined ? results.sortino_ratio.toFixed(2) : "-"}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Calmar Ratio</span>
-                          <span className="text-sm font-medium">{results.calmarRatio}</span>
+                          <span className="text-sm font-medium">
+                            {results.calmar_ratio !== undefined ? results.calmar_ratio.toFixed(2) : "-"}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Max Drawdown</span>
-                          <span className="text-sm font-medium text-red-600">{results.maxDrawdown}%</span>
+                          <span className="text-sm font-medium text-red-600">
+                            {results.max_drawdown !== undefined ? `${results.max_drawdown.toFixed(2)}%` : "-"}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -682,15 +760,19 @@ export function Backtester() {
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-sm">Total Trades</span>
-                          <span className="text-sm font-medium">{results.totalTrades}</span>
+                          <span className="text-sm font-medium">{results.total_trades || 0}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Win Rate</span>
-                          <span className="text-sm font-medium text-green-600">{results.winRate}%</span>
+                          <span className="text-sm font-medium text-green-600">
+                            {results.win_rate !== undefined ? `${results.win_rate.toFixed(2)}%` : "-"}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Profit Factor</span>
-                          <span className="text-sm font-medium">{results.profitFactor}</span>
+                          <span className="text-sm font-medium">
+                            {results.profit_factor !== undefined ? results.profit_factor.toFixed(2) : "-"}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -700,19 +782,27 @@ export function Backtester() {
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-sm">Avg Win</span>
-                          <span className="text-sm font-medium text-green-600">+{results.avgWin}%</span>
+                          <span className="text-sm font-medium text-green-600">
+                            {results.avg_win !== undefined ? `$${results.avg_win.toFixed(2)}` : "-"}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Avg Loss</span>
-                          <span className="text-sm font-medium text-red-600">{results.avgLoss}%</span>
+                          <span className="text-sm font-medium text-red-600">
+                            {results.avg_loss !== undefined ? `$${results.avg_loss.toFixed(2)}` : "-"}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Largest Win</span>
-                          <span className="text-sm font-medium text-green-600">+{results.largestWin}%</span>
+                          <span className="text-sm font-medium text-green-600">
+                            {results.largest_win !== undefined ? `$${results.largest_win.toFixed(2)}` : "-"}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Largest Loss</span>
-                          <span className="text-sm font-medium text-red-600">{results.largestLoss}%</span>
+                          <span className="text-sm font-medium text-red-600">
+                            {results.largest_loss !== undefined ? `$${results.largest_loss.toFixed(2)}` : "-"}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -722,12 +812,12 @@ export function Backtester() {
             </>
           ) : (
             <Card>
-              <CardContent className="flex items-center justify-center py-12">
+              <CardContent className="flex items-center justify-center py-8 sm:py-12 px-4">
                 <div className="text-center space-y-4">
-                  <Target className="w-12 h-12 mx-auto text-muted-foreground" />
+                  <Target className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-muted-foreground" />
                   <div>
-                    <h3 className="text-lg font-medium">No Results Yet</h3>
-                    <p className="text-muted-foreground">Configure your strategy and run a backtest to see results</p>
+                    <h3 className="text-base sm:text-lg font-medium">No Results Yet</h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">Configure your strategy and run a backtest to see results</p>
                   </div>
                 </div>
               </CardContent>
@@ -735,50 +825,104 @@ export function Backtester() {
           )}
         </TabsContent>
 
-        <TabsContent value="trades" className="space-y-6">
+        <TabsContent value="trades" className="space-y-4 sm:space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Trade Log</CardTitle>
-              <CardDescription>Detailed record of all trades executed during backtest</CardDescription>
+              <CardTitle className="text-lg sm:text-xl">Trade Log</CardTitle>
+              <CardDescription className="text-sm">Detailed record of all trades executed during backtest</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2">Date</th>
-                      <th className="text-left p-2">Symbol</th>
-                      <th className="text-left p-2">Type</th>
-                      <th className="text-right p-2">Entry</th>
-                      <th className="text-right p-2">Exit</th>
-                      <th className="text-right p-2">Qty</th>
-                      <th className="text-right p-2">P&L</th>
-                      <th className="text-right p-2">Duration</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tradeLog.map((trade) => (
-                      <tr key={trade.id} className="border-b hover:bg-muted/50">
-                        <td className="p-2">{trade.date}</td>
-                        <td className="p-2 font-medium">{trade.symbol}</td>
-                        <td className="p-2">
-                          <Badge variant={trade.type === "Long" ? "default" : "secondary"}>{trade.type}</Badge>
-                        </td>
-                        <td className="p-2 text-right">${trade.entry}</td>
-                        <td className="p-2 text-right">${trade.exit}</td>
-                        <td className="p-2 text-right">{trade.quantity}</td>
-                        <td
-                          className={`p-2 text-right font-medium ${trade.pnl > 0 ? "text-green-600" : "text-red-600"}`}
-                        >
-                          ${trade.pnl > 0 ? "+" : ""}
-                          {trade.pnl}
-                        </td>
-                        <td className="p-2 text-right text-muted-foreground">{trade.duration}</td>
-                      </tr>
+              {trades && trades.length > 0 ? (
+                <>
+                  {/* Mobile Card View */}
+                  <div className="block sm:hidden space-y-3">
+                    {trades.map((trade: any) => (
+                      <Card key={trade.id} className="p-3">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Date</span>
+                            <span className="text-sm font-medium">{new Date(trade.entry_date).toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Type</span>
+                            <Badge variant={trade.trade_type === "long" ? "default" : "secondary"} className="text-xs">
+                              {trade.trade_type === "long" ? "Long" : "Short"}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Entry</span>
+                            <span className="text-sm">${trade.entry_price?.toFixed(2) || "-"}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Exit</span>
+                            <span className="text-sm">${trade.exit_price?.toFixed(2) || "-"}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Quantity</span>
+                            <span className="text-sm">{trade.quantity?.toFixed(2) || "-"}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">P&L</span>
+                            <span className={`text-sm font-medium ${trade.pnl && trade.pnl > 0 ? "text-green-600" : "text-red-600"}`}>
+                              {trade.pnl ? `$${trade.pnl > 0 ? "+" : ""}${trade.pnl.toFixed(2)}` : "-"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Duration</span>
+                            <span className="text-sm">{trade.duration_days ? `${trade.duration_days.toFixed(1)} days` : "-"}</span>
+                          </div>
+                        </div>
+                      </Card>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </div>
+
+                  {/* Desktop Table View */}
+                  <div className="hidden sm:block overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2">Date</th>
+                          <th className="text-left p-2">Symbol</th>
+                          <th className="text-left p-2">Type</th>
+                          <th className="text-right p-2">Entry</th>
+                          <th className="text-right p-2">Exit</th>
+                          <th className="text-right p-2">Qty</th>
+                          <th className="text-right p-2">P&L</th>
+                          <th className="text-right p-2">Duration</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {trades.map((trade: any) => (
+                          <tr key={trade.id} className="border-b hover:bg-muted/50">
+                            <td className="p-2">{new Date(trade.entry_date).toLocaleDateString()}</td>
+                            <td className="p-2 font-medium">-</td>
+                            <td className="p-2">
+                              <Badge variant={trade.trade_type === "long" ? "default" : "secondary"}>
+                                {trade.trade_type === "long" ? "Long" : "Short"}
+                              </Badge>
+                            </td>
+                            <td className="p-2 text-right">${trade.entry_price?.toFixed(2) || "-"}</td>
+                            <td className="p-2 text-right">${trade.exit_price?.toFixed(2) || "-"}</td>
+                            <td className="p-2 text-right">{trade.quantity?.toFixed(2) || "-"}</td>
+                            <td
+                              className={`p-2 text-right font-medium ${trade.pnl && trade.pnl > 0 ? "text-green-600" : "text-red-600"}`}
+                            >
+                              {trade.pnl ? `$${trade.pnl > 0 ? "+" : ""}${trade.pnl.toFixed(2)}` : "-"}
+                            </td>
+                            <td className="p-2 text-right text-muted-foreground">
+                              {trade.duration_days ? `${trade.duration_days.toFixed(1)} days` : "-"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              ) : (
+                <div className="p-8 text-center text-muted-foreground text-sm">
+                  No trades available. Run a backtest to see trade history.
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
