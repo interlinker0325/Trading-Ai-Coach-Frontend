@@ -44,6 +44,7 @@ const assetTypes = [
   { value: "forex", label: "Forex" },
   { value: "commodities", label: "Commodities" },
   { value: "options", label: "Options" },
+  {value: "futures", label: "Futures"}
 ]
 
 export function Backtester() {
