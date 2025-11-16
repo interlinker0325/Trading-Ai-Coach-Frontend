@@ -42,9 +42,7 @@ const assetTypes = [
   { value: "stocks", label: "Stocks" },
   { value: "crypto", label: "Cryptocurrency" },
   { value: "forex", label: "Forex" },
-  { value: "commodities", label: "Commodities" },
   { value: "options", label: "Options" },
-  {value: "futures", label: "Futures"}
 ]
 
 export function Backtester() {
@@ -70,7 +68,6 @@ export function Backtester() {
   const [results, setResults] = useState<any>(null)
   const [trades, setTrades] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState("builder")
-  const [resultId, setResultId] = useState<number | null>(null)
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null)
 
   const handleIndicatorChange = (indicator: string, checked: boolean) => {
@@ -133,7 +130,6 @@ export function Backtester() {
       }
 
       const data = await response.json()
-      setResultId(data.result_id)
 
       // Start polling for results
       startPolling(data.result_id)
@@ -175,7 +171,6 @@ export function Backtester() {
       }
 
       const data = await response.json()
-      setResultId(data.result_id)
 
       // Start polling for results
       startPolling(data.result_id)
