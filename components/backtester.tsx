@@ -13,7 +13,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Play, Settings, Target, Activity, Plus, X } from "lucide-react"
 import { apiClient } from "@/lib/api-client"
 import { useToast } from "@/hooks/use-toast"
-   
+        
 const indicators = [
   { value: "sma", label: "Simple Moving Average (SMA)" },
   { value: "ema", label: "Exponential Moving Average (EMA)" },
