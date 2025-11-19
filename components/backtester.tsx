@@ -6,12 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts"
-import { Play, Settings, Target, Brain, Activity } from "lucide-react"
+import { Play, Settings, Target, Activity, Plus, X } from "lucide-react"
 import { apiClient } from "@/lib/api-client"
 import { useToast } from "@/hooks/use-toast"
 
@@ -29,13 +28,13 @@ const indicators = [
 ]
 
 const timeframes = [
-  { value: "1m", label: "1 Minute" },
-  { value: "5m", label: "5 Minutes" },
-  { value: "15m", label: "15 Minutes" },
-  { value: "1h", label: "1 Hour" },
-  { value: "4h", label: "4 Hours" },
-  { value: "1d", label: "1 Day" },
-  { value: "1w", label: "1 Week" },
+  { value: "minute", label: "1 Minute" },
+  { value: "hour", label: "1 Hour" },
+  { value: "day", label: "1 Day" },
+  { value: "week", label: "1 Week" },
+  { value: "month", label: "1 Month" },
+  { value: "quarter", label: "1 Quarter" },
+  { value: "year", label: "1 Year" },
 ]
 
 const assetTypes = [
@@ -56,14 +55,13 @@ export function Backtester() {
     endDate: "",
     initialCapital: "100000",
     indicators: [] as string[],
-    entryRules: "",
-    exitRules: "",
+    entryRules: [] as Array<{indicator: string, operator: string, value: string, logic?: string}>,
+    exitRules: [] as Array<{indicator: string, operator: string, value: string, logic?: string}>,
     stopLoss: "",
     takeProfit: "",
     positionSize: "2",
   })
 
-  const [naturalLanguageQuery, setNaturalLanguageQuery] = useState("")
   const [isRunning, setIsRunning] = useState(false)
   const [results, setResults] = useState<any>(null)
   const [trades, setTrades] = useState<any[]>([])
@@ -80,8 +78,75 @@ export function Backtester() {
       setStrategy((prev) => ({
         ...prev,
         indicators: prev.indicators.filter((i) => i !== indicator),
+        // Remove rules that use this indicator
+        entryRules: prev.entryRules.filter((r) => r.indicator !== indicator),
+        exitRules: prev.exitRules.filter((r) => r.indicator !== indicator),
       }))
     }
+  }
+
+  const addEntryRule = () => {
+    setStrategy((prev) => ({
+      ...prev,
+      entryRules: [...prev.entryRules, { indicator: "", operator: ">", value: "", logic: "AND" }],
+    }))
+  }
+
+  const removeEntryRule = (index: number) => {
+    setStrategy((prev) => ({
+      ...prev,
+      entryRules: prev.entryRules.filter((_, i) => i !== index),
+    }))
+  }
+
+  const updateEntryRule = (index: number, field: string, value: string) => {
+    setStrategy((prev) => ({
+      ...prev,
+      entryRules: prev.entryRules.map((rule, i) =>
+        i === index ? { ...rule, [field]: value } : rule
+      ),
+    }))
+  }
+
+  const addExitRule = () => {
+    setStrategy((prev) => ({
+      ...prev,
+      exitRules: [...prev.exitRules, { indicator: "", operator: ">", value: "", logic: "AND" }],
+    }))
+  }
+
+  const removeExitRule = (index: number) => {
+    setStrategy((prev) => ({
+      ...prev,
+      exitRules: prev.exitRules.filter((_, i) => i !== index),
+    }))
+  }
+
+  const updateExitRule = (index: number, field: string, value: string) => {
+    setStrategy((prev) => ({
+      ...prev,
+      exitRules: prev.exitRules.map((rule, i) =>
+        i === index ? { ...rule, [field]: value } : rule
+      ),
+    }))
+  }
+
+  const getOperatorsForIndicator = (indicator: string) => {
+    const crossoverIndicators = ["macd", "sma", "ema"]
+    if (crossoverIndicators.includes(indicator.toLowerCase())) {
+      return [
+        { value: ">", label: ">" },
+        { value: "<", label: "<" },
+        { value: "crosses_above", label: "Crosses Above" },
+        { value: "crosses_below", label: "Crosses Below" },
+      ]
+    }
+    return [
+      { value: ">", label: ">" },
+      { value: "<", label: "<" },
+      { value: ">=", label: ">=" },
+      { value: "<=", label: "<=" },
+    ]
   }
 
   const runBacktest = async () => {
@@ -93,6 +158,64 @@ export function Backtester() {
         variant: "destructive",
       })
       return
+    }
+
+    // Validate date range
+    if (new Date(strategy.endDate) <= new Date(strategy.startDate)) {
+      toast({
+        title: "Validation Error",
+        description: "End date must be after start date",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Validate indicators and rules
+    if (strategy.indicators.length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please select at least one indicator",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Validate entry rules
+    if (strategy.entryRules.length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please define at least one entry rule",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Validate that all entry rules have required fields
+    const invalidEntryRules = strategy.entryRules.some(
+      (rule) => !rule.indicator || !rule.operator || (rule.operator !== "crosses_above" && rule.operator !== "crosses_below" && !rule.value)
+    )
+    if (invalidEntryRules) {
+      toast({
+        title: "Validation Error",
+        description: "Please complete all entry rules (indicator, operator, and value)",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Validate exit rules if provided
+    if (strategy.exitRules.length > 0) {
+      const invalidExitRules = strategy.exitRules.some(
+        (rule) => !rule.indicator || !rule.operator || (rule.operator !== "crosses_above" && rule.operator !== "crosses_below" && !rule.value)
+      )
+      if (invalidExitRules) {
+        toast({
+          title: "Validation Error",
+          description: "Please complete all exit rules (indicator, operator, and value)",
+          variant: "destructive",
+        })
+        return
+      }
     }
 
     setIsRunning(true)
@@ -111,8 +234,8 @@ export function Backtester() {
         end_date: new Date(strategy.endDate).toISOString(),
         initial_capital: parseFloat(strategy.initialCapital),
         indicators: strategy.indicators,
-        entry_rules: strategy.entryRules || null,
-        exit_rules: strategy.exitRules || null,
+        entry_rules: strategy.entryRules.length > 0 ? JSON.stringify(strategy.entryRules) : null,
+        exit_rules: strategy.exitRules.length > 0 ? JSON.stringify(strategy.exitRules) : null,
         stop_loss: strategy.stopLoss ? parseFloat(strategy.stopLoss) : null,
         take_profit: strategy.takeProfit ? parseFloat(strategy.takeProfit) : null,
         position_size: strategy.positionSize ? parseFloat(strategy.positionSize) : null,
@@ -138,47 +261,6 @@ export function Backtester() {
       toast({
         title: "Error",
         description: error.message || "Failed to run backtest",
-        variant: "destructive",
-      })
-      setIsRunning(false)
-    }
-  }
-
-  const runNaturalLanguageBacktest = async () => {
-    if (!naturalLanguageQuery.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Please enter a strategy description",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsRunning(true)
-    setActiveTab("results")
-    setResults(null)
-    setTrades([])
-
-    try {
-      const response = await apiClient.post("/api/v1/backtest/run/ai", {
-        query: naturalLanguageQuery,
-        initial_capital: parseFloat(strategy.initialCapital) || 100000,
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.detail || "Failed to parse natural language query")
-      }
-
-      const data = await response.json()
-
-      // Start polling for results
-      startPolling(data.result_id)
-    } catch (error: any) {
-      console.error("Error running AI backtest:", error)
-      toast({
-        title: "Error",
-        description: error.message || "Failed to run AI backtest",
         variant: "destructive",
       })
       setIsRunning(false)
@@ -272,9 +354,6 @@ export function Backtester() {
             <TabsTrigger value="builder" className="flex-1 sm:flex-initial text-xs sm:text-sm px-3 sm:px-4 py-2 whitespace-nowrap">
               Strategy Builder
             </TabsTrigger>
-            <TabsTrigger value="ai-query" className="flex-1 sm:flex-initial text-xs sm:text-sm px-3 sm:px-4 py-2 whitespace-nowrap">
-              AI Query
-            </TabsTrigger>
             <TabsTrigger value="results" className="flex-1 sm:flex-initial text-xs sm:text-sm px-3 sm:px-4 py-2 whitespace-nowrap">
               Results
             </TabsTrigger>
@@ -311,7 +390,7 @@ export function Backtester() {
                     <Label htmlFor="symbol">Symbol/Ticker</Label>
                     <Input
                       id="symbol"
-                      placeholder="AAPL, BTC-USD, EUR/USD"
+                      placeholder="AAPL, BTCUSD, EURUSD"
                       value={strategy.symbol}
                       onChange={(e) => setStrategy((prev) => ({ ...prev, symbol: e.target.value }))}
                       className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
@@ -426,30 +505,260 @@ export function Backtester() {
             <Card>
               <CardHeader>
                 <CardTitle>Entry Rules</CardTitle>
-                <CardDescription>Define when to enter trades</CardDescription>
+                <CardDescription>Define when to enter trades based on selected indicators</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Textarea
-                  placeholder="Example: Buy when RSI < 30 AND price > SMA(20) AND MACD crosses above signal line"
-                  value={strategy.entryRules}
-                  onChange={(e) => setStrategy((prev) => ({ ...prev, entryRules: e.target.value }))}
-                  className="min-h-24 bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
-                />
+              <CardContent className="space-y-3">
+                {strategy.entryRules.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No entry rules defined. Select indicators first, then add rules.</p>
+                ) : (
+                  strategy.entryRules.map((rule, index) => (
+                    <div key={index} className="flex gap-2 items-end">
+                      {index > 0 && (
+                        <Select
+                          value={rule.logic || "AND"}
+                          onValueChange={(value) => updateEntryRule(index, "logic", value)}
+                        >
+                          <SelectTrigger className="w-20">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="AND">AND</SelectItem>
+                            <SelectItem value="OR">OR</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                      <Select
+                        value={rule.indicator}
+                        onValueChange={(value) => updateEntryRule(index, "indicator", value)}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Indicator" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {strategy.indicators.map((ind) => {
+                            const indicatorObj = indicators.find((i) => i.value === ind)
+                            return (
+                              <SelectItem key={ind} value={ind}>
+                                {indicatorObj?.label || ind}
+                              </SelectItem>
+                            )
+                          })}
+                        </SelectContent>
+                      </Select>
+                      {rule.indicator && (
+                        <>
+                          <Select
+                            value={rule.operator}
+                            onValueChange={(value) => {
+                              updateEntryRule(index, "operator", value)
+                              // Auto-set value for MACD crossovers
+                              if (value.includes("crosses") && rule.indicator === "macd") {
+                                updateEntryRule(index, "value", "signal")
+                              } else if (value.includes("crosses") && !rule.value) {
+                                // Clear value for other crossovers until user selects
+                                updateEntryRule(index, "value", "")
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {getOperatorsForIndicator(rule.indicator).map((op) => (
+                                <SelectItem key={op.value} value={op.value}>
+                                  {op.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {rule.operator.includes("crosses") ? (
+                            rule.indicator === "macd" ? (
+                              <span className="text-sm text-muted-foreground px-2">signal</span>
+                            ) : (
+                              <Select
+                                value={rule.value}
+                                onValueChange={(value) => updateEntryRule(index, "value", value)}
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue placeholder="Compare to" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {strategy.indicators
+                                    .filter((ind) => ind !== rule.indicator)
+                                    .map((ind) => {
+                                      const indicatorObj = indicators.find((i) => i.value === ind)
+                                      return (
+                                        <SelectItem key={ind} value={ind}>
+                                          {indicatorObj?.label || ind}
+                                        </SelectItem>
+                                      )
+                                    })}
+                                </SelectContent>
+                              </Select>
+                            )
+                          ) : (
+                            <Input
+                              type="number"
+                              placeholder="Value"
+                              value={rule.value}
+                              onChange={(e) => updateEntryRule(index, "value", e.target.value)}
+                              className="w-24 bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
+                            />
+                          )}
+                        </>
+                      )}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeEntryRule(index)}
+                        className="h-10 w-10"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addEntryRule}
+                  disabled={strategy.indicators.length === 0}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Entry Rule
+                </Button>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
                 <CardTitle>Exit Rules</CardTitle>
-                <CardDescription>Define when to exit trades</CardDescription>
+                <CardDescription>Define when to exit trades based on selected indicators</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Textarea
-                  placeholder="Example: Sell when RSI > 70 OR price hits stop loss OR take profit target reached"
-                  value={strategy.exitRules}
-                  onChange={(e) => setStrategy((prev) => ({ ...prev, exitRules: e.target.value }))}
-                  className="min-h-24 bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
-                />
+              <CardContent className="space-y-3">
+                {strategy.exitRules.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No exit rules defined. Select indicators first, then add rules.</p>
+                ) : (
+                  strategy.exitRules.map((rule, index) => (
+                    <div key={index} className="flex gap-2 items-end">
+                      {index > 0 && (
+                        <Select
+                          value={rule.logic || "AND"}
+                          onValueChange={(value) => updateExitRule(index, "logic", value)}
+                        >
+                          <SelectTrigger className="w-20">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="AND">AND</SelectItem>
+                            <SelectItem value="OR">OR</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                      <Select
+                        value={rule.indicator}
+                        onValueChange={(value) => updateExitRule(index, "indicator", value)}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Indicator" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {strategy.indicators.map((ind) => {
+                            const indicatorObj = indicators.find((i) => i.value === ind)
+                            return (
+                              <SelectItem key={ind} value={ind}>
+                                {indicatorObj?.label || ind}
+                              </SelectItem>
+                            )
+                          })}
+                        </SelectContent>
+                      </Select>
+                      {rule.indicator && (
+                        <>
+                          <Select
+                            value={rule.operator}
+                            onValueChange={(value) => {
+                              updateExitRule(index, "operator", value)
+                              // Auto-set value for MACD crossovers
+                              if (value.includes("crosses") && rule.indicator === "macd") {
+                                updateExitRule(index, "value", "signal")
+                              } else if (value.includes("crosses") && !rule.value) {
+                                // Clear value for other crossovers until user selects
+                                updateExitRule(index, "value", "")
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {getOperatorsForIndicator(rule.indicator).map((op) => (
+                                <SelectItem key={op.value} value={op.value}>
+                                  {op.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {rule.operator.includes("crosses") ? (
+                            rule.indicator === "macd" ? (
+                              <span className="text-sm text-muted-foreground px-2">signal</span>
+                            ) : (
+                              <Select
+                                value={rule.value}
+                                onValueChange={(value) => updateExitRule(index, "value", value)}
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue placeholder="Compare to" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {strategy.indicators
+                                    .filter((ind) => ind !== rule.indicator)
+                                    .map((ind) => {
+                                      const indicatorObj = indicators.find((i) => i.value === ind)
+                                      return (
+                                        <SelectItem key={ind} value={ind}>
+                                          {indicatorObj?.label || ind}
+                                        </SelectItem>
+                                      )
+                                    })}
+                                </SelectContent>
+                              </Select>
+                            )
+                          ) : (
+                            <Input
+                              type="number"
+                              placeholder="Value"
+                              value={rule.value}
+                              onChange={(e) => updateExitRule(index, "value", e.target.value)}
+                              className="w-24 bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
+                            />
+                          )}
+                        </>
+                      )}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeExitRule(index)}
+                        className="h-10 w-10"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addExitRule}
+                  disabled={strategy.indicators.length === 0}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Exit Rule
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -494,72 +803,6 @@ export function Backtester() {
                     onChange={(e) => setStrategy((prev) => ({ ...prev, positionSize: e.target.value }))}
                     className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="ai-query" className="space-y-4 sm:space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                <Brain className="w-5 h-5" />
-                AI Natural Language Backtesting
-              </CardTitle>
-              <CardDescription className="text-sm sm:text-base">
-                Describe your strategy in plain English and let AI build and test it for you
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="ai-query" className="text-sm sm:text-base">Strategy Description</Label>
-                <Textarea
-                  id="ai-query"
-                  placeholder="Backtest buying gold when RSI < 30, sell when RSI > 70, last 5 years with 2% position sizing and 5% stop loss"
-                  value={naturalLanguageQuery}
-                  onChange={(e) => setNaturalLanguageQuery(e.target.value)}
-                  className="min-h-32 sm:min-h-40 bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 text-sm sm:text-base resize-y"
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <Button onClick={runNaturalLanguageBacktest} disabled={isRunning || !naturalLanguageQuery.trim()} className="w-full sm:w-auto">
-                  {isRunning ? (
-                    <>
-                      <Activity className="w-4 h-4 mr-2 animate-spin" />
-                      AI Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Brain className="w-4 h-4 mr-2" />
-                      Run AI Backtest
-                    </>
-                  )}
-                </Button>
-                <Button variant="outline" onClick={() => setNaturalLanguageQuery("")} className="w-full sm:w-auto">
-                  Clear
-                </Button>
-              </div>
-
-              {/* Example Queries */}
-              <div className="mt-6 pt-6 border-t">
-                <h3 className="font-medium mb-4 text-sm sm:text-base">Example Queries:</h3>
-                <div className="space-y-3">
-                  {[
-                    "Buy AAPL when price crosses above 20-day moving average, sell when it crosses below",
-                    "Trade Bitcoin using RSI divergence strategy with 3% stop loss over last 2 years",
-                    "Backtest EUR/USD carry trade strategy during high volatility periods",
-                    "Test oil futures momentum strategy using MACD crossovers with 1% position size",
-                  ].map((example, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setNaturalLanguageQuery(example)}
-                      className="w-full text-left p-3 rounded-lg border border-border bg-card hover:bg-primary/10 hover:border-primary/50 transition-colors text-sm sm:text-base text-foreground break-words"
-                    >
-                      <span className="text-foreground">"{example}"</span>
-                    </button>
-                  ))}
                 </div>
               </div>
             </CardContent>

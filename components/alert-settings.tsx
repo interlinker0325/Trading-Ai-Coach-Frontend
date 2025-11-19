@@ -106,7 +106,7 @@ export function AlertSettings({ plan }: AlertSettingsProps) {
 
   const { toast } = useToast()
 
-  const conditionOptions = {
+  const conditionOptions: Record<string, { value: string; label: string; description: string }[]> = {
     stocks: [
       { value: "price_above", label: "Price Above", description: "Alert when price crosses above threshold" },
       { value: "price_below", label: "Price Below", description: "Alert when price crosses below threshold" },
@@ -230,7 +230,7 @@ export function AlertSettings({ plan }: AlertSettingsProps) {
       return
     }
 
-    const selectedCondition = conditionOptions[newAlert.assetType].find((c) => c.value === newAlert.condition)
+    const selectedCondition = conditionOptions[newAlert.assetType].find((c: { value: string }) => c.value === newAlert.condition)
 
     const alert: AlertRule = {
       id: Date.now().toString(),
@@ -455,7 +455,7 @@ export function AlertSettings({ plan }: AlertSettingsProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {conditionOptions[newAlert.assetType].map((option) => (
+                  {conditionOptions[newAlert.assetType].map((option: { value: string; label: string; description: string }) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -478,7 +478,7 @@ export function AlertSettings({ plan }: AlertSettingsProps) {
           {newAlert.condition && (
             <div className="p-3 bg-muted/50 rounded-lg">
               <p className="text-sm text-muted-foreground">
-                {conditionOptions[newAlert.assetType].find((c) => c.value === newAlert.condition)?.description}
+                {conditionOptions[newAlert.assetType].find((c: { value: string }) => c.value === newAlert.condition)?.description}
               </p>
             </div>
           )}

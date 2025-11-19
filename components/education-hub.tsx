@@ -928,7 +928,7 @@ export function EducationHub() {
                   <Label htmlFor="ticker">Ticker/Symbol</Label>
                   <Input
                     id="ticker"
-                    placeholder="e.g., AAPL, BTC/USD, EUR/USD"
+                    placeholder="e.g., AAPL, BTCUSD, EURUSD"
                   />
                 </div>
                 <div className="space-y-2">
