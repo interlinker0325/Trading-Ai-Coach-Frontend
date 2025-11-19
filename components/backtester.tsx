@@ -59,7 +59,7 @@ export function Backtester() {
     exitRules: [] as Array<{indicator: string, operator: string, value: string, logic?: string}>,
     stopLoss: "",
     takeProfit: "",
-    positionSize: "2",
+    positionSize: "",
   })
 
   const [isRunning, setIsRunning] = useState(false)
