@@ -60,6 +60,7 @@ export function Backtester() {
     stopLoss: "",
     takeProfit: "",
     positionSize: "2",
+    tradeDirection: "long",
   })
 
   const [isRunning, setIsRunning] = useState(false)
@@ -239,6 +240,7 @@ export function Backtester() {
         stop_loss: strategy.stopLoss ? parseFloat(strategy.stopLoss) : null,
         take_profit: strategy.takeProfit ? parseFloat(strategy.takeProfit) : null,
         position_size: strategy.positionSize ? parseFloat(strategy.positionSize) : null,
+        trade_direction: strategy.tradeDirection || "long",
       }
 
       // Create and run backtest
@@ -770,7 +772,23 @@ export function Backtester() {
               <CardDescription>Set stop loss, take profit, and position sizing rules</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="trade-direction">Trade Direction</Label>
+                  <Select
+                    value={strategy.tradeDirection}
+                    onValueChange={(value) => setStrategy((prev) => ({ ...prev, tradeDirection: value }))}
+                  >
+                    <SelectTrigger className="bg-background dark:bg-background/50 border-2 border-border dark:border-border/80 text-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20">
+                      <SelectValue placeholder="Select direction" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="long">Long</SelectItem>
+                      <SelectItem value="short">Short</SelectItem>
+                      <SelectItem value="both">Both</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="stop-loss">Stop Loss (%)</Label>
                   <Input
@@ -830,7 +848,7 @@ export function Backtester() {
                 <Card>
                   <CardContent className="p-3 sm:p-4 text-center">
                     <div className="text-xl sm:text-2xl font-bold text-green-600">
-                      {results.total_return !== undefined ? `${results.total_return >= 0 ? "+" : ""}${results.total_return.toFixed(2)}%` : "-"}
+                      {results.total_return != null ? `${results.total_return >= 0 ? "+" : ""}${results.total_return.toFixed(2)}%` : "-"}
                     </div>
                     <div className="text-xs sm:text-sm text-muted-foreground">Total Return</div>
                   </CardContent>
@@ -838,7 +856,7 @@ export function Backtester() {
                 <Card>
                   <CardContent className="p-3 sm:p-4 text-center">
                     <div className="text-xl sm:text-2xl font-bold">
-                      {results.sharpe_ratio !== undefined ? results.sharpe_ratio.toFixed(2) : "-"}
+                      {results.sharpe_ratio != null ? results.sharpe_ratio.toFixed(2) : "-"}
                     </div>
                     <div className="text-xs sm:text-sm text-muted-foreground">Sharpe Ratio</div>
                   </CardContent>
@@ -846,7 +864,7 @@ export function Backtester() {
                 <Card>
                   <CardContent className="p-3 sm:p-4 text-center">
                     <div className="text-xl sm:text-2xl font-bold text-red-600">
-                      {results.max_drawdown !== undefined ? `${results.max_drawdown.toFixed(2)}%` : "-"}
+                      {results.max_drawdown != null ? `${results.max_drawdown.toFixed(2)}%` : "-"}
                     </div>
                     <div className="text-xs sm:text-sm text-muted-foreground">Max Drawdown</div>
                   </CardContent>
@@ -854,7 +872,7 @@ export function Backtester() {
                 <Card>
                   <CardContent className="p-3 sm:p-4 text-center">
                     <div className="text-xl sm:text-2xl font-bold text-green-600">
-                      {results.win_rate !== undefined ? `${results.win_rate.toFixed(2)}%` : "-"}
+                      {results.win_rate != null ? `${results.win_rate.toFixed(2)}%` : "-"}
                     </div>
                     <div className="text-xs sm:text-sm text-muted-foreground">Win Rate</div>
                   </CardContent>
@@ -868,7 +886,7 @@ export function Backtester() {
                 <Card>
                   <CardContent className="p-3 sm:p-4 text-center">
                     <div className="text-xl sm:text-2xl font-bold">
-                      {results.profit_factor !== undefined ? results.profit_factor.toFixed(2) : "-"}
+                      {results.profit_factor != null ? results.profit_factor.toFixed(2) : "-"}
                     </div>
                     <div className="text-xs sm:text-sm text-muted-foreground">Profit Factor</div>
                   </CardContent>
@@ -946,19 +964,19 @@ export function Backtester() {
                         <div className="flex justify-between">
                           <span className="text-sm">Total Return</span>
                           <span className="text-sm font-medium text-green-600">
-                            {results.total_return !== undefined ? `${results.total_return >= 0 ? "+" : ""}${results.total_return.toFixed(2)}%` : "-"}
+                            {results.total_return != null ? `${results.total_return >= 0 ? "+" : ""}${results.total_return.toFixed(2)}%` : "-"}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Annualized Return</span>
                           <span className="text-sm font-medium">
-                            {results.annualized_return !== undefined ? `${results.annualized_return >= 0 ? "+" : ""}${results.annualized_return.toFixed(2)}%` : "-"}
+                            {results.annualized_return != null ? `${results.annualized_return >= 0 ? "+" : ""}${results.annualized_return.toFixed(2)}%` : "-"}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Volatility</span>
                           <span className="text-sm font-medium">
-                            {results.volatility !== undefined ? `${results.volatility.toFixed(2)}%` : "-"}
+                            {results.volatility != null ? `${results.volatility.toFixed(2)}%` : "-"}
                           </span>
                         </div>
                       </div>
@@ -970,25 +988,25 @@ export function Backtester() {
                         <div className="flex justify-between">
                           <span className="text-sm">Sharpe Ratio</span>
                           <span className="text-sm font-medium">
-                            {results.sharpe_ratio !== undefined ? results.sharpe_ratio.toFixed(2) : "-"}
+                            {results.sharpe_ratio != null ? results.sharpe_ratio.toFixed(2) : "-"}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Sortino Ratio</span>
                           <span className="text-sm font-medium">
-                            {results.sortino_ratio !== undefined ? results.sortino_ratio.toFixed(2) : "-"}
+                            {results.sortino_ratio != null ? results.sortino_ratio.toFixed(2) : "-"}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Calmar Ratio</span>
                           <span className="text-sm font-medium">
-                            {results.calmar_ratio !== undefined ? results.calmar_ratio.toFixed(2) : "-"}
+                            {results.calmar_ratio != null ? results.calmar_ratio.toFixed(2) : "-"}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Max Drawdown</span>
                           <span className="text-sm font-medium text-red-600">
-                            {results.max_drawdown !== undefined ? `${results.max_drawdown.toFixed(2)}%` : "-"}
+                            {results.max_drawdown != null ? `${results.max_drawdown.toFixed(2)}%` : "-"}
                           </span>
                         </div>
                       </div>
@@ -1004,13 +1022,13 @@ export function Backtester() {
                         <div className="flex justify-between">
                           <span className="text-sm">Win Rate</span>
                           <span className="text-sm font-medium text-green-600">
-                            {results.win_rate !== undefined ? `${results.win_rate.toFixed(2)}%` : "-"}
+                            {results.win_rate != null ? `${results.win_rate.toFixed(2)}%` : "-"}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Profit Factor</span>
                           <span className="text-sm font-medium">
-                            {results.profit_factor !== undefined ? results.profit_factor.toFixed(2) : "-"}
+                            {results.profit_factor != null ? results.profit_factor.toFixed(2) : "-"}
                           </span>
                         </div>
                       </div>
@@ -1022,25 +1040,25 @@ export function Backtester() {
                         <div className="flex justify-between">
                           <span className="text-sm">Avg Win</span>
                           <span className="text-sm font-medium text-green-600">
-                            {results.avg_win !== undefined ? `$${results.avg_win.toFixed(2)}` : "-"}
+                            {results.avg_win != null ? `$${results.avg_win.toFixed(2)}` : "-"}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Avg Loss</span>
                           <span className="text-sm font-medium text-red-600">
-                            {results.avg_loss !== undefined ? `$${results.avg_loss.toFixed(2)}` : "-"}
+                            {results.avg_loss != null ? `$${results.avg_loss.toFixed(2)}` : "-"}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Largest Win</span>
                           <span className="text-sm font-medium text-green-600">
-                            {results.largest_win !== undefined ? `$${results.largest_win.toFixed(2)}` : "-"}
+                            {results.largest_win != null ? `$${results.largest_win.toFixed(2)}` : "-"}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Largest Loss</span>
                           <span className="text-sm font-medium text-red-600">
-                            {results.largest_loss !== undefined ? `$${results.largest_loss.toFixed(2)}` : "-"}
+                            {results.largest_loss != null ? `$${results.largest_loss.toFixed(2)}` : "-"}
                           </span>
                         </div>
                       </div>
@@ -1134,7 +1152,7 @@ export function Backtester() {
                         {trades.map((trade: any) => (
                           <tr key={trade.id} className="border-b hover:bg-muted/50">
                             <td className="p-2">{new Date(trade.entry_date).toLocaleDateString()}</td>
-                            <td className="p-2 font-medium">-</td>
+                            <td className="p-2 font-medium">{strategy.symbol.toUpperCase() || "-"}</td>
                             <td className="p-2">
                               <Badge variant={trade.trade_type === "long" ? "default" : "secondary"}>
                                 {trade.trade_type === "long" ? "Long" : "Short"}
