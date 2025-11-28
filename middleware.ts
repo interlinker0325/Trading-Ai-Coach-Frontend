@@ -11,7 +11,7 @@ const protectedRoutes = [
   "/alerts",
   "/charts",
   "/liquidity",
-  "/backtester",
+  "/backtest",
   "/education",
   "/admin",
   "/profile",
