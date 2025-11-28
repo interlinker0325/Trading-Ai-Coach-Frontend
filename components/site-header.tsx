@@ -14,15 +14,16 @@ import {
   Brain,
   Shield,
   Zap,
-  Users,
+  // Users,
   BookOpen,
-  Target,
+  // Target,
   DollarSign,
   User,
   LogOut,
   Settings,
   Bell,
   LayoutDashboard,
+  ChartLine,
 } from "lucide-react";
 
 export function SiteHeader() {
@@ -58,11 +59,12 @@ export function SiteHeader() {
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Screener", href: "/screener", icon: Zap },
     { name: "Alerts", href: "/alerts", icon: Shield },
-    { name: "Liquidity", href: "/liquidity", icon: Target },
+    // { name: "Liquidity", href: "/liquidity", icon: Target },
     { name: "Education", href: "/education", icon: BookOpen },
     { name: "Pricing", href: "/pricing", icon: DollarSign },
     { name: "AI Coach", href: "/ai-coach", icon: Brain },
-    { name: "Community", href: "#community", icon: Users },
+    { name: "Backtest", href: "/backtest", icon: ChartLine },
+    // { name: "Community", href: "#community", icon: Users },
   ];
 
   return (

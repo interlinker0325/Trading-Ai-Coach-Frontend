@@ -86,6 +86,7 @@ export function SiteFooter() {
           </div>
 
           {/* Links Sections */}
+          <div className="col-span-1 sm:col-span-2 lg:col-span-4 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           <div className="space-y-3 sm:space-y-4">
             <h3 className="text-xs sm:text-sm font-semibold text-white dark:text-foreground">
               Product
@@ -160,6 +161,7 @@ export function SiteFooter() {
                 </li>
               ))}
             </ul>
+            </div>
           </div>
         </div>
 
