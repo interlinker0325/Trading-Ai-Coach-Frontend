@@ -12,7 +12,6 @@ export function EducationNavigation() {
     { value: "courses", label: "Courses", href: "/education/courses" },
     { value: "playbooks", label: "Playbooks", href: "/education/playbooks" },
     { value: "quizzes", label: "Quizzes", href: "/education/quizzes" },
-    { value: "simulator", label: "Simulator", href: "/education/simulator" },
   ];
 
   const getActiveTab = () => {
@@ -20,7 +19,6 @@ export function EducationNavigation() {
       return "courses";
     if (pathname === "/education/playbooks") return "playbooks";
     if (pathname === "/education/quizzes") return "quizzes";
-    if (pathname === "/education/simulator") return "simulator";
     return null;
   };
 
@@ -28,7 +26,7 @@ export function EducationNavigation() {
 
   return (
     <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-      <div className="inline-flex w-full md:grid md:w-full md:grid-cols-4 h-auto min-w-max md:min-w-0 gap-2 p-1 bg-muted rounded-lg">
+      <div className="inline-flex w-full md:grid md:w-full md:grid-cols-3 h-auto min-w-max md:min-w-0 gap-2 p-1 bg-muted rounded-lg">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.value;
           return (
